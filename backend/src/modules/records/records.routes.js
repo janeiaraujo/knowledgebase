@@ -2,18 +2,28 @@ import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission, canApproveKB } from '../../middlewares/rbac.middleware.js';
 import { toObjectId } from '../../utils/mongodb.js';
+import { filterKBsByAccess } = require('../../middlewares/kbAccess.middleware');
+import { checkKBAccess, checkKBEditAccess, checkKBApproveAccess } = require('../../middlewares/kbAccess.middleware');
+import auditMiddleware, { logKBView } = require('../../middlewares/audit.middleware');
 import Joi from 'joi';
 
 export default async function recordRoutes(fastify, options) {
   
-  // List records
+  // List records (with access control)
   fastify.get('/', {
     preHandler: [authMiddleware, tenantMiddleware]
   }, async (request, reply) => {
     const db = fastify.db();
     const { database_id, status, search, page = 1, limit = 50 } = request.query;
     
-    const filter = { tenant_id: request.tenantId };
+    // Get accessible KB filter based on user permissions
+    const accessFilter = await filterKBsByAccess(
+      request.tenantId, 
+      request.userId, 
+      request.userRole
+    );
+    
+    const filter = { ...accessFilter };
     if (database_id) filter.database_id = database_id;
     if (status) filter.status = status;
     
@@ -41,9 +51,9 @@ export default async function recordRoutes(fastify, options) {
     };
   });
   
-  // Create record
+  // Create record (with audit)
   fastify.post('/', {
-    preHandler: [authMiddleware, tenantMiddleware, requirePermission('kb:create')]
+    preHandler: [authMiddleware, tenantMiddleware, requirePermission('kb:create'), auditMiddleware('kb_created')]
   }, async (request, reply) => {
     const db = fastify.db();
     const { database_id, title, content_md, properties, custom_properties, status } = request.body;
