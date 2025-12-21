@@ -1,0 +1,277 @@
+[AGENT ROLE]
+Você é um agente DEV SÊNIOR responsável por ENTREGAR sozinho o MVP de uma
+plataforma SaaS de Knowledge Base operacional orientada a incidentes (Incident Intelligence Platform) em 24 horas.
+
+O produto deve funcionar como um “Notion operacional”, focado em:
+quero que a interface visual seja como uma tabela no Notion (como um banco de dados), mas com funcionalidades de colunas dinâmicas, upload de arquivos/imagens, editor rich text (com saída em Markdown), versionamento, workflow de aprovação e busca inteligente (textual + semântica com IA).   
+- registro rápido de incidentes
+- busca inteligente de KBs
+- workflow de revisão/aprovação
+- ingestão de eventos (Zabbix/Grafana/etc.)
+- multi-tenant por organização
+
+Tome decisões técnicas de forma AUTÔNOMA.
+Só faça perguntas se houver BLOQUEIO REAL (ex: gateway de pagamento, domínio/SSL, exigência legal que altere o schema).
+Se algo estiver indefinido, escolha a opção segura, documente no README e continue.
+
+---
+
+[STACK OBRIGATÓRIA]
+Backend:
+- Node.js 18+
+- Fastify
+- MongoDB Atlas (Free Tier)
+- JWT para autenticação
+- RBAC por organização (multi-tenant)
+
+Frontend (MVP):
+- React + Vite
+- Bootstrap 5
+- Editor Rich Text (TipTap ou EditorJS) com saída em Markdown
+
+Infra:
+- Sem Docker
+- Sem Kubernetes
+- Sem microserviços
+- 1 backend Node.js
+- 1 frontend
+- Bucket para arquivos Cloudflare R2
+-
+IA:
+- OpenAI API
+- Embeddings para busca semântica
+- IA somente para sugestão, resumo e rascunhos (NUNCA publicar automaticamente)
+
+---
+
+[OBJETIVO DO PRODUTO]
+Criar uma plataforma onde:
+- o usuário pode colar um texto durante um incidente
+- pesquisar KBs existentes de forma rápida
+- gerar rascunhos de KB, RCA e pós-mortem com apoio de IA
+- revisar/aprovar KBs antes de torná-los públicos
+- ingerir eventos externos via API
+- operar em múltiplas organizações (tenants) com isolamento total de dados
+
+---
+
+[MODELO MULTI-TENANT]
+- Cada documento DEVE conter `tenant_id`
+- Todas as queries DEVEM filtrar por `tenant_id`
+- Embeddings e buscas semânticas DEVEM ser isoladas por tenant
+- Uploads DEVEM ser segregados por tenant no bucket
+
+---
+
+[ESTRUTURA ESPERADA DO PROJETO]
+
+/backend
+  /src
+    /modules
+      auth
+      organizations
+      users
+      roles
+      databases
+      properties
+      records
+      views
+      incidents
+      kb
+      files
+      events
+      ai
+      billing
+    /middlewares
+      tenant.middleware.ts
+      auth.middleware.ts
+      rbac.middleware.ts
+    /services
+    /routes
+    /jobs
+    server.ts
+
+/frontend
+  /src
+    /components
+    /pages
+    /services (API client)
+    /editors
+    /views
+    /auth
+
+---
+
+[MODELO DE DADOS – MONGODB]
+
+Coleções obrigatórias:
+- tenants
+- users
+- roles
+- organizations
+- databases
+- property_definitions
+- records
+- record_versions
+- views
+- incidents
+- events
+- files
+- ai_embeddings
+- audit_logs
+- subscriptions
+- usage_metrics
+
+Formato dos documentos KB:
+- content_md (Markdown como fonte da verdade)
+- properties dinâmicas (Notion-like)
+- attachments (referência ao bucket)
+- versionamento completo
+- status: captured | draft | in_review | approved | published | deprecated
+
+---
+
+[EDITOR E CONTEÚDO]
+- O editor permite colar texto, imagens e código
+- O frontend converte o conteúdo para Markdown antes de salvar
+- Imagens são enviadas para o bucket
+- O Markdown referencia as imagens via URL interna
+- NÃO salvar HTML como fonte principal
+- NÃO salvar imagens em base64 no banco
+
+---
+
+[INGESTÃO DE EVENTOS]
+Criar endpoint:
+POST /api/events/ingest
+
+- Autenticação via API Token
+- Payload flexível (JSON livre)
+- Normalizar eventos internamente
+- Deduplicar eventos similares
+- Relacionar eventos com KBs existentes
+- Permitir conversão de evento → incidente → KB
+
+---
+
+[BUSCA]
+Implementar:
+1) Busca textual (Mongo)
+2) Busca semântica (embeddings)
+3) Ranking por relevância, data, sucesso anterior
+
+Busca SEMPRE isolada por tenant.
+
+---
+
+[IA – REGRAS OBRIGATÓRIAS]
+A IA pode:
+- resumir texto
+- sugerir propriedades
+- sugerir RCA/post-mortem
+- sugerir relações entre KBs
+- gerar rascunho (draft)
+
+A IA NÃO pode:
+- publicar KB
+- alterar conteúdo aprovado
+- acessar dados de outro tenant
+
+IA deve rodar preferencialmente de forma assíncrona (jobs).
+
+---
+
+[WORKFLOW DE KB]
+Estados:
+- captured
+- draft
+- in_review
+- approved
+- published
+- deprecated
+
+Regras:
+- quem cria não aprova
+- todas as mudanças versionadas
+- auditoria completa (quem, quando, o quê)
+
+---
+
+[BILLING – MVP]
+Implementar cobrança baseada em:
+- número de usuários ativos
+- volume de registros (KB + incidents)
+- volume de eventos ingeridos
+- créditos de IA
+
+Modelo:
+- Plano por organização
+- Limites configuráveis
+- Medição via usage_metrics
+- Integração preparada para Stripe ou Mercado Pago (mock no MVP)
+
+---
+
+[SEGURANÇA]
+- JWT + refresh token
+- RBAC por role
+- Rate limit em ingestão e IA
+- Validação de payload
+- Auditoria de ações sensíveis
+- Logs estruturados
+
+---
+
+[PLANO DE EXECUÇÃO ]
+
+
+- Auth, multi-tenant, RBAC
+- Estrutura base do backend
+- Mongo schemas
+- CRUD de organizations/users
+
+- Database Builder (properties + records + views)
+- Editor Rich Text → Markdown
+- Upload de arquivos/imagens
+- Busca textual
+
+- Workflow de KB
+- Versionamento
+- Auditoria
+- Ingestão de eventos
+- Incident Chat (UI)
+
+
+- IA (resumo, rascunho, embeddings)
+- Busca semântica
+- Billing básico
+- Hardening, README, seed de demo
+
+---
+
+[CRITÉRIOS DE ACEITE – DoD]
+- Multi-tenant funcionando com isolamento real
+- Usuário consegue colar texto e pesquisar KBs em segundos
+- Editor salva em Markdown
+- Upload de imagem funcional
+- IA gera rascunho sem publicar
+- Eventos externos ingeridos corretamente
+- Workflow de aprovação funcionando
+- Uso e limites medidos
+- README claro com setup, decisões técnicas e roadmap
+
+---
+
+[PERGUNTE APENAS SE BLOQUEAR]
+- Gateway de pagamento asas 
+- Domínio/SSL
+- Exigência legal que altere o schema
+
+Se não bloquear, DECIDA, DOCUMENTE C:\xampp-8.0.30\htdocs\github_knowledgebase\doc e CONTINUE.
+
+COMECE AGORA:
+- Gerar plano técnico detalhado
+- Criar estrutura do repositório
+- Implementar fundação (auth + tenant + RBAC)
+- Avançar iterativamente até o MVP funcional
+- login com meta link via email ou senha

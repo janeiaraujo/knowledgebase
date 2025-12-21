@@ -1,0 +1,221 @@
+import Joi from 'joi';
+import * as authService from './auth.service.js';
+import { sendWelcomeEmail } from './email.service.js';
+
+export default async function authRoutes(fastify, options) {
+  
+  // Register new user
+  fastify.post('/register', async (request, reply) => {
+    try {
+      const db = fastify.db();
+      const { email, password, name, organizationName } = request.body;
+      
+      const { user, tenantId } = await authService.registerUser(db, {
+        email,
+        password,
+        name,
+        organizationName
+      });
+      
+      // Generate tokens
+      const { accessToken, refreshToken } = await authService.generateTokens(
+        fastify,
+        user._id,
+        tenantId
+      );
+      
+      // Send welcome email (async, don't wait)
+      sendWelcomeEmail(user.email, user.name).catch(err => {
+        fastify.log.error('Failed to send welcome email:', err);
+      });
+      
+      // Log audit
+      await db.collection('audit_logs').insertOne({
+        tenant_id: tenantId,
+        user_id: user._id,
+        action: 'user.registered',
+        resource: 'user',
+        resource_id: user._id,
+        timestamp: new Date()
+      });
+      
+      return {
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          tenant_id: tenantId
+        },
+        accessToken,
+        refreshToken
+      };
+      
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(400).send({ 
+        error: error.message || 'Registration failed' 
+      });
+    }
+  });
+  
+  // Login with password
+  fastify.post('/login', async (request, reply) => {
+    try {
+      const db = fastify.db();
+      const { email, password } = request.body;
+      
+      const user = await authService.loginWithPassword(db, { email, password });
+      
+      const { accessToken, refreshToken } = await authService.generateTokens(
+        fastify,
+        user._id,
+        user.tenant_id
+      );
+      
+      // Log audit
+      await db.collection('audit_logs').insertOne({
+        tenant_id: user.tenant_id,
+        user_id: user._id,
+        action: 'user.login',
+        resource: 'user',
+        resource_id: user._id,
+        timestamp: new Date(),
+        metadata: { method: 'password' }
+      });
+      
+      return {
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          tenant_id: user.tenant_id
+        },
+        accessToken,
+        refreshToken
+      };
+      
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(401).send({ 
+        error: error.message || 'Login failed' 
+      });
+    }
+  });
+  
+  // Request magic link
+  fastify.post('/magic-link', async (request, reply) => {
+    try {
+      const db = fastify.db();
+      const { email } = request.body;
+      
+      await authService.sendMagicLink(db, fastify, { email });
+      
+      return { 
+        success: true,
+        message: 'If an account exists, a magic link has been sent.'
+      };
+      
+    } catch (error) {
+      fastify.log.error(error);
+      // Always return success to prevent email enumeration
+      return { 
+        success: true,
+        message: 'If an account exists, a magic link has been sent.'
+      };
+    }
+  });
+  
+  // Verify magic link token
+  fastify.post('/magic-verify', async (request, reply) => {
+    try {
+      const db = fastify.db();
+      const { token } = request.body;
+      
+      const user = await authService.verifyMagicToken(db, { token });
+      
+      const { accessToken, refreshToken } = await authService.generateTokens(
+        fastify,
+        user._id,
+        user.tenant_id
+      );
+      
+      // Log audit
+      await db.collection('audit_logs').insertOne({
+        tenant_id: user.tenant_id,
+        user_id: user._id,
+        action: 'user.login',
+        resource: 'user',
+        resource_id: user._id,
+        timestamp: new Date(),
+        metadata: { method: 'magic_link' }
+      });
+      
+      return {
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          tenant_id: user.tenant_id
+        },
+        accessToken,
+        refreshToken
+      };
+      
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(401).send({ 
+        error: error.message || 'Invalid magic link' 
+      });
+    }
+  });
+  
+  // Refresh token
+  fastify.post('/refresh', async (request, reply) => {
+    try {
+      const db = fastify.db();
+      const { refreshToken } = request.body;
+      
+      const { accessToken } = await authService.refreshAccessToken(
+        fastify,
+        db,
+        refreshToken
+      );
+      
+      return { accessToken };
+      
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(401).send({ 
+        error: 'Invalid refresh token' 
+      });
+    }
+  });
+  
+  // Get current user
+  fastify.get('/me', {
+    preHandler: [
+      async (request, reply) => {
+        const { authMiddleware } = await import('../../middlewares/auth.middleware.js');
+        await authMiddleware(request, reply);
+      }
+    ]
+  }, async (request, reply) => {
+    const user = request.currentUser;
+    
+    return {
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        tenant_id: user.tenant_id,
+        email_verified: user.email_verified,
+        created_at: user.created_at,
+        last_login: user.last_login
+      }
+    };
+  });
+}
