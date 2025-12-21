@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import { getDb } from '../utils/mongodb.js';
 
 /**
  * KB Access Control Middleware
@@ -10,7 +9,7 @@ import { getDb } from '../utils/mongodb.js';
  * - Admin override
  */
 export async function checkKBAccess(request, reply) {
-  const db = getDb();
+  const db = request.server.db();
   const kbId = request.params.id;
   
   if (!kbId) {
@@ -160,8 +159,7 @@ export async function checkKBApproveAccess(request, reply) {
  * Filter KBs based on user access
  * Returns only KBs user is allowed to see
  */
-export async function filterKBsByAccess(tenantId, userId, userRole) {
-  const db = getDb();
+export async function filterKBsByAccess(db, tenantId, userId, userRole) {
 
   // Admin sees everything
   if (userRole === 'admin') {

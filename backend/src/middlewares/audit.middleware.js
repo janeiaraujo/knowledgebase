@@ -1,5 +1,3 @@
-import { getDb } from '../utils/mongodb.js';
-
 /**
  * Audit middleware - Automatically logs actions to audit_logs collection
  * Usage: auditMiddleware('action_name')
@@ -26,7 +24,7 @@ export default function auditMiddleware(action) {
         // Log audit asynchronously (don't block response)
         setImmediate(async () => {
           try {
-            const db = getDb();
+            const db = request.server.db();
             
             // Extract entity type from route path
             const pathParts = request.routerPath.split('/');
@@ -63,10 +61,8 @@ export default function auditMiddleware(action) {
 /**
  * Log auth events (login, logout, login failures)
  */
-export async function logAuthEvent(action, data = {}) {
+export async function logAuthEvent(db, action, data = {}) {
   try {
-    const db = getDb();
-    
     const auditLog = {
       tenant_id: data.tenant_id || null,
       user_id: data.user_id || null,
@@ -93,10 +89,8 @@ export async function logAuthEvent(action, data = {}) {
 /**
  * Log KB view (only once per session)
  */
-export async function logKBView(tenantId, userId, kbId, metadata = {}) {
+export async function logKBView(db, tenantId, userId, kbId, metadata = {}) {
   try {
-    const db = getDb();
-    
     // Check if already viewed in last hour (session-based)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const recentView = await db.collection('audit_logs').findOne({

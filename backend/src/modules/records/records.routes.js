@@ -17,6 +17,7 @@ export default async function recordRoutes(fastify, options) {
     
     // Get accessible KB filter based on user permissions
     const accessFilter = await filterKBsByAccess(
+      db,
       request.tenantId, 
       request.userId, 
       request.userRole
