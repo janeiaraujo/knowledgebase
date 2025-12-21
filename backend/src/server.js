@@ -122,10 +122,10 @@ import eventRoutes from './modules/events/events.routes.js';
 import aiRoutes from './modules/ai/ai.routes.js';
 import billingRoutes from './modules/billing/billing.routes.js';
 import propertyRoutes from './modules/properties/properties.routes.js';
-const departmentRoutes = require('./modules/departments/departments.routes.js');
-const groupRoutes = require('./modules/groups/groups.routes.js');
-const kbAccessRoutes = require('./modules/kb-access/kb-access.routes.js');
-const auditRoutes = require('./modules/audit/audit.routes.js');
+import departmentRoutes from './modules/departments/departments.routes.js';
+import groupRoutes from './modules/groups/groups.routes.js';
+import kbAccessRoutes from './modules/kb-access/kb-access.routes.js';
+import auditRoutes from './modules/audit/audit.routes.js';
 
 // Register routes
 await fastify.register(authRoutes, { prefix: '/api/auth' });
