@@ -2,9 +2,8 @@ import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission, canApproveKB } from '../../middlewares/rbac.middleware.js';
 import { toObjectId } from '../../utils/mongodb.js';
-import { filterKBsByAccess } = require('../../middlewares/kbAccess.middleware');
-import { checkKBAccess, checkKBEditAccess, checkKBApproveAccess } = require('../../middlewares/kbAccess.middleware');
-import auditMiddleware, { logKBView } = require('../../middlewares/audit.middleware');
+import { filterKBsByAccess, checkKBAccess, checkKBEditAccess, checkKBApproveAccess } from '../../middlewares/kbAccess.middleware.js';
+import auditMiddleware, { logKBView } from '../../middlewares/audit.middleware.js';
 import Joi from 'joi';
 
 export default async function recordRoutes(fastify, options) {

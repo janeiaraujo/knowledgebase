@@ -1,4 +1,4 @@
-const { getDb } = require('../utils/mongodb');
+import { getDb } from '../utils/mongodb.js';
 
 /**
  * Audit middleware - Automatically logs actions to audit_logs collection
@@ -15,7 +15,7 @@ const { getDb } = require('../utils/mongodb');
  * - user_agent
  * - created_at (UTC)
  */
-function auditMiddleware(action) {
+export default function auditMiddleware(action) {
   return async (request, reply) => {
     // Store original send to intercept response
     const originalSend = reply.send.bind(reply);
@@ -63,7 +63,7 @@ function auditMiddleware(action) {
 /**
  * Log auth events (login, logout, login failures)
  */
-async function logAuthEvent(action, data = {}) {
+export async function logAuthEvent(action, data = {}) {
   try {
     const db = getDb();
     
@@ -93,7 +93,7 @@ async function logAuthEvent(action, data = {}) {
 /**
  * Log KB view (only once per session)
  */
-async function logKBView(tenantId, userId, kbId, metadata = {}) {
+export async function logKBView(tenantId, userId, kbId, metadata = {}) {
   try {
     const db = getDb();
     
@@ -128,7 +128,3 @@ async function logKBView(tenantId, userId, kbId, metadata = {}) {
     console.error('KB view audit log failed:', error);
   }
 }
-
-module.exports = auditMiddleware;
-module.exports.logAuthEvent = logAuthEvent;
-module.exports.logKBView = logKBView;

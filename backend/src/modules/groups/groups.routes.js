@@ -1,11 +1,11 @@
-const { ObjectId } = require('mongodb');
-const { getDb } = require('../../utils/mongodb');
-const authMiddleware = require('../../middlewares/auth.middleware');
-const tenantMiddleware = require('../../middlewares/tenant.middleware');
-const { requireRole } = require('../../middlewares/rbac.middleware');
-const auditMiddleware = require('../../middlewares/audit.middleware');
+import { ObjectId } from 'mongodb';
+import { getDb } from '../../utils/mongodb.js';
+import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
+import { requireRole } from '../../middlewares/rbac.middleware.js';
+import auditMiddleware from '../../middlewares/audit.middleware.js';
 
-async function groupRoutes(fastify) {
+export default async function groupRoutes(fastify) {
   const toObjectId = (id) => {
     try {
       return new ObjectId(id);
@@ -365,5 +365,3 @@ async function groupRoutes(fastify) {
     return { users };
   });
 }
-
-module.exports = groupRoutes;

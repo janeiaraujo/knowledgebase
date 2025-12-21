@@ -1,10 +1,10 @@
-const { ObjectId } = require('mongodb');
-const { getDb } = require('../../utils/mongodb');
-const authMiddleware = require('../../middlewares/auth.middleware');
-const tenantMiddleware = require('../../middlewares/tenant.middleware');
-const { requireRole } = require('../../middlewares/rbac.middleware');
+import { ObjectId } from 'mongodb';
+import { getDb } from '../../utils/mongodb.js';
+import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
+import { requireRole } from '../../middlewares/rbac.middleware.js';
 
-async function auditRoutes(fastify) {
+export default async function auditRoutes(fastify) {
   // Get audit logs (admin only)
   fastify.get('/', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin'])]
@@ -200,5 +200,3 @@ async function auditRoutes(fastify) {
     };
   });
 }
-
-module.exports = auditRoutes;

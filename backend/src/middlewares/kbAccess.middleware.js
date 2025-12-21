@@ -1,5 +1,5 @@
-const { ObjectId } = require('mongodb');
-const { getDb } = require('../utils/mongodb');
+import { ObjectId } from 'mongodb';
+import { getDb } from '../utils/mongodb.js';
 
 /**
  * KB Access Control Middleware
@@ -9,7 +9,7 @@ const { getDb } = require('../utils/mongodb');
  * - Global visibility
  * - Admin override
  */
-async function checkKBAccess(request, reply) {
+export async function checkKBAccess(request, reply) {
   const db = getDb();
   const kbId = request.params.id;
   
@@ -105,7 +105,7 @@ async function checkKBAccess(request, reply) {
  * - Reviewer, OR
  * - Editor AND (creator OR has group/dept access)
  */
-async function checkKBEditAccess(request, reply) {
+export async function checkKBEditAccess(request, reply) {
   // First check if they can view it
   await checkKBAccess(request, reply);
   
@@ -145,7 +145,7 @@ async function checkKBEditAccess(request, reply) {
  * Check if user can approve KB
  * Must be reviewer or admin
  */
-async function checkKBApproveAccess(request, reply) {
+export async function checkKBApproveAccess(request, reply) {
   const userRole = request.userRole;
 
   if (!['admin', 'reviewer'].includes(userRole)) {
@@ -160,7 +160,7 @@ async function checkKBApproveAccess(request, reply) {
  * Filter KBs based on user access
  * Returns only KBs user is allowed to see
  */
-async function filterKBsByAccess(tenantId, userId, userRole) {
+export async function filterKBsByAccess(tenantId, userId, userRole) {
   const db = getDb();
 
   // Admin sees everything
@@ -223,10 +223,3 @@ async function filterKBsByAccess(tenantId, userId, userRole) {
     _id: { $in: accessibleKBIds }
   };
 }
-
-module.exports = {
-  checkKBAccess,
-  checkKBEditAccess,
-  checkKBApproveAccess,
-  filterKBsByAccess
-};
