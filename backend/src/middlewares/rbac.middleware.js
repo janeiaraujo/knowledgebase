@@ -121,3 +121,30 @@ export async function requireAdmin(request, reply) {
     return reply.status(403).send({ error: 'Admin access required' });
   }
 }
+
+/**
+ * Role-based middleware factory
+ * Allows access only to specified roles
+ */
+export function requireRole(allowedRoles) {
+  return async (request, reply) => {
+    const user = request.currentUser;
+    
+    if (!user) {
+      return reply.status(401).send({ error: 'Authentication required' });
+    }
+    
+    if (!user.role) {
+      return reply.status(403).send({ error: 'User has no role assigned' });
+    }
+    
+    if (!allowedRoles.includes(user.role)) {
+      return reply.status(403).send({ 
+        error: 'Insufficient permissions',
+        required_roles: allowedRoles,
+        current_role: user.role
+      });
+    }
+  };
+}
+

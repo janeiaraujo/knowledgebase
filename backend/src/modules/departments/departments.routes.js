@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import { getDb } from '../../utils/mongodb.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requireRole } from '../../middlewares/rbac.middleware.js';
@@ -18,7 +17,7 @@ export default async function departmentRoutes(fastify) {
   fastify.get('/', {
     preHandler: [authMiddleware, tenantMiddleware]
   }, async (request) => {
-    const db = getDb();
+    const db = fastify.db();
     const departments = await db.collection('departments')
       .find({ tenant_id: request.tenantId })
       .sort({ name: 1 })
@@ -31,7 +30,7 @@ export default async function departmentRoutes(fastify) {
   fastify.get('/:id', {
     preHandler: [authMiddleware, tenantMiddleware]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const id = toObjectId(request.params.id);
     
     if (!id) {
@@ -54,7 +53,7 @@ export default async function departmentRoutes(fastify) {
   fastify.post('/', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('department_created')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const { name, description, parent_department_id } = request.body;
 
     if (!name) {
@@ -105,7 +104,7 @@ export default async function departmentRoutes(fastify) {
   fastify.put('/:id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('department_updated')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const id = toObjectId(request.params.id);
     const { name, description, parent_department_id } = request.body;
 
@@ -173,7 +172,7 @@ export default async function departmentRoutes(fastify) {
   fastify.delete('/:id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('department_deleted')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const id = toObjectId(request.params.id);
 
     if (!id) {
@@ -224,3 +223,4 @@ export default async function departmentRoutes(fastify) {
     return { message: 'Department deleted successfully' };
   });
 }
+

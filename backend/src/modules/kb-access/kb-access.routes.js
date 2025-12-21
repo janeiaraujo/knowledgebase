@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import { getDb } from '../../utils/mongodb.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requireRole } from '../../middlewares/rbac.middleware.js';
@@ -18,7 +17,7 @@ export default async function kbAccessRoutes(fastify) {
   fastify.get('/:kb_id', {
     preHandler: [authMiddleware, tenantMiddleware]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const kbId = toObjectId(request.params.kb_id);
 
     if (!kbId) {
@@ -41,7 +40,7 @@ export default async function kbAccessRoutes(fastify) {
   fastify.post('/:kb_id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin', 'reviewer']), auditMiddleware('kb_access_updated')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const kbId = toObjectId(request.params.kb_id);
     const { visibility, allowed_departments, allowed_groups } = request.body;
 
@@ -109,7 +108,7 @@ export default async function kbAccessRoutes(fastify) {
   fastify.delete('/:kb_id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('kb_access_deleted')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const kbId = toObjectId(request.params.kb_id);
 
     if (!kbId) {
@@ -133,7 +132,7 @@ export default async function kbAccessRoutes(fastify) {
   fastify.post('/bulk', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('kb_access_bulk_updated')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const { kb_ids, visibility, allowed_departments, allowed_groups } = request.body;
 
     if (!kb_ids || !Array.isArray(kb_ids) || kb_ids.length === 0) {
@@ -193,3 +192,5 @@ export default async function kbAccessRoutes(fastify) {
     };
   });
 }
+
+

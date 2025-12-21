@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import { getDb } from '../../utils/mongodb.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requireRole } from '../../middlewares/rbac.middleware.js';
@@ -18,7 +17,7 @@ export default async function groupRoutes(fastify) {
   fastify.get('/', {
     preHandler: [authMiddleware, tenantMiddleware]
   }, async (request) => {
-    const db = getDb();
+    const db = fastify.db();
     const { department_id } = request.query;
     
     const query = { tenant_id: request.tenantId };
@@ -42,7 +41,7 @@ export default async function groupRoutes(fastify) {
   fastify.get('/:id', {
     preHandler: [authMiddleware, tenantMiddleware]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const id = toObjectId(request.params.id);
     
     if (!id) {
@@ -65,7 +64,7 @@ export default async function groupRoutes(fastify) {
   fastify.post('/', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('group_created')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const { name, description, department_id, parent_group_id } = request.body;
 
     if (!name || !department_id) {
@@ -133,7 +132,7 @@ export default async function groupRoutes(fastify) {
   fastify.put('/:id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('group_updated')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const id = toObjectId(request.params.id);
     const { name, description, department_id, parent_group_id } = request.body;
 
@@ -197,7 +196,7 @@ export default async function groupRoutes(fastify) {
   fastify.delete('/:id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('group_deleted')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const id = toObjectId(request.params.id);
 
     if (!id) {
@@ -247,7 +246,7 @@ export default async function groupRoutes(fastify) {
   fastify.post('/:id/users', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('user_added_to_group')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const groupId = toObjectId(request.params.id);
     const { user_id, role_in_group } = request.body;
 
@@ -313,7 +312,7 @@ export default async function groupRoutes(fastify) {
   fastify.delete('/:id/users/:user_id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin']), auditMiddleware('user_removed_from_group')]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const groupId = toObjectId(request.params.id);
     const userId = toObjectId(request.params.user_id);
 
@@ -344,7 +343,7 @@ export default async function groupRoutes(fastify) {
   fastify.get('/:id/users', {
     preHandler: [authMiddleware, tenantMiddleware]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     const groupId = toObjectId(request.params.id);
 
     if (!groupId) {
@@ -365,3 +364,5 @@ export default async function groupRoutes(fastify) {
     return { users };
   });
 }
+
+

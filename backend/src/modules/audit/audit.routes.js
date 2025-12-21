@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import { getDb } from '../../utils/mongodb.js';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requireRole } from '../../middlewares/rbac.middleware.js';
@@ -9,7 +8,7 @@ export default async function auditRoutes(fastify) {
   fastify.get('/', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin'])]
   }, async (request) => {
-    const db = getDb();
+    const db = fastify.db();
     const { 
       action, 
       entity_type, 
@@ -60,7 +59,7 @@ export default async function auditRoutes(fastify) {
   fastify.get('/:id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin'])]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     let id;
     
     try {
@@ -85,7 +84,7 @@ export default async function auditRoutes(fastify) {
   fastify.get('/stats/summary', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin'])]
   }, async (request) => {
-    const db = getDb();
+    const db = fastify.db();
     const { start_date, end_date } = request.query;
 
     const query = { tenant_id: request.tenantId };
@@ -133,7 +132,7 @@ export default async function auditRoutes(fastify) {
   fastify.get('/users/:user_id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin'])]
   }, async (request, reply) => {
-    const db = getDb();
+    const db = fastify.db();
     let userId;
     
     try {
@@ -171,7 +170,7 @@ export default async function auditRoutes(fastify) {
   fastify.get('/kb/:kb_id', {
     preHandler: [authMiddleware, tenantMiddleware, requireRole(['admin', 'reviewer'])]
   }, async (request) => {
-    const db = getDb();
+    const db = fastify.db();
     const { kb_id } = request.params;
     const { limit = 50, skip = 0 } = request.query;
 
@@ -200,3 +199,5 @@ export default async function auditRoutes(fastify) {
     };
   });
 }
+
+
