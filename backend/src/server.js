@@ -47,6 +47,24 @@ async function createIndexes() {
   await db.collection('ai_embeddings').createIndex({ tenant_id: 1, record_id: 1 });
   await db.collection('events').createIndex({ tenant_id: 1, created_at: -1 });
   await db.collection('audit_logs').createIndex({ tenant_id: 1, created_at: -1 });
+  await db.collection('audit_logs').createIndex({ tenant_id: 1, user_id: 1, created_at: -1 });
+  await db.collection('audit_logs').createIndex({ tenant_id: 1, action: 1, created_at: -1 });
+  await db.collection('audit_logs').createIndex({ tenant_id: 1, entity_type: 1, entity_id: 1 });
+  
+  // Organizational structure indexes
+  await db.collection('departments').createIndex({ tenant_id: 1, name: 1 });
+  await db.collection('departments').createIndex({ tenant_id: 1, parent_department_id: 1 });
+  await db.collection('groups').createIndex({ tenant_id: 1, department_id: 1 });
+  await db.collection('groups').createIndex({ tenant_id: 1, parent_group_id: 1 });
+  await db.collection('user_groups').createIndex({ tenant_id: 1, user_id: 1 });
+  await db.collection('user_groups').createIndex({ tenant_id: 1, group_id: 1 });
+  await db.collection('user_groups').createIndex({ tenant_id: 1, user_id: 1, group_id: 1 }, { unique: true });
+  
+  // KB access control indexes
+  await db.collection('kb_access').createIndex({ tenant_id: 1, kb_id: 1 }, { unique: true });
+  await db.collection('kb_access').createIndex({ tenant_id: 1, visibility: 1 });
+  await db.collection('kb_access').createIndex({ tenant_id: 1, allowed_departments: 1 });
+  await db.collection('kb_access').createIndex({ tenant_id: 1, allowed_groups: 1 });
   
   // Text search indexes
   await db.collection('records').createIndex({ 
@@ -104,6 +122,10 @@ import eventRoutes from './modules/events/events.routes.js';
 import aiRoutes from './modules/ai/ai.routes.js';
 import billingRoutes from './modules/billing/billing.routes.js';
 import propertyRoutes from './modules/properties/properties.routes.js';
+const departmentRoutes = require('./modules/departments/departments.routes.js');
+const groupRoutes = require('./modules/groups/groups.routes.js');
+const kbAccessRoutes = require('./modules/kb-access/kb-access.routes.js');
+const auditRoutes = require('./modules/audit/audit.routes.js');
 
 // Register routes
 await fastify.register(authRoutes, { prefix: '/api/auth' });
@@ -118,6 +140,10 @@ await fastify.register(eventRoutes, { prefix: '/api/events' });
 await fastify.register(aiRoutes, { prefix: '/api/ai' });
 await fastify.register(billingRoutes, { prefix: '/api/billing' });
 await fastify.register(propertyRoutes, { prefix: '/api/properties' });
+await fastify.register(departmentRoutes, { prefix: '/api/departments' });
+await fastify.register(groupRoutes, { prefix: '/api/groups' });
+await fastify.register(kbAccessRoutes, { prefix: '/api/kb-access' });
+await fastify.register(auditRoutes, { prefix: '/api/audit' });
 
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {
