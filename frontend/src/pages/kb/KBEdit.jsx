@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Card, Form, Button } from 'react-bootstrap';
+import { Card, Form, Button, Row, Col } from 'react-bootstrap';
 import { recordAPI } from '../../services/api';
 import api from '../../services/api';
 import CustomPropertyFields from '../../components/properties/CustomPropertyFields';
 import RichTextEditor from '../../components/RichTextEditor';
+import { TagSelector, CategorySelector } from '../../components/tags/TagSelector';
 
 export default function KBEdit() {
   const { id } = useParams();
@@ -13,7 +14,9 @@ export default function KBEdit() {
     title: '',
     content_md: '',
     status: 'draft',
-    custom_properties: {}
+    custom_properties: {},
+    tags: [],
+    category_id: null
   });
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +43,9 @@ export default function KBEdit() {
         title: data.record.title,
         content_md: data.record.content_md,
         status: data.record.status,
-        custom_properties: data.record.custom_properties || {}
+        custom_properties: data.record.custom_properties || {},
+        tags: data.record.tags?.map(t => typeof t === 'object' ? t._id : t) || [],
+        category_id: data.record.category_id || null
       });
     } catch (error) {
       alert('Failed to load KB');
@@ -108,6 +113,32 @@ export default function KBEdit() {
                 onChange={(values) => setFormData({...formData, custom_properties: values})}
               />
             )}
+            
+            {/* Tags and Category */}
+            <Row className="mb-4">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>
+                    <i className="bi bi-tags me-1"></i>Tags
+                  </Form.Label>
+                  <TagSelector
+                    selectedTags={formData.tags}
+                    onChange={(tags) => setFormData({...formData, tags})}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>
+                    <i className="bi bi-folder me-1"></i>Categoria
+                  </Form.Label>
+                  <CategorySelector
+                    selectedCategory={formData.category_id}
+                    onChange={(category_id) => setFormData({...formData, category_id})}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
             
             <div className="d-flex gap-2">
               <Button type="submit" variant="primary" disabled={saving}>

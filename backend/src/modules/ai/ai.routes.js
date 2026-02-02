@@ -123,6 +123,130 @@ export default async function aiRoutes(fastify, options) {
     }
   });
   
+  // Index all KBs for semantic search (batch operation)
+  fastify.post('/index-all', {
+    preHandler: [authMiddleware, tenantMiddleware, requirePermission('ai:use')]
+  }, async (request, reply) => {
+    const db = fastify.db();
+    
+    try {
+      // Get all records that don't have embeddings yet
+      const existingEmbeddings = await db.collection('ai_embeddings')
+        .find({ tenant_id: request.tenantId })
+        .project({ record_id: 1 })
+        .toArray();
+      
+      const indexedIds = existingEmbeddings.map(e => e.record_id);
+      
+      const records = await db.collection('records')
+        .find({
+          tenant_id: request.tenantId,
+          deleted_at: null,
+          _id: { $nin: indexedIds }
+        })
+        .limit(50) // Process in batches of 50
+        .toArray();
+      
+      if (records.length === 0) {
+        const totalIndexed = await db.collection('ai_embeddings')
+          .countDocuments({ tenant_id: request.tenantId });
+        return { 
+          success: true, 
+          message: 'Todos os KBs já foram indexados',
+          indexed: 0,
+          total_indexed: totalIndexed
+        };
+      }
+      
+      let indexed = 0;
+      let totalTokens = 0;
+      
+      for (const record of records) {
+        const text = `${record.title}\n\n${record.content_md || ''}`.substring(0, 8000);
+        
+        try {
+          const response = await getOpenAI().embeddings.create({
+            model: 'text-embedding-3-small',
+            input: text
+          });
+          
+          const embedding = response.data[0].embedding;
+          totalTokens += response.usage.total_tokens;
+          
+          await db.collection('ai_embeddings').updateOne(
+            { tenant_id: request.tenantId, record_id: record._id },
+            {
+              $set: {
+                tenant_id: request.tenantId,
+                record_id: record._id,
+                embedding,
+                text_length: text.length,
+                created_at: new Date(),
+                updated_at: new Date()
+              }
+            },
+            { upsert: true }
+          );
+          
+          indexed++;
+        } catch (err) {
+          fastify.log.error(`Failed to index record ${record._id}:`, err);
+        }
+      }
+      
+      // Track usage
+      await trackAIUsage(db, request.tenantId, request.currentUser._id, {
+        action: 'batch_indexing',
+        tokens: totalTokens,
+        cost_credits: Math.ceil(totalTokens / 1000)
+      });
+      
+      const totalIndexed = await db.collection('ai_embeddings')
+        .countDocuments({ tenant_id: request.tenantId });
+      
+      const remaining = await db.collection('records')
+        .countDocuments({
+          tenant_id: request.tenantId,
+          deleted_at: null,
+          _id: { $nin: [...indexedIds, ...records.map(r => r._id)] }
+        });
+      
+      return { 
+        success: true, 
+        indexed,
+        total_indexed: totalIndexed,
+        remaining,
+        message: remaining > 0 
+          ? `Indexados ${indexed} KBs. Ainda restam ${remaining} para indexar.`
+          : `Indexados ${indexed} KBs. Indexação completa!`
+      };
+      
+    } catch (error) {
+      fastify.log.error('Batch indexing error:', error);
+      return reply.status(500).send({ error: 'Indexação falhou' });
+    }
+  });
+  
+  // Get indexing status
+  fastify.get('/index-status', {
+    preHandler: [authMiddleware, tenantMiddleware]
+  }, async (request, reply) => {
+    const db = fastify.db();
+    
+    const totalRecords = await db.collection('records')
+      .countDocuments({ tenant_id: request.tenantId, deleted_at: null });
+    
+    const indexedRecords = await db.collection('ai_embeddings')
+      .countDocuments({ tenant_id: request.tenantId });
+    
+    return {
+      total: totalRecords,
+      indexed: indexedRecords,
+      pending: totalRecords - indexedRecords,
+      percentage: totalRecords > 0 ? Math.round((indexedRecords / totalRecords) * 100) : 0
+    };
+  });
+  
   // Generate embeddings for semantic search
   fastify.post('/generate-embeddings', {
     preHandler: [authMiddleware, tenantMiddleware, requirePermission('ai:use')]
@@ -181,7 +305,7 @@ export default async function aiRoutes(fastify, options) {
     preHandler: [authMiddleware, tenantMiddleware, requirePermission('ai:use')]
   }, async (request, reply) => {
     const db = fastify.db();
-    const { query, limit } = request.body;
+    const { query, limit = 20 } = request.body;
     
     const canUse = await checkAICredits(db, request.tenantId);
     if (!canUse) {
@@ -189,6 +313,36 @@ export default async function aiRoutes(fastify, options) {
     }
     
     try {
+      // Check if there are any embeddings for this tenant
+      const embeddingsCount = await db.collection('ai_embeddings')
+        .countDocuments({ tenant_id: request.tenantId });
+      
+      // If no embeddings exist, fall back to text search
+      if (embeddingsCount === 0) {
+        fastify.log.info('No embeddings found, falling back to text search');
+        
+        // Perform text-based search as fallback
+        const textResults = await db.collection('records')
+          .find({
+            tenant_id: request.tenantId,
+            deleted_at: null,
+            status: { $in: ['approved', 'published'] },
+            $or: [
+              { title: { $regex: query, $options: 'i' } },
+              { content_md: { $regex: query, $options: 'i' } }
+            ]
+          })
+          .limit(parseInt(limit))
+          .toArray();
+        
+        return { 
+          success: true, 
+          results: textResults.map(r => ({ ...r, similarity: null })),
+          fallback: true,
+          message: 'Busca semântica indisponível. Nenhum KB foi indexado ainda. Mostrando resultados de busca por texto.'
+        };
+      }
+      
       // Generate query embedding
       const response = await getOpenAI().embeddings.create({
         model: 'text-embedding-3-small',
@@ -208,6 +362,7 @@ export default async function aiRoutes(fastify, options) {
           record_id: doc.record_id,
           similarity: cosineSimilarity(queryEmbedding, doc.embedding)
         }))
+        .filter(r => r.similarity > 0.3) // Filter low similarity results
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, parseInt(limit));
       
@@ -217,6 +372,7 @@ export default async function aiRoutes(fastify, options) {
         .find({
           _id: { $in: recordIds },
           tenant_id: request.tenantId,
+          deleted_at: null,
           status: { $in: ['approved', 'published'] }
         })
         .toArray();
@@ -234,7 +390,8 @@ export default async function aiRoutes(fastify, options) {
       
       return { 
         success: true, 
-        results: enrichedResults 
+        results: enrichedResults,
+        indexed_count: embeddingsCount
       };
       
     } catch (error) {

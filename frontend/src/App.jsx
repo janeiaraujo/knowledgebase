@@ -11,11 +11,23 @@ import KBList from './pages/kb/KBList';
 import KBView from './pages/kb/KBView';
 import KBCreate from './pages/kb/KBCreate';
 import KBEdit from './pages/kb/KBEdit';
+import KBVersionHistory from './pages/kb/KBVersionHistory';
+import KBPermissions from './pages/kb/KBPermissions';
 import IncidentList from './pages/incidents/IncidentList';
 import IncidentView from './pages/incidents/IncidentView';
 import EventList from './pages/events/EventList';
 import Settings from './pages/Settings';
 import PropertyManager from './components/properties/PropertyManager';
+import Admin from './pages/Admin';
+import Notifications from './pages/Notifications';
+import TagsCategoriesManager from './components/tags/TagsCategoriesManager';
+import Favorites from './pages/Favorites';
+import Search from './pages/Search';
+import Templates from './pages/Templates';
+import Analytics from './pages/Analytics';
+import Import from './pages/Import';
+import Reviews from './pages/Reviews';
+import AuditLogs from './pages/AuditLogs';
 
 // Layout
 import Layout from './components/Layout';
@@ -83,10 +95,22 @@ function AppRoutes() {
         <Route path="kb/new" element={<KBCreate />} />
         <Route path="kb/:id" element={<KBView />} />
         <Route path="kb/:id/edit" element={<KBEdit />} />
+        <Route path="kb/:id/history" element={<KBVersionHistory />} />
+        <Route path="kb/:id/permissions" element={<KBPermissions />} />
         <Route path="incidents" element={<IncidentList />} />
         <Route path="incidents/:id" element={<IncidentView />} />
         <Route path="events" element={<EventList />} />
         <Route path="properties" element={<PropertyManager />} />
+        <Route path="admin" element={<Admin />} />
+        <Route path="notifications" element={<Notifications />} />
+        <Route path="tags" element={<TagsCategoriesManager />} />
+        <Route path="favorites" element={<Favorites />} />
+        <Route path="search" element={<Search />} />
+        <Route path="templates" element={<Templates />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="import" element={<Import />} />
+        <Route path="reviews" element={<Reviews />} />
+        <Route path="audit-logs" element={<AuditLogs />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

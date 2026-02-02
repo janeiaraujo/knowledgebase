@@ -9,92 +9,92 @@ import { ObjectId } from 'mongodb';
  * - Admin override
  */
 export async function checkKBAccess(request, reply) {
-  const db = request.server.db();
-  const kbId = request.params.id;
-  
-  if (!kbId) {
-    return reply.code(400).send({ error: 'KB ID required' });
-  }
+    const db = request.server.db();
+    const kbId = request.params.id;
 
-  let objectId;
-  try {
-    objectId = new ObjectId(kbId);
-  } catch {
-    return reply.code(400).send({ error: 'Invalid KB ID' });
-  }
+    if (!kbId) {
+        return reply.code(400).send({ error: 'KB ID required' });
+    }
 
-  // Get KB
-  const kb = await db.collection('records').findOne({
-    _id: objectId,
-    tenant_id: request.tenantId
-  });
+    let objectId;
+    try {
+        objectId = new ObjectId(kbId);
+    } catch {
+        return reply.code(400).send({ error: 'Invalid KB ID' });
+    }
 
-  if (!kb) {
-    return reply.code(404).send({ error: 'KB not found' });
-  }
+    // Get KB
+    const kb = await db.collection('records').findOne({
+        _id: objectId,
+        tenant_id: request.tenantId
+    });
 
-  // Get KB access control
-  const kbAccess = await db.collection('kb_access').findOne({
-    kb_id: objectId,
-    tenant_id: request.tenantId
-  });
+    if (!kb) {
+        return reply.code(404).send({ error: 'KB not found' });
+    }
 
-  // If no access control, default to restricted (secure default)
-  const visibility = kbAccess?.visibility || 'restricted';
+    // Get KB access control
+    const kbAccess = await db.collection('kb_access').findOne({
+        kb_id: objectId,
+        tenant_id: request.tenantId
+    });
 
-  // Admin can see everything
-  if (request.userRole === 'admin') {
-    request.kb = kb;
-    request.kbAccess = kbAccess;
-    return;
-  }
+    // If no access control, default to restricted (secure default)
+    const visibility = kbAccess ?.visibility || 'restricted';
 
-  // Global visibility - everyone can see
-  if (visibility === 'global') {
-    request.kb = kb;
-    request.kbAccess = kbAccess;
-    return;
-  }
+    // Admin and owner can see everything
+    if (request.userRole === 'admin' || request.userRole === 'owner') {
+        request.kb = kb;
+        request.kbAccess = kbAccess;
+        return;
+    }
 
-  // Restricted - check department/group access
-  const userId = request.userId;
+    // Global visibility - everyone can see
+    if (visibility === 'global') {
+        request.kb = kb;
+        request.kbAccess = kbAccess;
+        return;
+    }
 
-  // Get user's groups
-  const userGroups = await db.collection('user_groups')
-    .find({ user_id: userId, tenant_id: request.tenantId })
-    .toArray();
+    // Restricted - check department/group access
+    const userId = request.userId;
 
-  const userGroupIds = userGroups.map(ug => ug.group_id.toString());
+    // Get user's groups
+    const userGroups = await db.collection('user_groups')
+        .find({ user_id: userId, tenant_id: request.tenantId })
+        .toArray();
 
-  // Get departments from user's groups
-  const groups = await db.collection('groups')
-    .find({ 
-      _id: { $in: userGroups.map(ug => ug.group_id) },
-      tenant_id: request.tenantId 
-    })
-    .toArray();
+    const userGroupIds = userGroups.map(ug => ug.group_id.toString());
 
-  const userDepartmentIds = [...new Set(groups.map(g => g.department_id.toString()))];
+    // Get departments from user's groups
+    const groups = await db.collection('groups')
+        .find({
+            _id: { $in: userGroups.map(ug => ug.group_id) },
+            tenant_id: request.tenantId
+        })
+        .toArray();
 
-  // Check if user has access via department
-  const allowedDepartments = (kbAccess?.allowed_departments || []).map(d => d.toString());
-  const hasDepAccess = allowedDepartments.some(deptId => userDepartmentIds.includes(deptId));
+    const userDepartmentIds = [...new Set(groups.map(g => g.department_id.toString()))];
 
-  // Check if user has access via group
-  const allowedGroups = (kbAccess?.allowed_groups || []).map(g => g.toString());
-  const hasGroupAccess = allowedGroups.some(groupId => userGroupIds.includes(groupId));
+    // Check if user has access via department
+    const allowedDepartments = (kbAccess ?.allowed_departments || []).map(d => d.toString());
+    const hasDepAccess = allowedDepartments.some(deptId => userDepartmentIds.includes(deptId));
 
-  if (hasDepAccess || hasGroupAccess) {
-    request.kb = kb;
-    request.kbAccess = kbAccess;
-    return;
-  }
+    // Check if user has access via group
+    const allowedGroups = (kbAccess ?.allowed_groups || []).map(g => g.toString());
+    const hasGroupAccess = allowedGroups.some(groupId => userGroupIds.includes(groupId));
 
-  // No access
-  return reply.code(403).send({ 
-    error: 'Access denied',
-    message: 'You do not have permission to view this KB'
-  });
+    if (hasDepAccess || hasGroupAccess) {
+        request.kb = kb;
+        request.kbAccess = kbAccess;
+        return;
+    }
+
+    // No access
+    return reply.code(403).send({
+        error: 'Access denied',
+        message: 'You do not have permission to view this KB'
+    });
 }
 
 /**
@@ -105,54 +105,54 @@ export async function checkKBAccess(request, reply) {
  * - Editor AND (creator OR has group/dept access)
  */
 export async function checkKBEditAccess(request, reply) {
-  // First check if they can view it
-  await checkKBAccess(request, reply);
-  
-  if (reply.sent) {
-    return; // Access denied already sent
-  }
+    // First check if they can view it
+    await checkKBAccess(request, reply);
 
-  const kb = request.kb;
-  const userRole = request.userRole;
-  const userId = request.userId;
-
-  // Admin can edit everything
-  if (userRole === 'admin') {
-    return;
-  }
-
-  // Reviewer can edit everything they can see
-  if (userRole === 'reviewer') {
-    return;
-  }
-
-  // Editor can only edit their own KBs
-  if (userRole === 'editor') {
-    if (kb.created_by && kb.created_by.toString() === userId.toString()) {
-      return;
+    if (reply.sent) {
+        return; // Access denied already sent
     }
-  }
 
-  // Viewer cannot edit
-  return reply.code(403).send({ 
-    error: 'Access denied',
-    message: 'You do not have permission to edit this KB'
-  });
+    const kb = request.kb;
+    const userRole = request.userRole;
+    const userId = request.userId;
+
+    // Admin and owner can edit everything
+    if (userRole === 'admin' || userRole === 'owner') {
+        return;
+    }
+
+    // Reviewer can edit everything they can see
+    if (userRole === 'reviewer') {
+        return;
+    }
+
+    // Editor can only edit their own KBs
+    if (userRole === 'editor') {
+        if (kb.created_by && kb.created_by.toString() === userId.toString()) {
+            return;
+        }
+    }
+
+    // Viewer cannot edit
+    return reply.code(403).send({
+        error: 'Access denied',
+        message: 'You do not have permission to edit this KB'
+    });
 }
 
 /**
  * Check if user can approve KB
- * Must be reviewer or admin
+ * Must be reviewer, admin or owner
  */
 export async function checkKBApproveAccess(request, reply) {
-  const userRole = request.userRole;
+    const userRole = request.userRole;
 
-  if (!['admin', 'reviewer'].includes(userRole)) {
-    return reply.code(403).send({ 
-      error: 'Access denied',
-      message: 'Only reviewers and admins can approve KBs'
-    });
-  }
+    if (!['admin', 'owner', 'reviewer'].includes(userRole)) {
+        return reply.code(403).send({
+            error: 'Access denied',
+            message: 'Only reviewers, admins and owners can approve KBs'
+        });
+    }
 }
 
 /**
@@ -161,63 +161,63 @@ export async function checkKBApproveAccess(request, reply) {
  */
 export async function filterKBsByAccess(db, tenantId, userId, userRole) {
 
-  // Admin sees everything
-  if (userRole === 'admin') {
-    return { tenant_id: tenantId };
-  }
-
-  // Get user's groups
-  const userGroups = await db.collection('user_groups')
-    .find({ user_id: userId, tenant_id: tenantId })
-    .toArray();
-
-  const userGroupIds = userGroups.map(ug => ug.group_id);
-
-  // Get departments from user's groups
-  const groups = await db.collection('groups')
-    .find({ 
-      _id: { $in: userGroupIds },
-      tenant_id: tenantId 
-    })
-    .toArray();
-
-  const userDepartmentIds = [...new Set(groups.map(g => g.department_id))];
-
-  // Get all KB access controls
-  const kbAccesses = await db.collection('kb_access')
-    .find({ tenant_id: tenantId })
-    .toArray();
-
-  // Filter accessible KB IDs
-  const accessibleKBIds = [];
-
-  for (const kbAccess of kbAccesses) {
-    // Global visibility
-    if (kbAccess.visibility === 'global') {
-      accessibleKBIds.push(kbAccess.kb_id);
-      continue;
+    // Admin and owner see everything
+    if (userRole === 'admin' || userRole === 'owner') {
+        return { tenant_id: tenantId };
     }
 
-    // Check department access
-    const allowedDepartments = (kbAccess.allowed_departments || []);
-    const hasDepAccess = allowedDepartments.some(deptId => 
-      userDepartmentIds.some(userDept => userDept.equals(deptId))
-    );
+    // Get user's groups
+    const userGroups = await db.collection('user_groups')
+        .find({ user_id: userId, tenant_id: tenantId })
+        .toArray();
 
-    // Check group access
-    const allowedGroups = (kbAccess.allowed_groups || []);
-    const hasGroupAccess = allowedGroups.some(groupId =>
-      userGroupIds.some(userGroup => userGroup.equals(groupId))
-    );
+    const userGroupIds = userGroups.map(ug => ug.group_id);
 
-    if (hasDepAccess || hasGroupAccess) {
-      accessibleKBIds.push(kbAccess.kb_id);
+    // Get departments from user's groups
+    const groups = await db.collection('groups')
+        .find({
+            _id: { $in: userGroupIds },
+            tenant_id: tenantId
+        })
+        .toArray();
+
+    const userDepartmentIds = [...new Set(groups.map(g => g.department_id))];
+
+    // Get all KB access controls
+    const kbAccesses = await db.collection('kb_access')
+        .find({ tenant_id: tenantId })
+        .toArray();
+
+    // Filter accessible KB IDs
+    const accessibleKBIds = [];
+
+    for (const kbAccess of kbAccesses) {
+        // Global visibility
+        if (kbAccess.visibility === 'global') {
+            accessibleKBIds.push(kbAccess.kb_id);
+            continue;
+        }
+
+        // Check department access
+        const allowedDepartments = (kbAccess.allowed_departments || []);
+        const hasDepAccess = allowedDepartments.some(deptId =>
+            userDepartmentIds.some(userDept => userDept.equals(deptId))
+        );
+
+        // Check group access
+        const allowedGroups = (kbAccess.allowed_groups || []);
+        const hasGroupAccess = allowedGroups.some(groupId =>
+            userGroupIds.some(userGroup => userGroup.equals(groupId))
+        );
+
+        if (hasDepAccess || hasGroupAccess) {
+            accessibleKBIds.push(kbAccess.kb_id);
+        }
     }
-  }
 
-  // Return query filter
-  return {
-    tenant_id: tenantId,
-    _id: { $in: accessibleKBIds }
-  };
+    // Return query filter
+    return {
+        tenant_id: tenantId,
+        _id: { $in: accessibleKBIds }
+    };
 }
