@@ -100,6 +100,22 @@ export default function Layout() {
           </Link>
           
           <Link 
+            to="/quick-capture" 
+            className={`nav-link ${isActive('/quick-capture') ? 'active' : ''}`}
+          >
+            <i className="bi bi-lightning-charge me-2"></i>
+            Captura Rápida
+          </Link>
+          
+          <Link 
+            to="/gps" 
+            className={`nav-link ${isActive('/gps') ? 'active' : ''}`}
+          >
+            <i className="bi bi-signpost-2 me-2"></i>
+            Diagnóstico GPS
+          </Link>
+          
+          <Link 
             to="/analytics" 
             className={`nav-link ${isActive('/analytics') ? 'active' : ''}`}
           >

@@ -165,7 +165,10 @@ export const incidentAPI = {
     create: (data) => api.post('/incidents', data),
     get: (id) => api.get(`/incidents/${id}`),
     update: (id, data) => api.patch(`/incidents/${id}`, data),
-    addNote: (id, note) => api.post(`/incidents/${id}/notes`, { note })
+    addNote: (id, note) => api.post(`/incidents/${id}/notes`, { note }),
+    // Quick Capture
+    quickCapture: (data) => api.post('/incidents/quick-capture', data),
+    listQuickCaptures: (params) => api.get('/incidents/quick-captures', { params })
 };
 
 // Events API
@@ -328,4 +331,26 @@ export const analyticsAPI = {
     trackView: (recordId) => api.post(`/analytics/track/view/${recordId}`),
     getAIUsage: (period) => api.get('/analytics/ai-usage', { params: { period } }),
     getSearchAnalytics: (period) => api.get('/analytics/search-analytics', { params: { period } })
+};
+
+// GPS (Guided Problem Solving) API
+export const gpsAPI = {
+    // Flows
+    listFlows: (params) => api.get('/gps/flows', { params }),
+    getFlow: (id) => api.get(`/gps/flows/${id}`),
+    createFlow: (data) => api.post('/gps/flows', data),
+    updateFlow: (id, data) => api.put(`/gps/flows/${id}`, data),
+    deleteFlow: (id) => api.delete(`/gps/flows/${id}`),
+    duplicateFlow: (id) => api.post(`/gps/flows/${id}/duplicate`),
+    
+    // Sessions
+    listSessions: (params) => api.get('/gps/sessions', { params }),
+    getSession: (id) => api.get(`/gps/sessions/${id}`),
+    startSession: (flowId, data) => api.post('/gps/sessions', { flow_id: flowId, ...data }),
+    submitResponse: (sessionId, data) => api.post(`/gps/sessions/${sessionId}/respond`, data),
+    abandonSession: (sessionId, reason) => api.post(`/gps/sessions/${sessionId}/abandon`, { reason }),
+    generateRCA: (sessionId) => api.post(`/gps/sessions/${sessionId}/generate-rca`),
+    
+    // Categories
+    getCategories: () => api.get('/gps/categories')
 };

@@ -255,6 +255,7 @@ import websocketRoutes from './modules/websocket/websocket.routes.js';
 import importRoutes from './modules/import/import.routes.js';
 import reviewRoutes from './modules/review/review.routes.js';
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
+import gpsRoutes from './modules/gps/gps.routes.js';
 
 // Register routes
 await fastify.register(authRoutes, { prefix: '/api/auth' });
@@ -285,6 +286,7 @@ await fastify.register(websocketRoutes, { prefix: '/api' });
 await fastify.register(importRoutes, { prefix: '/api/import' });
 await fastify.register(reviewRoutes, { prefix: '/api/review' });
 await fastify.register(dashboardRoutes, { prefix: '/api/dashboard' });
+await fastify.register(gpsRoutes, { prefix: '/api/gps' });
 
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {

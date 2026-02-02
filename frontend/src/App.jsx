@@ -13,6 +13,7 @@ import KBCreate from './pages/kb/KBCreate';
 import KBEdit from './pages/kb/KBEdit';
 import KBVersionHistory from './pages/kb/KBVersionHistory';
 import KBPermissions from './pages/kb/KBPermissions';
+import QuickCapture from './pages/kb/QuickCapture';
 import IncidentList from './pages/incidents/IncidentList';
 import IncidentView from './pages/incidents/IncidentView';
 import EventList from './pages/events/EventList';
@@ -28,6 +29,9 @@ import Analytics from './pages/Analytics';
 import Import from './pages/Import';
 import Reviews from './pages/Reviews';
 import AuditLogs from './pages/AuditLogs';
+import GPSFlowList from './pages/gps/GPSFlowList';
+import GPSFlowEditor from './pages/gps/GPSFlowEditor';
+import GPSPlayer from './pages/gps/GPSPlayer';
 
 // Layout
 import Layout from './components/Layout';
@@ -97,6 +101,7 @@ function AppRoutes() {
         <Route path="kb/:id/edit" element={<KBEdit />} />
         <Route path="kb/:id/history" element={<KBVersionHistory />} />
         <Route path="kb/:id/permissions" element={<KBPermissions />} />
+        <Route path="quick-capture" element={<QuickCapture />} />
         <Route path="incidents" element={<IncidentList />} />
         <Route path="incidents/:id" element={<IncidentView />} />
         <Route path="events" element={<EventList />} />
@@ -111,6 +116,10 @@ function AppRoutes() {
         <Route path="import" element={<Import />} />
         <Route path="reviews" element={<Reviews />} />
         <Route path="audit-logs" element={<AuditLogs />} />
+        <Route path="gps" element={<GPSFlowList />} />
+        <Route path="gps/flows/:flowId/edit" element={<GPSFlowEditor />} />
+        <Route path="gps/play/:flowId" element={<GPSPlayer />} />
+        <Route path="gps/session/:sessionId" element={<GPSPlayer />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
