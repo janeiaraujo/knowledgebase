@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Card, Form, Button } from 'react-bootstrap';
+import { Card, Form, Button, Row, Col } from 'react-bootstrap';
 import { recordAPI, databaseAPI } from '../../services/api';
 import api from '../../services/api';
 import CustomPropertyFields from '../../components/properties/CustomPropertyFields';
 import RichTextEditor from '../../components/RichTextEditor';
+import { TagSelector, CategorySelector } from '../../components/tags/TagSelector';
+import TemplateSelector from '../../components/templates/TemplateSelector';
+
+// Icon component using Bootstrap Icons
+const IconFileAlt = () => <i className="bi bi-file-earmark-text"></i>;
 
 export default function KBCreate() {
   const navigate = useNavigate();
+  const [showTemplateSelector, setShowTemplateSelector] = useState(true); // Show on load
   const [formData, setFormData] = useState({
     title: '',
     content_md: '',
     status: 'draft',
-    custom_properties: {}
+    custom_properties: {},
+    tags: [],
+    category_id: null
   });
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -31,6 +39,14 @@ export default function KBCreate() {
     } finally {
       setLoadingProperties(false);
     }
+  };
+  
+  const handleTemplateSelect = (templateData) => {
+    setFormData(prev => ({
+      ...prev,
+      content_md: templateData.content_md || '',
+      custom_properties: templateData.custom_properties || {}
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -52,6 +68,13 @@ export default function KBCreate() {
   
   return (
     <>
+      {/* Template Selector Modal */}
+      <TemplateSelector
+        show={showTemplateSelector}
+        onHide={() => setShowTemplateSelector(false)}
+        onSelect={handleTemplateSelect}
+      />
+      
       <div className="mb-4">
         <Link to="/kb" className="btn btn-link ps-0">
           <i className="bi bi-arrow-left me-2"></i>Back to KBs
@@ -59,8 +82,16 @@ export default function KBCreate() {
       </div>
       
       <Card className="border-0 shadow-sm">
-        <Card.Header className="bg-white py-3">
+        <Card.Header className="bg-white py-3 d-flex justify-content-between align-items-center">
           <h3 className="mb-0">Create New KB</h3>
+          <Button 
+            variant="outline-secondary" 
+            size="sm"
+            onClick={() => setShowTemplateSelector(true)}
+          >
+            <IconFileAlt className="me-1" />
+            Choose Template
+          </Button>
         </Card.Header>
         <Card.Body className="p-4">
           <Form onSubmit={handleSubmit}>
@@ -96,6 +127,38 @@ export default function KBCreate() {
                 onChange={(values) => setFormData({...formData, custom_properties: values})}
               />
             )}
+            
+            {/* Tags and Category */}
+            <Row className="mb-4">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>
+                    <i className="bi bi-tags me-1"></i>Tags
+                  </Form.Label>
+                  <TagSelector
+                    selectedTags={formData.tags}
+                    onChange={(tags) => setFormData({...formData, tags})}
+                  />
+                  <Form.Text className="text-muted">
+                    Adicione tags para facilitar a busca
+                  </Form.Text>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>
+                    <i className="bi bi-folder me-1"></i>Categoria
+                  </Form.Label>
+                  <CategorySelector
+                    selectedCategory={formData.category_id}
+                    onChange={(category_id) => setFormData({...formData, category_id})}
+                  />
+                  <Form.Text className="text-muted">
+                    Organize em categorias
+                  </Form.Text>
+                </Form.Group>
+              </Col>
+            </Row>
             
             <Form.Group className="mb-4">
               <Form.Label>Status</Form.Label>

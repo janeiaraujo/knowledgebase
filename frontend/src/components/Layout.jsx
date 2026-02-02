@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
+import { Container, Nav, Navbar, NavDropdown, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
+import { NotificationProvider } from '../contexts/NotificationContext';
 import QuickSearch from './QuickSearch';
+import NotificationDropdown from './notifications/NotificationDropdown';
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location]);
+  
+  // Close sidebar on escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
   
   const handleLogout = () => {
     logout();
@@ -18,8 +35,14 @@ export default function Layout() {
   
   return (
     <div className="d-flex">
+      {/* Mobile overlay */}
+      <div 
+        className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      
       {/* Sidebar */}
-      <div className="sidebar">
+      <div className={`sidebar ${sidebarOpen ? 'show' : ''}`}>
         <div className="px-3 py-2 mb-3 border-bottom border-secondary">
           <h5 className="text-white mb-0">
             <i className="bi bi-database-fill me-2"></i>
@@ -60,7 +83,41 @@ export default function Layout() {
             Events
           </Link>
           
+          <Link 
+            to="/favorites" 
+            className={`nav-link ${isActive('/favorites') ? 'active' : ''}`}
+          >
+            <i className="bi bi-star me-2"></i>
+            Favoritos
+          </Link>
+          
+          <Link 
+            to="/search" 
+            className={`nav-link ${isActive('/search') ? 'active' : ''}`}
+          >
+            <i className="bi bi-search me-2"></i>
+            Busca Avançada
+          </Link>
+          
+          <Link 
+            to="/analytics" 
+            className={`nav-link ${isActive('/analytics') ? 'active' : ''}`}
+          >
+            <i className="bi bi-graph-up me-2"></i>
+            Analytics
+          </Link>
+          
           <hr className="text-white-50 my-3" />
+          
+          {(user?.role === 'admin' || user?.role === 'owner') && (
+            <Link 
+              to="/admin" 
+              className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
+            >
+              <i className="bi bi-gear-fill me-2"></i>
+              Administração
+            </Link>
+          )}
           
           <Link 
             to="/properties" 
@@ -69,6 +126,48 @@ export default function Layout() {
             <i className="bi bi-sliders me-2"></i>
             Propriedades
           </Link>
+          
+          <Link 
+            to="/tags" 
+            className={`nav-link ${isActive('/tags') ? 'active' : ''}`}
+          >
+            <i className="bi bi-tags me-2"></i>
+            Tags & Categorias
+          </Link>
+          
+          <Link 
+            to="/templates" 
+            className={`nav-link ${isActive('/templates') ? 'active' : ''}`}
+          >
+            <i className="bi bi-file-earmark-text me-2"></i>
+            Templates
+          </Link>
+          
+          <Link 
+            to="/import" 
+            className={`nav-link ${isActive('/import') ? 'active' : ''}`}
+          >
+            <i className="bi bi-cloud-upload me-2"></i>
+            Importar
+          </Link>
+          
+          <Link 
+            to="/reviews" 
+            className={`nav-link ${isActive('/reviews') ? 'active' : ''}`}
+          >
+            <i className="bi bi-calendar-check me-2"></i>
+            Revisões
+          </Link>
+          
+          {(user?.role === 'admin' || user?.role === 'owner') && (
+            <Link 
+              to="/audit-logs" 
+              className={`nav-link ${isActive('/audit-logs') ? 'active' : ''}`}
+            >
+              <i className="bi bi-journal-text me-2"></i>
+              Audit Logs
+            </Link>
+          )}
           
           <Link 
             to="/settings" 
@@ -99,23 +198,47 @@ export default function Layout() {
       
       {/* Main Content */}
       <div className="main-content flex-grow-1">
-        <Navbar bg="white" className="border-bottom mb-4">
+        <NotificationProvider>
+          <Navbar bg="white" className="border-bottom mb-4">
+            <Container fluid>
+              {/* Mobile menu button - hidden on desktop */}
+              <Button 
+                variant="outline-secondary"
+                className="d-md-none me-2"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <i className="bi bi-list"></i>
+              </Button>
+              
+              <QuickSearch />
+              
+              <Nav className="ms-auto align-items-center gap-2">
+                <NotificationDropdown />
+                <Link to="/kb/new" className="btn btn-primary btn-sm d-none d-sm-inline-flex">
+                  <i className="bi bi-plus-circle me-1"></i>
+                  <span className="d-none d-md-inline">Novo KB</span>
+                </Link>
+                <Link to="/kb/new" className="btn btn-primary btn-sm d-sm-none">
+                  <i className="bi bi-plus-circle"></i>
+                </Link>
+              </Nav>
+            </Container>
+          </Navbar>
+          
           <Container fluid>
-            <QuickSearch />
-            
-            <Nav className="ms-auto">
-              <Link to="/kb/new" className="btn btn-primary btn-sm">
-                <i className="bi bi-plus-circle me-1"></i>
-                New KB
-              </Link>
-            </Nav>
+            <Outlet />
           </Container>
-        </Navbar>
-        
-        <Container fluid>
-          <Outlet />
-        </Container>
+        </NotificationProvider>
       </div>
+      
+      {/* Mobile floating menu button */}
+      <Button 
+        variant="primary"
+        className="sidebar-toggle"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+      >
+        <i className={`bi bi-${sidebarOpen ? 'x-lg' : 'list'}`}></i>
+      </Button>
     </div>
   );
 }
