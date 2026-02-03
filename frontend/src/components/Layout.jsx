@@ -102,6 +102,14 @@ export default function Layout() {
           </Link>
           
           <Link 
+            to="/smart-search" 
+            className={`nav-link ${isActive('/smart-search') ? 'active' : ''}`}
+          >
+            <i className="bi bi-robot me-2"></i>
+            Busca Inteligente
+          </Link>
+          
+          <Link 
             to="/quick-capture" 
             className={`nav-link ${isActive('/quick-capture') ? 'active' : ''}`}
           >
@@ -184,6 +192,24 @@ export default function Layout() {
             <i className="bi bi-calendar-check me-2"></i>
             Revisões
           </Link>
+          
+          <Link 
+            to="/postmortem" 
+            className={`nav-link ${isActive('/postmortem') ? 'active' : ''}`}
+          >
+            <i className="bi bi-file-earmark-medical me-2"></i>
+            Post-Mortem
+          </Link>
+          
+          {(user?.role === 'admin' || user?.role === 'owner') && (
+            <Link 
+              to="/kb-requests" 
+              className={`nav-link ${isActive('/kb-requests') ? 'active' : ''}`}
+            >
+              <i className="bi bi-inbox me-2"></i>
+              Solicitações KB
+            </Link>
+          )}
           
           {(user?.role === 'admin' || user?.role === 'owner') && (
             <Link 

@@ -265,6 +265,8 @@ import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
 import gpsRoutes from './modules/gps/gps.routes.js';
 import webhooksRoutes from './modules/webhooks/webhooks.routes.js';
 import activityRoutes from './modules/activity/activity.routes.js';
+import smartSearchRoutes from './modules/smart-search/smart-search.routes.js';
+import postMortemRoutes from './modules/postmortem/postmortem.routes.js';
 
 // Register routes
 await fastify.register(authRoutes, { prefix: '/api/auth' });
@@ -298,6 +300,8 @@ await fastify.register(dashboardRoutes, { prefix: '/api/dashboard' });
 await fastify.register(gpsRoutes, { prefix: '/api/gps' });
 await fastify.register(webhooksRoutes, { prefix: '/api/webhooks' });
 await fastify.register(activityRoutes, { prefix: '/api/activity' });
+await fastify.register(smartSearchRoutes, { prefix: '/api/smart-search' });
+await fastify.register(postMortemRoutes, { prefix: '/api/postmortem' });
 
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {

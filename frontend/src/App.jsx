@@ -36,6 +36,10 @@ import GPSPlayer from './pages/gps/GPSPlayer';
 import GPSSessions from './pages/gps/GPSSessions';
 import Webhooks from './pages/Webhooks';
 import UserActivity from './pages/UserActivity';
+import SmartSearch from './pages/SmartSearch';
+import KBRequests from './pages/KBRequests';
+import PostMortemList from './pages/postmortem/PostMortemList';
+import PostMortemEditor from './pages/postmortem/PostMortemEditor';
 
 // Layout
 import Layout from './components/Layout';
@@ -129,6 +133,10 @@ function AppRoutes() {
         <Route path="gps/session/:sessionId" element={<GPSPlayer />} />
         <Route path="webhooks" element={<Webhooks />} />
         <Route path="user-activity" element={<UserActivity />} />
+        <Route path="smart-search" element={<SmartSearch />} />
+        <Route path="kb-requests" element={<KBRequests />} />
+        <Route path="postmortem" element={<PostMortemList />} />
+        <Route path="postmortem/:id" element={<PostMortemEditor />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
