@@ -63,12 +63,35 @@ const GPSFlowList = () => {
     };
 
     const handleDelete = async (flowId) => {
-        if (!confirm('Tem certeza que deseja excluir este fluxo?')) return;
+        if (!window.confirm('Tem certeza que deseja excluir este fluxo? Esta ação não pode ser desfeita.')) return;
+        
         try {
+            setLoading(true);
             await gpsAPI.deleteFlow(flowId);
-            loadFlows();
+            await loadFlows();
+            
+            // Toast de sucesso
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+            toastEl.setAttribute('role', 'alert');
+            toastEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Fluxo excluído com sucesso!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toastEl);
+            const toast = new window.bootstrap.Toast(toastEl);
+            toast.show();
+            setTimeout(() => toastEl.remove(), 3000);
         } catch (error) {
             console.error('Error deleting flow:', error);
+            alert('Erro ao excluir fluxo: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -200,50 +223,50 @@ const GPSFlowList = () => {
                                             </div>
                                         </div>
                                         <div className="dropdown">
-                                            <button className="btn btn-link text-muted p-0" data-bs-toggle="dropdown">
+                                            <button className="btn btn-link text-muted p-0" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i className="bi bi-three-dots-vertical"></i>
                                             </button>
                                             <ul className="dropdown-menu dropdown-menu-end">
                                                 <li>
-                                                    <a 
+                                                    <button 
                                                         className="dropdown-item" 
-                                                        href="#"
-                                                        onClick={(e) => { e.preventDefault(); navigate(`/gps/flows/${flow._id}/edit`); }}
+                                                        type="button"
+                                                        onClick={() => navigate(`/gps/flows/${flow._id}/edit`)}
                                                     >
                                                         <i className="bi bi-pencil me-2"></i>
                                                         Editar
-                                                    </a>
+                                                    </button>
                                                 </li>
                                                 <li>
-                                                    <a 
+                                                    <button 
                                                         className="dropdown-item" 
-                                                        href="#"
-                                                        onClick={(e) => { e.preventDefault(); handleDuplicate(flow._id); }}
+                                                        type="button"
+                                                        onClick={() => handleDuplicate(flow._id)}
                                                     >
                                                         <i className="bi bi-copy me-2"></i>
                                                         Duplicar
-                                                    </a>
+                                                    </button>
                                                 </li>
                                                 <li>
-                                                    <a 
+                                                    <button 
                                                         className="dropdown-item" 
-                                                        href="#"
-                                                        onClick={(e) => { e.preventDefault(); handleToggleActive(flow); }}
+                                                        type="button"
+                                                        onClick={() => handleToggleActive(flow)}
                                                     >
                                                         <i className={`bi ${flow.is_active ? 'bi-pause-circle' : 'bi-play-circle'} me-2`}></i>
                                                         {flow.is_active ? 'Desativar' : 'Ativar'}
-                                                    </a>
+                                                    </button>
                                                 </li>
                                                 <li><hr className="dropdown-divider" /></li>
                                                 <li>
-                                                    <a 
+                                                    <button 
                                                         className="dropdown-item text-danger" 
-                                                        href="#"
-                                                        onClick={(e) => { e.preventDefault(); handleDelete(flow._id); }}
+                                                        type="button"
+                                                        onClick={() => handleDelete(flow._id)}
                                                     >
                                                         <i className="bi bi-trash me-2"></i>
                                                         Excluir
-                                                    </a>
+                                                    </button>
                                                 </li>
                                             </ul>
                                         </div>

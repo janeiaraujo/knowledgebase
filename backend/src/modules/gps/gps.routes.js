@@ -205,16 +205,31 @@ async function gpsRoutes(fastify, options) {
         const { flowId } = request.params;
         const objectId = toObjectId(flowId);
 
+        fastify.log.info({ flowId, objectId, tenantId: request.tenantId }, 'Attempting to delete GPS flow');
+
         if (!objectId) {
             return reply.status(400).send({ error: 'Invalid flow ID' });
         }
 
-        await db.collection('gps_flows').updateOne(
+        // Check if flow exists and belongs to tenant
+        const flow = await db.collection('gps_flows').findOne({
+            _id: objectId,
+            tenant_id: request.tenantId
+        });
+
+        if (!flow) {
+            fastify.log.warn({ flowId, tenantId: request.tenantId }, 'GPS flow not found for deletion');
+            return reply.status(404).send({ error: 'Flow not found' });
+        }
+
+        const result = await db.collection('gps_flows').updateOne(
             { _id: objectId, tenant_id: request.tenantId },
             { $set: { deleted_at: new Date(), is_active: false } }
         );
 
-        return { success: true };
+        fastify.log.info({ flowId, modified: result.modifiedCount }, 'GPS flow deleted');
+
+        return { success: true, modified: result.modifiedCount };
     });
 
     // Duplicate flow
