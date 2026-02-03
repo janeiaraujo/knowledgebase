@@ -36,6 +36,7 @@ const getMenuConfig = (user) => [
       { path: '/smart-search', label: 'Busca Inteligente', icon: 'bi-robot', badge: 'AI' },
       { path: '/search', label: 'Busca Avançada', icon: 'bi-search' },
       { path: '/analytics', label: 'Analytics', icon: 'bi-graph-up' },
+      { path: '/gamification', label: 'Gamificação', icon: 'bi-trophy', badge: 'NEW' },
     ]
   },
   {
@@ -47,6 +48,8 @@ const getMenuConfig = (user) => [
       { path: '/gps', label: 'Diagnóstico GPS', icon: 'bi-signpost-2', exact: true },
       { path: '/gps/sessions', label: 'Sessões GPS', icon: 'bi-clock-history' },
       { path: '/postmortem', label: 'Post-Mortem', icon: 'bi-file-earmark-medical' },
+      { path: '/reports', label: 'Relatórios', icon: 'bi-file-earmark-bar-graph', badge: 'NEW' },
+      { path: '/integrations', label: 'Integrações', icon: 'bi-plug' },
     ]
   },
   {

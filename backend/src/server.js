@@ -267,6 +267,9 @@ import webhooksRoutes from './modules/webhooks/webhooks.routes.js';
 import activityRoutes from './modules/activity/activity.routes.js';
 import smartSearchRoutes from './modules/smart-search/smart-search.routes.js';
 import postMortemRoutes from './modules/postmortem/postmortem.routes.js';
+import reportsRoutes from './modules/reports/reports.routes.js';
+import integrationsRoutes from './modules/integrations/integrations.routes.js';
+import gamificationRoutes from './modules/gamification/gamification.routes.js';
 
 // Register routes
 await fastify.register(authRoutes, { prefix: '/api/auth' });
@@ -302,6 +305,9 @@ await fastify.register(webhooksRoutes, { prefix: '/api/webhooks' });
 await fastify.register(activityRoutes, { prefix: '/api/activity' });
 await fastify.register(smartSearchRoutes, { prefix: '/api/smart-search' });
 await fastify.register(postMortemRoutes, { prefix: '/api/postmortem' });
+await fastify.register(reportsRoutes, { prefix: '/api/reports' });
+await fastify.register(integrationsRoutes, { prefix: '/api/integrations' });
+await fastify.register(gamificationRoutes, { prefix: '/api/gamification' });
 
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {

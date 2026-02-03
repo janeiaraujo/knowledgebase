@@ -40,6 +40,9 @@ import SmartSearch from './pages/SmartSearch';
 import KBRequests from './pages/KBRequests';
 import PostMortemList from './pages/postmortem/PostMortemList';
 import PostMortemEditor from './pages/postmortem/PostMortemEditor';
+import Reports from './pages/Reports';
+import Integrations from './pages/Integrations';
+import Gamification from './pages/Gamification';
 
 // Layout
 import Layout from './components/Layout';
@@ -137,6 +140,9 @@ function AppRoutes() {
         <Route path="kb-requests" element={<KBRequests />} />
         <Route path="postmortem" element={<PostMortemList />} />
         <Route path="postmortem/:id" element={<PostMortemEditor />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="integrations" element={<Integrations />} />
+        <Route path="gamification" element={<Gamification />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

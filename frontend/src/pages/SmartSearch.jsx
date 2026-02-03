@@ -82,7 +82,10 @@ export default function SmartSearch() {
 
     // Perform search
     const performSearch = async (searchQuery, mode = searchMode) => {
-        if (!searchQuery.trim()) {
+        if (!searchQuery.trim() || searchQuery.trim().length < 3) {
+            if (searchQuery.trim().length > 0 && searchQuery.trim().length < 3) {
+                toast.warning('Digite pelo menos 3 caracteres para buscar');
+            }
             setResults(null);
             return;
         }
@@ -91,8 +94,10 @@ export default function SmartSearch() {
         try {
             const response = await api.post('/smart-search/search', {
                 query: searchQuery,
-                mode,
-                ...filters
+                search_type: mode,
+                include_draft: filters.include_related,
+                limit: filters.max_results,
+                min_similarity: filters.min_score
             });
 
             setResults(response.data);
