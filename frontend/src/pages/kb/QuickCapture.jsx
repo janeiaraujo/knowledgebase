@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { incidentAPI, kbAPI, tagsAPI, categoriesAPI } from '../../services/api';
+import { incidentAPI, tagAPI, categoryAPI } from '../../services/api';
 
 const QuickCapture = () => {
     const navigate = useNavigate();
@@ -28,8 +28,8 @@ const QuickCapture = () => {
     const loadInitialData = async () => {
         try {
             const [catRes, tagRes, capturesRes] = await Promise.all([
-                categoriesAPI.list({ limit: 100 }),
-                tagsAPI.list({ limit: 100 }),
+                categoryAPI.list({ limit: 100 }),
+                tagAPI.list({ limit: 100 }),
                 incidentAPI.listQuickCaptures({ limit: 5 })
             ]);
             setCategories(catRes.data.categories || []);

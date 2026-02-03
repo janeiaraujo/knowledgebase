@@ -6,9 +6,11 @@ import { ObjectId } from 'mongodb';
 import Joi from 'joi';
 
 // Helper to get OpenAI instance
-const getOpenAI = () => {
-    const OpenAI = require('openai').default;
-    return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const getOpenAI = async () => {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return null;
+    const { default: OpenAI } = await import('openai');
+    return new OpenAI({ apiKey });
 };
 
 export default async function incidentRoutes(fastify, options) {
@@ -37,7 +39,7 @@ export default async function incidentRoutes(fastify, options) {
 
             if (openaiKey) {
                 // Use AI to generate KB article
-                const openai = getOpenAI();
+                const openai = await getOpenAI();
 
                 const prompt = `Você é um especialista em documentação técnica. Com base no relato de incidente abaixo, gere um artigo de Knowledge Base profissional e bem estruturado em Markdown.
 

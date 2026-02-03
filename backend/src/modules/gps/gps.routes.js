@@ -1,6 +1,6 @@
-const authMiddleware = require('../../middlewares/auth');
-const tenantMiddleware = require('../../middlewares/tenant');
-const { ObjectId } = require('mongodb');
+import { authMiddleware } from '../../middlewares/auth.middleware.js';
+import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
+import { ObjectId } from 'mongodb';
 
 /**
  * GPS (Guided Problem Solving) Routes
@@ -42,10 +42,10 @@ async function gpsRoutes(fastify, options) {
     };
 
     // Helper: Get OpenAI client
-    const getOpenAI = () => {
-        const OpenAI = require('openai');
+    const getOpenAI = async () => {
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) return null;
+        const { default: OpenAI } = await import('openai');
         return new OpenAI({ apiKey });
     };
 
@@ -542,7 +542,7 @@ async function gpsRoutes(fastify, options) {
         ).join('\n');
 
         let rcaContent;
-        const openai = getOpenAI();
+        const openai = await getOpenAI();
 
         if (openai) {
             try {
@@ -656,4 +656,4 @@ async function gpsRoutes(fastify, options) {
     });
 }
 
-module.exports = gpsRoutes;
+export default gpsRoutes;
