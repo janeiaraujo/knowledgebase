@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gpsAPI } from '../../services/api';
+import * as bootstrap from 'bootstrap';
 
 const GPSFlowList = () => {
     const navigate = useNavigate();
@@ -74,6 +75,7 @@ const GPSFlowList = () => {
             const toastEl = document.createElement('div');
             toastEl.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
             toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('style', 'z-index: 9999;');
             toastEl.innerHTML = `
                 <div class="d-flex">
                     <div class="toast-body">
@@ -84,7 +86,7 @@ const GPSFlowList = () => {
                 </div>
             `;
             document.body.appendChild(toastEl);
-            const toast = new window.bootstrap.Toast(toastEl);
+            const toast = new bootstrap.Toast(toastEl);
             toast.show();
             setTimeout(() => toastEl.remove(), 3000);
         } catch (error) {
