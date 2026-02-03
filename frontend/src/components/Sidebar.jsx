@@ -63,6 +63,7 @@ const getMenuConfig = (user) => [
       { path: '/properties', label: 'Propriedades', icon: 'bi-sliders' },
       { path: '/reviews', label: 'Revisões', icon: 'bi-calendar-check' },
       { path: '/import', label: 'Importar', icon: 'bi-cloud-upload' },
+      { path: '/help', label: 'Central de Ajuda', icon: 'bi-question-circle' },
     ]
   },
   {

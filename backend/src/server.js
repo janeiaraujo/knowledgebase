@@ -270,6 +270,7 @@ import postMortemRoutes from './modules/postmortem/postmortem.routes.js';
 import reportsRoutes from './modules/reports/reports.routes.js';
 import integrationsRoutes from './modules/integrations/integrations.routes.js';
 import gamificationRoutes from './modules/gamification/gamification.routes.js';
+import helpCenterRoutes from './modules/help-center/help-center.routes.js';
 
 // Register routes
 await fastify.register(authRoutes, { prefix: '/api/auth' });
@@ -308,6 +309,7 @@ await fastify.register(postMortemRoutes, { prefix: '/api/postmortem' });
 await fastify.register(reportsRoutes, { prefix: '/api/reports' });
 await fastify.register(integrationsRoutes, { prefix: '/api/integrations' });
 await fastify.register(gamificationRoutes, { prefix: '/api/gamification' });
+await fastify.register(helpCenterRoutes, { prefix: '/api/help-center' });
 
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {

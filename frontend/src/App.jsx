@@ -43,6 +43,7 @@ import PostMortemEditor from './pages/postmortem/PostMortemEditor';
 import Reports from './pages/Reports';
 import Integrations from './pages/Integrations';
 import Gamification from './pages/Gamification';
+import HelpCenter from './pages/HelpCenter';
 
 // Layout
 import Layout from './components/Layout';
@@ -143,6 +144,7 @@ function AppRoutes() {
         <Route path="reports" element={<Reports />} />
         <Route path="integrations" element={<Integrations />} />
         <Route path="gamification" element={<Gamification />} />
+        <Route path="help" element={<HelpCenter />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
