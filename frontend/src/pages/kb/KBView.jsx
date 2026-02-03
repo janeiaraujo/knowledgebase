@@ -11,6 +11,8 @@ import KBRelations from '../../components/relations/KBRelations';
 import RelatedKBs from '../../components/related/RelatedKBs';
 import TableOfContents from '../../components/kb/TableOfContents';
 import KBBreadcrumb from '../../components/kb/KBBreadcrumb';
+import { useKBTracking } from '../../hooks/useKBTracking';
+import KBViewStats from '../../components/kb/KBViewStats';
 
 const isProbablyHtml = (value) => {
   if (!value) return false;
@@ -31,6 +33,9 @@ export default function KBView() {
   const [activeTab, setActiveTab] = useState('content');
   const [showTOC, setShowTOC] = useState(true);
   const contentRef = useRef(null);
+  
+  // Track KB view - records who is viewing this KB and for how long
+  useKBTracking(id, !!record);
   
   useEffect(() => {
     fetchRecord();
@@ -455,6 +460,11 @@ export default function KBView() {
             {showTOC && (
               <Col md={3}>
                 <TableOfContents content={record.content_md || ''} />
+                
+                {/* View Statistics - only for admin/owner */}
+                {(user?.role === 'admin' || user?.role === 'owner') && (
+                  <KBViewStats kbId={id} />
+                )}
               </Col>
             )}
           </Row>

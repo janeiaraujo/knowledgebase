@@ -205,6 +205,16 @@ export default function Layout() {
             </Link>
           )}
           
+          {(user?.role === 'admin' || user?.role === 'owner') && (
+            <Link 
+              to="/user-activity" 
+              className={`nav-link ${isActive('/user-activity') ? 'active' : ''}`}
+            >
+              <i className="bi bi-activity me-2"></i>
+              Atividade Usuários
+            </Link>
+          )}
+          
           <Link 
             to="/settings" 
             className={`nav-link ${isActive('/settings') ? 'active' : ''}`}

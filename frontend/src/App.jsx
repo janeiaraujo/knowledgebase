@@ -35,6 +35,7 @@ import GPSFlowEditor from './pages/gps/GPSFlowEditor';
 import GPSPlayer from './pages/gps/GPSPlayer';
 import GPSSessions from './pages/gps/GPSSessions';
 import Webhooks from './pages/Webhooks';
+import UserActivity from './pages/UserActivity';
 
 // Layout
 import Layout from './components/Layout';
@@ -127,6 +128,7 @@ function AppRoutes() {
         <Route path="gps/player/:sessionId" element={<GPSPlayer />} />
         <Route path="gps/session/:sessionId" element={<GPSPlayer />} />
         <Route path="webhooks" element={<Webhooks />} />
+        <Route path="user-activity" element={<UserActivity />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>

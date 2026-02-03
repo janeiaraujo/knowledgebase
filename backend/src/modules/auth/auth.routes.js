@@ -84,6 +84,31 @@ export default async function authRoutes(fastify, options) {
         metadata: { method: 'password' }
       });
       
+      // Record login for activity tracking
+      await db.collection('activity_logs').insertOne({
+        tenant_id: user.tenant_id,
+        user_id: user._id,
+        user_name: user.name,
+        user_email: user.email,
+        action: 'login',
+        entity_type: 'auth',
+        ip_address: request.headers['x-forwarded-for']?.split(',')[0] || request.ip,
+        user_agent: request.headers['user-agent'] || '',
+        created_at: new Date()
+      });
+      
+      // Update user's last activity
+      await db.collection('users').updateOne(
+        { _id: user._id },
+        { 
+          $set: { 
+            last_login: new Date(),
+            last_activity: new Date(),
+            last_activity_type: 'login'
+          }
+        }
+      );
+      
       return {
         user: {
           id: user._id,
@@ -167,6 +192,32 @@ export default async function authRoutes(fastify, options) {
         timestamp: new Date(),
         metadata: { method: 'magic_link' }
       });
+      
+      // Record login for activity tracking
+      await db.collection('activity_logs').insertOne({
+        tenant_id: user.tenant_id,
+        user_id: user._id,
+        user_name: user.name,
+        user_email: user.email,
+        action: 'login',
+        entity_type: 'auth',
+        metadata: { method: 'magic_link' },
+        ip_address: request.headers['x-forwarded-for']?.split(',')[0] || request.ip,
+        user_agent: request.headers['user-agent'] || '',
+        created_at: new Date()
+      });
+      
+      // Update user's last activity
+      await db.collection('users').updateOne(
+        { _id: user._id },
+        { 
+          $set: { 
+            last_login: new Date(),
+            last_activity: new Date(),
+            last_activity_type: 'login'
+          }
+        }
+      );
       
       return {
         user: {

@@ -88,6 +88,13 @@ async function createIndexes() {
     await db.collection('favorites').createIndex({ tenant_id: 1, user_id: 1, record_id: 1 }, { unique: true });
     await db.collection('favorites').createIndex({ tenant_id: 1, user_id: 1, created_at: -1 });
 
+    // Activity and KB views indexes
+    await db.collection('kb_views').createIndex({ tenant_id: 1, kb_id: 1, viewed_at: -1 });
+    await db.collection('kb_views').createIndex({ tenant_id: 1, user_id: 1, viewed_at: -1 });
+    await db.collection('kb_views').createIndex({ tenant_id: 1, viewed_at: -1 });
+    await db.collection('activity_logs').createIndex({ tenant_id: 1, user_id: 1, created_at: -1 });
+    await db.collection('activity_logs').createIndex({ tenant_id: 1, action: 1, created_at: -1 });
+
     // Relations indexes
     await db.collection('record_relations').createIndex({ tenant_id: 1, source_id: 1 });
     await db.collection('record_relations').createIndex({ tenant_id: 1, target_id: 1 });
@@ -257,6 +264,7 @@ import reviewRoutes from './modules/review/review.routes.js';
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
 import gpsRoutes from './modules/gps/gps.routes.js';
 import webhooksRoutes from './modules/webhooks/webhooks.routes.js';
+import activityRoutes from './modules/activity/activity.routes.js';
 
 // Register routes
 await fastify.register(authRoutes, { prefix: '/api/auth' });
@@ -289,6 +297,7 @@ await fastify.register(reviewRoutes, { prefix: '/api/review' });
 await fastify.register(dashboardRoutes, { prefix: '/api/dashboard' });
 await fastify.register(gpsRoutes, { prefix: '/api/gps' });
 await fastify.register(webhooksRoutes, { prefix: '/api/webhooks' });
+await fastify.register(activityRoutes, { prefix: '/api/activity' });
 
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {
