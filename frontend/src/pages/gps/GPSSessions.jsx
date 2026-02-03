@@ -134,7 +134,6 @@ export default function GPSSessions() {
       setLoading(false);
     }
   };
-  };
 
   const formatDate = (date) => {
     if (!date) return '-';
