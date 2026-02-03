@@ -1,15 +1,27 @@
+/**
+ * Layout Component - Professional Version
+ * 
+ * Main application layout with:
+ * - Professional sidebar with collapsible groups
+ * - Top navbar with quick actions
+ * - Theme toggle
+ * - Notifications
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { Container, Nav, Navbar, NavDropdown, Button } from 'react-bootstrap';
+import { Container, Nav, Navbar, Button, Dropdown } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import QuickSearch from './QuickSearch';
 import NotificationDropdown from './notifications/NotificationDropdown';
+import Sidebar from './Sidebar';
+import './Sidebar.css';
 
 export default function Layout() {
   const { user, logout } = useAuth();
-  const { theme, isDark, toggleTheme, setThemeMode } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,293 +45,153 @@ export default function Layout() {
     navigate('/login');
   };
   
-  const isActive = (path) => location.pathname.startsWith(path);
+  // Get page title based on current route
+  const getPageTitle = () => {
+    const routes = {
+      '/': 'Dashboard',
+      '/kb': 'Knowledge Base',
+      '/incidents': 'Incidentes',
+      '/events': 'Eventos',
+      '/smart-search': 'Busca Inteligente',
+      '/search': 'Busca Avançada',
+      '/analytics': 'Analytics',
+      '/quick-capture': 'Captura Rápida',
+      '/gps': 'Diagnóstico GPS',
+      '/postmortem': 'Post-Mortem',
+      '/favorites': 'Favoritos',
+      '/templates': 'Templates',
+      '/tags': 'Tags & Categorias',
+      '/properties': 'Propriedades',
+      '/reviews': 'Revisões',
+      '/import': 'Importar',
+      '/admin': 'Administração',
+      '/kb-requests': 'Solicitações KB',
+      '/audit-logs': 'Audit Logs',
+      '/webhooks': 'Webhooks',
+      '/user-activity': 'Atividade de Usuários',
+      '/settings': 'Configurações',
+    };
+    
+    // Check exact match first
+    if (routes[location.pathname]) return routes[location.pathname];
+    
+    // Check partial matches
+    for (const [path, title] of Object.entries(routes)) {
+      if (location.pathname.startsWith(path) && path !== '/') {
+        return title;
+      }
+    }
+    
+    return 'Incident KB';
+  };
   
   return (
     <div className="d-flex">
-      {/* Mobile overlay */}
-      <div 
-        className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`}
-        onClick={() => setSidebarOpen(false)}
+      {/* Sidebar */}
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)} 
       />
       
-      {/* Sidebar */}
-      <div className={`sidebar ${sidebarOpen ? 'show' : ''}`}>
-        <div className="px-3 py-2 mb-3 border-bottom border-secondary">
-          <h5 className="text-white mb-0">
-            <i className="bi bi-database-fill me-2"></i>
-            Incident KB
-          </h5>
-        </div>
-        
-        <Nav className="flex-column">
-          <Link 
-            to="/" 
-            className={`nav-link ${isActive('/') && location.pathname === '/' ? 'active' : ''}`}
-          >
-            <i className="bi bi-speedometer2 me-2"></i>
-            Dashboard
-          </Link>
-          
-          <Link 
-            to="/kb" 
-            className={`nav-link ${isActive('/kb') ? 'active' : ''}`}
-          >
-            <i className="bi bi-book me-2"></i>
-            Knowledge Base
-          </Link>
-          
-          <Link 
-            to="/incidents" 
-            className={`nav-link ${isActive('/incidents') ? 'active' : ''}`}
-          >
-            <i className="bi bi-exclamation-triangle me-2"></i>
-            Incidents
-          </Link>
-          
-          <Link 
-            to="/events" 
-            className={`nav-link ${isActive('/events') ? 'active' : ''}`}
-          >
-            <i className="bi bi-calendar-event me-2"></i>
-            Events
-          </Link>
-          
-          <Link 
-            to="/favorites" 
-            className={`nav-link ${isActive('/favorites') ? 'active' : ''}`}
-          >
-            <i className="bi bi-star me-2"></i>
-            Favoritos
-          </Link>
-          
-          <Link 
-            to="/search" 
-            className={`nav-link ${isActive('/search') ? 'active' : ''}`}
-          >
-            <i className="bi bi-search me-2"></i>
-            Busca Avançada
-          </Link>
-          
-          <Link 
-            to="/smart-search" 
-            className={`nav-link ${isActive('/smart-search') ? 'active' : ''}`}
-          >
-            <i className="bi bi-robot me-2"></i>
-            Busca Inteligente
-          </Link>
-          
-          <Link 
-            to="/quick-capture" 
-            className={`nav-link ${isActive('/quick-capture') ? 'active' : ''}`}
-          >
-            <i className="bi bi-lightning-charge me-2"></i>
-            Captura Rápida
-          </Link>
-          
-          <Link 
-            to="/gps" 
-            className={`nav-link ${isActive('/gps') && location.pathname === '/gps' ? 'active' : ''}`}
-          >
-            <i className="bi bi-signpost-2 me-2"></i>
-            Diagnóstico GPS
-          </Link>
-          
-          <Link 
-            to="/gps/sessions" 
-            className={`nav-link ${isActive('/gps/sessions') ? 'active' : ''}`}
-          >
-            <i className="bi bi-clock-history me-2"></i>
-            Sessões GPS
-          </Link>
-          
-          <Link 
-            to="/analytics" 
-            className={`nav-link ${isActive('/analytics') ? 'active' : ''}`}
-          >
-            <i className="bi bi-graph-up me-2"></i>
-            Analytics
-          </Link>
-          
-          <hr className="text-white-50 my-3" />
-          
-          {(user?.role === 'admin' || user?.role === 'owner') && (
-            <Link 
-              to="/admin" 
-              className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
-            >
-              <i className="bi bi-gear-fill me-2"></i>
-              Administração
-            </Link>
-          )}
-          
-          <Link 
-            to="/properties" 
-            className={`nav-link ${isActive('/properties') ? 'active' : ''}`}
-          >
-            <i className="bi bi-sliders me-2"></i>
-            Propriedades
-          </Link>
-          
-          <Link 
-            to="/tags" 
-            className={`nav-link ${isActive('/tags') ? 'active' : ''}`}
-          >
-            <i className="bi bi-tags me-2"></i>
-            Tags & Categorias
-          </Link>
-          
-          <Link 
-            to="/templates" 
-            className={`nav-link ${isActive('/templates') ? 'active' : ''}`}
-          >
-            <i className="bi bi-file-earmark-text me-2"></i>
-            Templates
-          </Link>
-          
-          <Link 
-            to="/import" 
-            className={`nav-link ${isActive('/import') ? 'active' : ''}`}
-          >
-            <i className="bi bi-cloud-upload me-2"></i>
-            Importar
-          </Link>
-          
-          <Link 
-            to="/reviews" 
-            className={`nav-link ${isActive('/reviews') ? 'active' : ''}`}
-          >
-            <i className="bi bi-calendar-check me-2"></i>
-            Revisões
-          </Link>
-          
-          <Link 
-            to="/postmortem" 
-            className={`nav-link ${isActive('/postmortem') ? 'active' : ''}`}
-          >
-            <i className="bi bi-file-earmark-medical me-2"></i>
-            Post-Mortem
-          </Link>
-          
-          {(user?.role === 'admin' || user?.role === 'owner') && (
-            <Link 
-              to="/kb-requests" 
-              className={`nav-link ${isActive('/kb-requests') ? 'active' : ''}`}
-            >
-              <i className="bi bi-inbox me-2"></i>
-              Solicitações KB
-            </Link>
-          )}
-          
-          {(user?.role === 'admin' || user?.role === 'owner') && (
-            <Link 
-              to="/audit-logs" 
-              className={`nav-link ${isActive('/audit-logs') ? 'active' : ''}`}
-            >
-              <i className="bi bi-journal-text me-2"></i>
-              Audit Logs
-            </Link>
-          )}
-          
-          {(user?.role === 'admin' || user?.role === 'owner') && (
-            <Link 
-              to="/webhooks" 
-              className={`nav-link ${isActive('/webhooks') ? 'active' : ''}`}
-            >
-              <i className="bi bi-link-45deg me-2"></i>
-              Webhooks
-            </Link>
-          )}
-          
-          {(user?.role === 'admin' || user?.role === 'owner') && (
-            <Link 
-              to="/user-activity" 
-              className={`nav-link ${isActive('/user-activity') ? 'active' : ''}`}
-            >
-              <i className="bi bi-activity me-2"></i>
-              Atividade Usuários
-            </Link>
-          )}
-          
-          <Link 
-            to="/settings" 
-            className={`nav-link ${isActive('/settings') ? 'active' : ''}`}
-          >
-            <i className="bi bi-gear me-2"></i>
-            Settings
-          </Link>
-        </Nav>
-        
-        <div className="position-absolute bottom-0 w-100 p-3 border-top border-secondary">
-          <div className="text-white-50 small">
-            <div className="mb-1">{user?.name}</div>
-            <div className="mb-2 text-capitalize">
-              <i className="bi bi-shield-check me-1"></i>
-              {user?.role}
-            </div>
-            <button 
-              onClick={handleLogout}
-              className="btn btn-sm btn-outline-light w-100"
-            >
-              <i className="bi bi-box-arrow-right me-1"></i>
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-      
       {/* Main Content */}
-      <div className="main-content flex-grow-1">
+      <div className="main-content-pro flex-grow-1">
         <NotificationProvider>
-          <Navbar bg="white" className="border-bottom mb-4">
-            <Container fluid>
-              {/* Mobile menu button - hidden on desktop */}
-              <Button 
-                variant="outline-secondary"
-                className="d-md-none me-2"
-                onClick={() => setSidebarOpen(true)}
-              >
-                <i className="bi bi-list"></i>
-              </Button>
-              
+          {/* Top Navbar */}
+          <Navbar 
+            bg={isDark ? 'dark' : 'white'} 
+            variant={isDark ? 'dark' : 'light'}
+            className="border-bottom px-3 py-2 sticky-top"
+            style={{ 
+              backdropFilter: 'blur(10px)',
+              backgroundColor: isDark ? 'rgba(13, 17, 23, 0.9)' : 'rgba(255, 255, 255, 0.95)'
+            }}
+          >
+            {/* Mobile menu button */}
+            <Button 
+              variant={isDark ? 'outline-light' : 'outline-secondary'}
+              className="d-lg-none me-2 border-0"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <i className="bi bi-list fs-5"></i>
+            </Button>
+            
+            {/* Page Title - Hidden on mobile */}
+            <div className="d-none d-md-flex align-items-center">
+              <h5 className="mb-0 fw-semibold">{getPageTitle()}</h5>
+            </div>
+            
+            {/* Quick Search */}
+            <div className="ms-auto me-3 d-none d-sm-block" style={{ maxWidth: '400px', flex: 1 }}>
               <QuickSearch />
+            </div>
+            
+            <Nav className="align-items-center gap-2">
+              {/* Theme Toggle */}
+              <button 
+                onClick={toggleTheme} 
+                className="btn btn-link nav-link p-2 border-0"
+                title={isDark ? 'Tema claro' : 'Tema escuro'}
+              >
+                <i className={`bi ${isDark ? 'bi-sun-fill text-warning' : 'bi-moon-fill'} fs-5`}></i>
+              </button>
               
-              <Nav className="ms-auto align-items-center gap-2">
-                {/* Theme Toggle */}
-                <button 
-                  onClick={toggleTheme} 
-                  className="theme-toggle nav-link border-0 bg-transparent"
-                  title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
-                >
-                  <i className={`bi ${isDark ? 'bi-sun-fill text-warning' : 'bi-moon-fill text-secondary'} fs-5`}></i>
-                </button>
-                
-                <NotificationDropdown />
-                <Link to="/kb/new" className="btn btn-primary btn-sm d-none d-sm-inline-flex">
-                  <i className="bi bi-plus-circle me-1"></i>
-                  <span className="d-none d-md-inline">Novo KB</span>
-                </Link>
-                <Link to="/kb/new" className="btn btn-primary btn-sm d-sm-none">
-                  <i className="bi bi-plus-circle"></i>
-                </Link>
-              </Nav>
-            </Container>
+              {/* Notifications */}
+              <NotificationDropdown />
+              
+              {/* New KB Button */}
+              <Link 
+                to="/kb/new" 
+                className="btn btn-primary d-none d-sm-inline-flex align-items-center gap-1"
+              >
+                <i className="bi bi-plus-lg"></i>
+                <span className="d-none d-md-inline">Novo KB</span>
+              </Link>
+              
+              {/* Quick Actions Dropdown - Mobile */}
+              <Dropdown align="end" className="d-sm-none">
+                <Dropdown.Toggle variant="primary" size="sm" id="quick-actions">
+                  <i className="bi bi-plus-lg"></i>
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item as={Link} to="/kb/new">
+                    <i className="bi bi-file-earmark-plus me-2"></i>
+                    Novo KB
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/quick-capture">
+                    <i className="bi bi-lightning-charge me-2"></i>
+                    Captura Rápida
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/smart-search">
+                    <i className="bi bi-robot me-2"></i>
+                    Busca Inteligente
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item as={Link} to="/gps">
+                    <i className="bi bi-signpost-2 me-2"></i>
+                    Diagnóstico GPS
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Nav>
           </Navbar>
           
-          <Container fluid>
-            <Outlet />
-          </Container>
+          {/* Page Content */}
+          <main className="p-3 p-md-4">
+            <Container fluid className="px-0">
+              <Outlet />
+            </Container>
+          </main>
         </NotificationProvider>
       </div>
       
       {/* Mobile floating menu button */}
-      <Button 
-        variant="primary"
-        className="sidebar-toggle"
+      <button 
+        className="sidebar-mobile-toggle"
         onClick={() => setSidebarOpen(!sidebarOpen)}
+        title="Menu"
       >
         <i className={`bi bi-${sidebarOpen ? 'x-lg' : 'list'}`}></i>
-      </Button>
+      </button>
     </div>
   );
 }
