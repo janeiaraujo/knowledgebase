@@ -561,21 +561,56 @@ export default function Dashboard() {
                 <Link to="/kb/new" className="btn btn-primary">
                   <i className="bi bi-plus-circle me-2"></i>Novo KB
                 </Link>
-                <Link to="/kb?status=in_review" className="btn btn-outline-info">
-                  <i className="bi bi-clock-history me-2"></i>KBs Pendentes
+                <Link to="/quick-capture" className="btn btn-success">
+                  <i className="bi bi-lightning-charge me-2"></i>Captura Rápida
+                </Link>
+                <Link to="/gps" className="btn btn-info text-white">
+                  <i className="bi bi-signpost-2 me-2"></i>Diagnóstico GPS
+                </Link>
+                <Link to="/incidents" className="btn btn-outline-danger">
+                  <i className="bi bi-exclamation-triangle me-2"></i>Incidentes
                 </Link>
                 <Link to="/reviews" className="btn btn-outline-warning">
                   <i className="bi bi-calendar-check me-2"></i>Revisões
                 </Link>
-                <Link to="/favorites" className="btn btn-outline-secondary">
-                  <i className="bi bi-star me-2"></i>Meus Favoritos
-                </Link>
-                <Link to="/analytics" className="btn btn-outline-primary">
-                  <i className="bi bi-graph-up me-2"></i>Analytics
-                </Link>
               </div>
             </Card.Body>
           </Card>
+          
+          {/* Active GPS Sessions */}
+          {myActivity?.activeSessions?.length > 0 && (
+            <Card className="border-0 shadow-sm mt-4">
+              <Card.Header className="bg-white border-0 py-3">
+                <h5 className="mb-0">
+                  <i className="bi bi-compass me-2 text-primary"></i>
+                  Sessões GPS Ativas
+                </h5>
+              </Card.Header>
+              <Card.Body className="p-0">
+                <div className="list-group list-group-flush">
+                  {myActivity.activeSessions.slice(0, 3).map(session => (
+                    <Link 
+                      key={session._id} 
+                      to={`/gps/session/${session._id}`}
+                      className="list-group-item list-group-item-action"
+                    >
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span>{session.flow_name}</span>
+                        <Badge bg="primary" pill>
+                          {session.responses?.length || 0} passos
+                        </Badge>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                <div className="p-2 text-center">
+                  <Link to="/gps/sessions" className="btn btn-sm btn-link">
+                    Ver todas sessões
+                  </Link>
+                </div>
+              </Card.Body>
+            </Card>
+          )}
           
           {/* Tag Cloud */}
           {analytics?.tagDistribution?.length > 0 && (

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Pages
 import Login from './pages/auth/Login';
@@ -32,6 +33,8 @@ import AuditLogs from './pages/AuditLogs';
 import GPSFlowList from './pages/gps/GPSFlowList';
 import GPSFlowEditor from './pages/gps/GPSFlowEditor';
 import GPSPlayer from './pages/gps/GPSPlayer';
+import GPSSessions from './pages/gps/GPSSessions';
+import Webhooks from './pages/Webhooks';
 
 // Layout
 import Layout from './components/Layout';
@@ -117,9 +120,13 @@ function AppRoutes() {
         <Route path="reviews" element={<Reviews />} />
         <Route path="audit-logs" element={<AuditLogs />} />
         <Route path="gps" element={<GPSFlowList />} />
+        <Route path="gps/flows" element={<GPSFlowList />} />
+        <Route path="gps/sessions" element={<GPSSessions />} />
         <Route path="gps/flows/:flowId/edit" element={<GPSFlowEditor />} />
         <Route path="gps/play/:flowId" element={<GPSPlayer />} />
+        <Route path="gps/player/:sessionId" element={<GPSPlayer />} />
         <Route path="gps/session/:sessionId" element={<GPSPlayer />} />
+        <Route path="webhooks" element={<Webhooks />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
@@ -128,9 +135,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

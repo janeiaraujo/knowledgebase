@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Nav, Navbar, NavDropdown, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import QuickSearch from './QuickSearch';
 import NotificationDropdown from './notifications/NotificationDropdown';
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const { theme, isDark, toggleTheme, setThemeMode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -109,10 +111,18 @@ export default function Layout() {
           
           <Link 
             to="/gps" 
-            className={`nav-link ${isActive('/gps') ? 'active' : ''}`}
+            className={`nav-link ${isActive('/gps') && location.pathname === '/gps' ? 'active' : ''}`}
           >
             <i className="bi bi-signpost-2 me-2"></i>
             Diagnóstico GPS
+          </Link>
+          
+          <Link 
+            to="/gps/sessions" 
+            className={`nav-link ${isActive('/gps/sessions') ? 'active' : ''}`}
+          >
+            <i className="bi bi-clock-history me-2"></i>
+            Sessões GPS
           </Link>
           
           <Link 
@@ -185,6 +195,16 @@ export default function Layout() {
             </Link>
           )}
           
+          {(user?.role === 'admin' || user?.role === 'owner') && (
+            <Link 
+              to="/webhooks" 
+              className={`nav-link ${isActive('/webhooks') ? 'active' : ''}`}
+            >
+              <i className="bi bi-link-45deg me-2"></i>
+              Webhooks
+            </Link>
+          )}
+          
           <Link 
             to="/settings" 
             className={`nav-link ${isActive('/settings') ? 'active' : ''}`}
@@ -229,6 +249,15 @@ export default function Layout() {
               <QuickSearch />
               
               <Nav className="ms-auto align-items-center gap-2">
+                {/* Theme Toggle */}
+                <button 
+                  onClick={toggleTheme} 
+                  className="theme-toggle nav-link border-0 bg-transparent"
+                  title={isDark ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
+                >
+                  <i className={`bi ${isDark ? 'bi-sun-fill text-warning' : 'bi-moon-fill text-secondary'} fs-5`}></i>
+                </button>
+                
                 <NotificationDropdown />
                 <Link to="/kb/new" className="btn btn-primary btn-sm d-none d-sm-inline-flex">
                   <i className="bi bi-plus-circle me-1"></i>

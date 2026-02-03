@@ -284,7 +284,8 @@ export default async function dashboardRoutes(fastify, options) {
             myPublished,
             myRecentKBs,
             myFavorites,
-            myComments
+            myComments,
+            activeSessions
         ] = await Promise.all([
             db.collection('records').countDocuments(baseMatch),
             db.collection('records').countDocuments({...baseMatch, status: 'draft' }),
@@ -302,7 +303,17 @@ export default async function dashboardRoutes(fastify, options) {
             db.collection('kb_comments').countDocuments({
                 tenant_id: request.tenantId,
                 user_id: new ObjectId(userId)
+            }),
+            // GPS Sessions ativas do usuário
+            db.collection('gps_sessions').find({
+                tenant_id: request.tenantId,
+                user_id: new ObjectId(userId),
+                status: 'active'
             })
+            .sort({ started_at: -1 })
+            .limit(5)
+            .project({ flow_name: 1, started_at: 1, current_step: 1, responses: 1 })
+            .toArray()
         ]);
 
         return {
@@ -312,7 +323,8 @@ export default async function dashboardRoutes(fastify, options) {
             published: myPublished,
             favorites: myFavorites,
             comments: myComments,
-            recentKBs: myRecentKBs
+            recentKBs: myRecentKBs,
+            activeSessions: activeSessions
         };
     });
 
@@ -491,6 +503,147 @@ export default async function dashboardRoutes(fastify, options) {
         return {
             byComments: trendingByComments,
             byFavorites: trendingByFavorites
+        };
+    });
+
+    /**
+     * Get system/API statistics
+     */
+    fastify.get('/system-stats', {
+        preHandler: [authMiddleware, tenantMiddleware]
+    }, async(request, reply) => {
+        const db = fastify.db();
+        const tenantId = request.tenantId;
+        
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const [
+            // User statistics
+            totalUsers,
+            activeUsers,
+            
+            // Content statistics
+            totalRecords,
+            publishedRecords,
+            draftRecords,
+            
+            // Session statistics
+            activeSessions,
+            completedSessionsThisWeek,
+            
+            // Webhook statistics
+            activeWebhooks,
+            webhookDeliveriesToday,
+            
+            // Interaction statistics
+            commentsThisMonth,
+            favoritesThisMonth,
+            
+            // Incident statistics
+            openIncidents,
+            resolvedThisWeek,
+            
+            // GPS statistics
+            totalGPSFlows,
+            activeGPSFlows
+        ] = await Promise.all([
+            // Users
+            db.collection('users').countDocuments({ tenant_id: tenantId, active: true }),
+            db.collection('users').countDocuments({ 
+                tenant_id: tenantId, 
+                active: true, 
+                last_login: { $gte: thisWeek } 
+            }),
+            
+            // Records
+            db.collection('records').countDocuments({ tenant_id: tenantId }),
+            db.collection('records').countDocuments({ tenant_id: tenantId, status: 'published' }),
+            db.collection('records').countDocuments({ tenant_id: tenantId, status: 'draft' }),
+            
+            // GPS Sessions
+            db.collection('gps_sessions').countDocuments({ tenant_id: tenantId, status: 'active' }),
+            db.collection('gps_sessions').countDocuments({ 
+                tenant_id: tenantId, 
+                status: 'completed',
+                completed_at: { $gte: thisWeek }
+            }),
+            
+            // Webhooks
+            db.collection('webhooks').countDocuments({ tenant_id: tenantId, is_active: true, deleted_at: null }),
+            db.collection('webhook_deliveries').countDocuments({ 
+                tenant_id: tenantId, 
+                created_at: { $gte: today }
+            }),
+            
+            // Comments
+            db.collection('kb_comments').countDocuments({ 
+                tenant_id: tenantId, 
+                created_at: { $gte: thisMonth }
+            }),
+            
+            // Favorites
+            db.collection('favorites').countDocuments({ 
+                tenant_id: tenantId, 
+                created_at: { $gte: thisMonth }
+            }),
+            
+            // Incidents
+            db.collection('incidents').countDocuments({ 
+                tenant_id: tenantId, 
+                status: { $in: ['open', 'investigating', 'identified'] }
+            }),
+            db.collection('incidents').countDocuments({ 
+                tenant_id: tenantId, 
+                status: 'resolved',
+                resolved_at: { $gte: thisWeek }
+            }),
+            
+            // GPS Flows
+            db.collection('gps_flows').countDocuments({ tenant_id: tenantId, deleted_at: null }),
+            db.collection('gps_flows').countDocuments({ tenant_id: tenantId, is_active: true, deleted_at: null })
+        ]);
+
+        // Calculate storage usage (estimated)
+        const stats = await db.stats();
+        const storageUsedMB = Math.round(stats.dataSize / 1024 / 1024);
+
+        return {
+            users: {
+                total: totalUsers,
+                activeThisWeek: activeUsers,
+                activityRate: totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0
+            },
+            content: {
+                total: totalRecords,
+                published: publishedRecords,
+                drafts: draftRecords,
+                publishRate: totalRecords > 0 ? Math.round((publishedRecords / totalRecords) * 100) : 0
+            },
+            gps: {
+                totalFlows: totalGPSFlows,
+                activeFlows: activeGPSFlows,
+                activeSessions: activeSessions,
+                completedThisWeek: completedSessionsThisWeek
+            },
+            incidents: {
+                open: openIncidents,
+                resolvedThisWeek: resolvedThisWeek
+            },
+            webhooks: {
+                active: activeWebhooks,
+                deliveriesToday: webhookDeliveriesToday
+            },
+            engagement: {
+                commentsThisMonth: commentsThisMonth,
+                favoritesThisMonth: favoritesThisMonth
+            },
+            storage: {
+                usedMB: storageUsedMB
+            },
+            timestamp: new Date().toISOString()
         };
     });
 }

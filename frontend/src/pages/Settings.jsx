@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Card, Nav, Row, Col, Form, Button, Alert } from 'react-bootstrap';
+import { useTheme } from '../contexts/ThemeContext';
 import TagsSettings from './settings/TagsSettings';
 import CategoriesSettings from './settings/CategoriesSettings';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState('tags');
+  const { theme, setThemeMode, isDark } = useTheme();
+  const [activeTab, setActiveTab] = useState('appearance');
   const [generalSettings, setGeneralSettings] = useState({
     siteName: 'Knowledge Base',
     defaultLanguage: 'pt-BR',
@@ -16,6 +18,72 @@ export default function Settings() {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'appearance':
+        return (
+          <Card className="border-0 shadow-sm">
+            <Card.Header className="bg-white">
+              <h5 className="mb-0">
+                <i className="bi bi-palette me-2"></i>
+                Aparência
+              </h5>
+            </Card.Header>
+            <Card.Body>
+              <h6 className="mb-3">Tema da Interface</h6>
+              <div className="d-flex gap-3 mb-4">
+                <Card 
+                  className={`cursor-pointer ${theme === 'light' ? 'border-primary border-2' : ''}`}
+                  style={{ width: '140px', cursor: 'pointer' }}
+                  onClick={() => setThemeMode('light')}
+                >
+                  <Card.Body className="text-center p-3">
+                    <div className="bg-light border rounded p-3 mb-2">
+                      <i className="bi bi-sun-fill fs-3 text-warning"></i>
+                    </div>
+                    <small className="fw-semibold">Claro</small>
+                    {theme === 'light' && (
+                      <i className="bi bi-check-circle-fill text-primary ms-2"></i>
+                    )}
+                  </Card.Body>
+                </Card>
+                <Card 
+                  className={`cursor-pointer ${theme === 'dark' ? 'border-primary border-2' : ''}`}
+                  style={{ width: '140px', cursor: 'pointer' }}
+                  onClick={() => setThemeMode('dark')}
+                >
+                  <Card.Body className="text-center p-3">
+                    <div className="bg-dark border rounded p-3 mb-2">
+                      <i className="bi bi-moon-fill fs-3 text-light"></i>
+                    </div>
+                    <small className="fw-semibold">Escuro</small>
+                    {theme === 'dark' && (
+                      <i className="bi bi-check-circle-fill text-primary ms-2"></i>
+                    )}
+                  </Card.Body>
+                </Card>
+                <Card 
+                  className={`cursor-pointer ${theme === 'system' ? 'border-primary border-2' : ''}`}
+                  style={{ width: '140px', cursor: 'pointer' }}
+                  onClick={() => setThemeMode('system')}
+                >
+                  <Card.Body className="text-center p-3">
+                    <div className="bg-secondary border rounded p-3 mb-2">
+                      <i className="bi bi-display fs-3 text-light"></i>
+                    </div>
+                    <small className="fw-semibold">Sistema</small>
+                    {theme === 'system' && (
+                      <i className="bi bi-check-circle-fill text-primary ms-2"></i>
+                    )}
+                  </Card.Body>
+                </Card>
+              </div>
+              <Alert variant="info">
+                <i className="bi bi-info-circle me-2"></i>
+                <strong>Tema atual:</strong> {isDark ? 'Escuro' : 'Claro'}
+                {theme === 'system' && ' (seguindo preferência do sistema)'}
+              </Alert>
+            </Card.Body>
+          </Card>
+        );
       case 'tags':
         return <TagsSettings />;
       case 'categories':
@@ -137,6 +205,16 @@ export default function Settings() {
           <Card className="border-0 shadow-sm mb-4">
             <Card.Body className="p-0">
               <Nav className="flex-column" variant="pills">
+                <Nav.Item>
+                  <Nav.Link 
+                    active={activeTab === 'appearance'}
+                    onClick={() => setActiveTab('appearance')}
+                    className="rounded-0 border-bottom"
+                  >
+                    <i className="bi bi-palette me-2"></i>
+                    Aparência
+                  </Nav.Link>
+                </Nav.Item>
                 <Nav.Item>
                   <Nav.Link 
                     active={activeTab === 'tags'}
