@@ -150,6 +150,22 @@ const POINTS_CONFIG = {
 export default async function gamificationRoutes(fastify) {
     const db = fastify.mongo.db;
 
+    // Clean up any existing duplicates FIRST (keep the one with most points)
+    await cleanupDuplicateProfiles(db);
+
+    // Then create unique index to prevent future duplicates
+    try {
+        await db.collection('user_gamification').createIndex(
+            { user_id: 1, tenant_id: 1 },
+            { unique: true, background: true }
+        );
+        console.log('✅ Unique index created on user_gamification');
+    } catch (err) {
+        if (err.code !== 85) { // 85 = IndexOptionsConflict (index already exists)
+            console.error('Error creating index:', err.message);
+        }
+    }
+
     // Get user profile with gamification stats
     fastify.get('/profile', {
         preHandler: [fastify.authenticate]
@@ -473,28 +489,65 @@ export default async function gamificationRoutes(fastify) {
     });
 }
 
-// Helper functions
-async function getOrCreateProfile(db, userId) {
-    let profile = await db.collection('user_gamification')
-        .findOne({ user_id: new ObjectId(userId) });
+// Helper function to clean up duplicate profiles
+async function cleanupDuplicateProfiles(db) {
+    try {
+        // Find users with duplicate profiles
+        const duplicates = await db.collection('user_gamification').aggregate([
+            {
+                $group: {
+                    _id: { user_id: '$user_id', tenant_id: '$tenant_id' },
+                    count: { $sum: 1 },
+                    docs: { $push: { _id: '$_id', total_points: '$total_points' } }
+                }
+            },
+            { $match: { count: { $gt: 1 } } }
+        ]).toArray();
 
-    if (!profile) {
-        const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
-        profile = {
-            user_id: new ObjectId(userId),
-            tenant_id: user?.tenant_id,
-            total_points: 0,
-            current_streak: 0,
-            longest_streak: 0,
-            badges_count: 0,
-            last_activity_date: null,
-            created_at: new Date(),
-            updated_at: new Date()
-        };
-        await db.collection('user_gamification').insertOne(profile);
+        for (const dup of duplicates) {
+            // Sort by total_points descending, keep the one with most points
+            const sorted = dup.docs.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+            const toDelete = sorted.slice(1).map(d => d._id);
+            
+            if (toDelete.length > 0) {
+                await db.collection('user_gamification').deleteMany({
+                    _id: { $in: toDelete }
+                });
+                console.log(`🧹 Removed ${toDelete.length} duplicate profile(s) for user ${dup._id.user_id}`);
+            }
+        }
+    } catch (error) {
+        console.error('Error cleaning up duplicates:', error.message);
     }
+}
 
-    return profile;
+// Helper functions
+async function getOrCreateProfile(db, userId, tenantId = null) {
+    const userObjId = new ObjectId(userId);
+    
+    // Use findOneAndUpdate with upsert for atomic operation
+    const user = await db.collection('users').findOne({ _id: userObjId });
+    const effectiveTenantId = tenantId || user?.tenant_id;
+    
+    const result = await db.collection('user_gamification').findOneAndUpdate(
+        { user_id: userObjId, tenant_id: effectiveTenantId },
+        {
+            $setOnInsert: {
+                user_id: userObjId,
+                tenant_id: effectiveTenantId,
+                total_points: 0,
+                current_streak: 0,
+                longest_streak: 0,
+                badges_count: 0,
+                last_activity_date: null,
+                created_at: new Date()
+            },
+            $set: { updated_at: new Date() }
+        },
+        { upsert: true, returnDocument: 'after' }
+    );
+
+    return result;
 }
 
 function calculateLevel(points) {
