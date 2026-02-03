@@ -119,7 +119,23 @@ export default async function authRoutes(fastify, options) {
       
     } catch (error) {
       fastify.log.error(error);
-      // Always return success to prevent email enumeration
+      
+      // Check for specific email errors
+      if (error.message === 'SMTP_NOT_CONFIGURED') {
+        return reply.status(503).send({ 
+          error: 'Serviço de email não configurado. Entre em contato com o administrador.',
+          code: 'SMTP_NOT_CONFIGURED'
+        });
+      }
+      
+      if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+        return reply.status(503).send({ 
+          error: 'Falha ao conectar com servidor de email. Tente novamente mais tarde.',
+          code: 'SMTP_CONNECTION_ERROR'
+        });
+      }
+      
+      // Generic response to prevent email enumeration
       return { 
         success: true,
         message: 'If an account exists, a magic link has been sent.'

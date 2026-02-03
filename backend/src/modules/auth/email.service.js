@@ -3,18 +3,32 @@ import nodemailer from 'nodemailer';
 let transporter = null;
 
 /**
+ * Check if SMTP is configured
+ */
+export function isEmailConfigured() {
+  return !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+}
+
+/**
  * Initialize email transporter
  */
 function getTransporter() {
+  if (!isEmailConfigured()) {
+    throw new Error('SMTP_NOT_CONFIGURED');
+  }
+  
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT),
-      secure: false,
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      secure: process.env.SMTP_SECURE === 'true',
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
-      }
+      },
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000,
+      socketTimeout: 15000
     });
   }
   return transporter;

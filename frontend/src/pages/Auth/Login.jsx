@@ -49,7 +49,16 @@ export default function Login() {
       await authAPI.requestMagicLink({ email });
       setSuccess('Magic link enviado! Verifique seu email.');
     } catch (err) {
-      setError('Falha ao enviar magic link');
+      const errorCode = err.response?.data?.code;
+      const errorMessage = err.response?.data?.error;
+      
+      if (errorCode === 'SMTP_NOT_CONFIGURED') {
+        setError('Serviço de email não configurado. Use login com senha ou contate o administrador.');
+      } else if (errorCode === 'SMTP_CONNECTION_ERROR') {
+        setError('Falha ao conectar com servidor de email. Tente novamente mais tarde.');
+      } else {
+        setError(errorMessage || 'Falha ao enviar magic link. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
