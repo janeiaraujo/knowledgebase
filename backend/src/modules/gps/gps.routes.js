@@ -380,7 +380,8 @@ async function gpsRoutes(fastify, options) {
 
         const filter = {
             tenant_id: request.tenantId,
-            user_id: request.currentUser._id
+            user_id: request.currentUser._id,
+            deleted_at: null
         };
 
         if (status) {
@@ -524,6 +525,41 @@ async function gpsRoutes(fastify, options) {
         );
 
         return { success: true };
+    });
+
+    // Delete session (soft delete)
+    fastify.delete('/sessions/:sessionId', {
+        preHandler: [authMiddleware, tenantMiddleware]
+    }, async (request, reply) => {
+        const db = fastify.db();
+        const { sessionId } = request.params;
+        const objectId = toObjectId(sessionId);
+
+        fastify.log.info({ sessionId, tenantId: request.tenantId }, 'Attempting to delete GPS session');
+
+        if (!objectId) {
+            return reply.status(400).send({ error: 'Invalid session ID' });
+        }
+
+        // Check if session exists and belongs to tenant
+        const session = await db.collection('gps_sessions').findOne({
+            _id: objectId,
+            tenant_id: request.tenantId
+        });
+
+        if (!session) {
+            fastify.log.warn({ sessionId, tenantId: request.tenantId }, 'GPS session not found for deletion');
+            return reply.status(404).send({ error: 'Session not found' });
+        }
+
+        const result = await db.collection('gps_sessions').updateOne(
+            { _id: objectId, tenant_id: request.tenantId },
+            { $set: { deleted_at: new Date() } }
+        );
+
+        fastify.log.info({ sessionId, modified: result.modifiedCount }, 'GPS session deleted');
+
+        return { success: true, modified: result.modifiedCount };
     });
 
     // Generate RCA/Summary for completed session

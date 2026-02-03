@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Table, Button, Badge, Form, Row, Col, Spinner, Modal, Alert, Pagination } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import api, { gpsAPI } from '../../services/api';
+import * as bootstrap from 'bootstrap';
 
 const STATUS_CONFIG = {
   active: { label: 'Em Andamento', variant: 'primary', icon: 'play-circle' },
@@ -98,6 +99,41 @@ export default function GPSSessions() {
     } catch (err) {
       console.error('Erro ao abandonar sessão:', err);
     }
+  };
+
+  const handleDeleteSession = async (sessionId) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta sessão? Esta ação não pode ser desfeita.')) return;
+    
+    try {
+      setLoading(true);
+      await gpsAPI.deleteSession(sessionId);
+      await fetchSessions();
+      
+      // Toast de sucesso
+      const toastEl = document.createElement('div');
+      toastEl.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+      toastEl.setAttribute('role', 'alert');
+      toastEl.setAttribute('style', 'z-index: 9999;');
+      toastEl.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle me-2"></i>
+            Sessão excluída com sucesso!
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      `;
+      document.body.appendChild(toastEl);
+      const toast = new bootstrap.Toast(toastEl);
+      toast.show();
+      setTimeout(() => toastEl.remove(), 3000);
+    } catch (err) {
+      console.error('Erro ao excluir sessão:', err);
+      alert('Erro ao excluir sessão: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
   };
 
   const formatDate = (date) => {
@@ -317,6 +353,13 @@ export default function GPSSessions() {
                               <i className="bi bi-file-text"></i>
                             </Link>
                           )}
+                          <Button 
+                            variant="outline-danger" 
+                            onClick={() => handleDeleteSession(session._id)}
+                            title="Excluir Sessão"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </Button>
                         </div>
                       </td>
                     </tr>

@@ -349,6 +349,7 @@ export const gpsAPI = {
     startSession: (flowId, data) => api.post('/gps/sessions', { flow_id: flowId, ...data }),
     submitResponse: (sessionId, data) => api.post(`/gps/sessions/${sessionId}/respond`, data),
     abandonSession: (sessionId, reason) => api.post(`/gps/sessions/${sessionId}/abandon`, { reason }),
+    deleteSession: (id) => api.delete(`/gps/sessions/${id}`),
     generateRCA: (sessionId) => api.post(`/gps/sessions/${sessionId}/generate-rca`),
     
     // Categories
