@@ -534,16 +534,16 @@ export default async function activityRoutes(fastify, options) {
     });
 
     /**
-     * Get tenant-wide activity summary (for super admin)
+     * Get tenant-wide activity summary (for admin/owner)
      */
     fastify.get('/tenant-summary', {
         preHandler: [authMiddleware, tenantMiddleware]
     }, async (request, reply) => {
         const db = fastify.db();
 
-        // Only allow owners
-        if (request.currentUser.role !== 'owner') {
-            return reply.status(403).send({ error: 'Acesso negado' });
+        // Allow owners and admins
+        if (!['owner', 'admin'].includes(request.currentUser.role)) {
+            return reply.status(403).send({ error: 'Acesso negado. Você não tem permissão para esta ação.' });
         }
 
         const now = new Date();

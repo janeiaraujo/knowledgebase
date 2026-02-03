@@ -393,8 +393,8 @@ export default function Gamification() {
                                 <tbody>
                                     {leaderboard?.leaderboard?.map((entry, index) => (
                                         <tr 
-                                            key={entry.user_id}
-                                            className={entry.user_id === user?.id ? 'table-primary' : ''}
+                                            key={`${index}-${entry.user_id}`}
+                                            className={String(entry.user_id) === String(user?.id) ? 'table-primary' : ''}
                                         >
                                             <td className="text-center">
                                                 {index === 0 && '🥇'}

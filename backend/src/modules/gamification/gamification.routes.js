@@ -235,8 +235,18 @@ export default async function gamificationRoutes(fastify) {
             };
         }
 
+        // Convert tenantId to ObjectId if needed
+        let tenantObjId = tenantId;
+        if (typeof tenantId === 'string') {
+            try {
+                tenantObjId = new ObjectId(tenantId);
+            } catch (e) {
+                // Keep as string if not valid ObjectId
+            }
+        }
+
         const profiles = await db.collection('user_gamification')
-            .find({ tenant_id: tenantId, ...dateFilter })
+            .find({ tenant_id: tenantObjId, ...dateFilter })
             .sort({ total_points: -1 })
             .limit(parseInt(limit))
             .toArray();
@@ -265,13 +275,13 @@ export default async function gamificationRoutes(fastify) {
 
         // Get current user rank
         const currentUserProfile = await db.collection('user_gamification')
-            .findOne({ user_id: new ObjectId(request.user.id) });
+            .findOne({ user_id: new ObjectId(request.user.id), tenant_id: tenantObjId });
 
         let userRank = null;
         if (currentUserProfile) {
             const higherCount = await db.collection('user_gamification')
                 .countDocuments({
-                    tenant_id: tenantId,
+                    tenant_id: tenantObjId,
                     total_points: { $gt: currentUserProfile.total_points },
                     ...dateFilter
                 });
