@@ -2,10 +2,14 @@ import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission } from '../../middlewares/rbac.middleware.js';
 import Joi from 'joi';
-import { getOpenAI } from '../../utils/ai.js';
+import { getOpenAI, requireAI } from '../../utils/ai.js';
 
 export default async function aiRoutes(fastify, options) {
-  
+
+  // Todas as rotas deste modulo dependem da OpenAI: sem a chave, respondem 503
+  // antes de chegar ao handler (que converteria o erro em 500).
+  fastify.addHook('preHandler', requireAI);
+
   // Generate KB draft from text
   fastify.post('/generate-draft', {
     preHandler: [authMiddleware, tenantMiddleware, requirePermission('ai:use')]

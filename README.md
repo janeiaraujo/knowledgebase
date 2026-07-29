@@ -209,16 +209,6 @@ O sistema sobe e funciona **sem nenhuma** delas. Cada uma habilita um recurso es
 
 Cada módulo do backend segue o padrão `<dominio>.routes.js` e, quando há regra de negócio relevante, `<dominio>.service.js`.
 
-### Expondo o ambiente local (demos)
-
-O proxy do Vite encaminha `/api` para o backend, então basta expor a porta `5173`:
-
-```bash
-ngrok http 5173
-```
-
-Em modo de desenvolvimento, o CORS já aceita origens `*.ngrok-free.dev`, `*.ngrok-free.app`, `*.ngrok.io` e `*.trycloudflare.com`. Em produção essa permissão não se aplica.
-
 ---
 
 ## Como contribuir

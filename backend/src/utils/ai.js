@@ -33,3 +33,18 @@ export function getOpenAI() {
     }
     return client;
 }
+
+/**
+ * preHandler do Fastify que barra a requisicao quando a IA nao esta configurada.
+ *
+ * Usado antes do handler porque os handlers envolvem a chamada da OpenAI em
+ * try/catch e converteriam o erro em um 500 generico.
+ */
+export async function requireAI(request, reply) {
+    if (!isAIConfigured()) {
+        return reply.status(503).send({
+            error: 'Recurso de IA indisponivel: defina OPENAI_API_KEY no backend/.env para habilita-lo.',
+            code: 'AI_NOT_CONFIGURED'
+        });
+    }
+}
