@@ -1,19 +1,8 @@
-import OpenAI from 'openai';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission } from '../../middlewares/rbac.middleware.js';
 import Joi from 'joi';
-
-// Lazy load OpenAI instance to ensure env vars are loaded
-let openai;
-function getOpenAI() {
-  if (!openai) {
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-  }
-  return openai;
-}
+import { getOpenAI } from '../../utils/ai.js';
 
 export default async function aiRoutes(fastify, options) {
   

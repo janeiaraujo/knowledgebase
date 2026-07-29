@@ -1,0 +1,34 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: incident-kb-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Interface web opcional para inspecionar o banco: http://localhost:8081
+  # Suba apenas quando precisar:  docker compose --profile tools up -d
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: incident-kb-mongo-ui
+    restart: unless-stopped
+    profiles: ["tools"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017
+      ME_CONFIG_BASICAUTH: "false"
+
+volumes:
+  mongo_data:

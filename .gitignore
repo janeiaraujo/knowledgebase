@@ -137,3 +137,16 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Uploads locais (fallback quando o Cloudflare R2 nao esta configurado)
+backend/uploads/
+
+# Notas e briefings internos de desenvolvimento (mantidos apenas localmente)
+context.txt
+context*.txt
+
+# Arquivos de editor e sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

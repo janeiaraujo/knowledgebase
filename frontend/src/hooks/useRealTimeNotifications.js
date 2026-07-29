@@ -8,7 +8,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
+// Sem VITE_WS_URL, deriva do host atual: mantem o protocolo correto (wss em HTTPS)
+// e funciona atras de tuneis, passando pelo proxy do Vite.
+const WS_URL = import.meta.env.VITE_WS_URL ||
+    `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
 
 export function useRealTimeNotifications() {
     const { token, isAuthenticated } = useAuth();

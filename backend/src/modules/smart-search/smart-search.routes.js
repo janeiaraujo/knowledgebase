@@ -11,16 +11,7 @@
 import { ObjectId } from 'mongodb';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
-
-// Lazy load OpenAI
-let openai;
-async function getOpenAI() {
-    if (!openai) {
-        const OpenAI = (await import('openai')).default;
-        openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    }
-    return openai;
-}
+import { getOpenAI } from '../../utils/ai.js';
 
 export default async function smartSearchRoutes(fastify, options) {
     const db = () => fastify.db();
