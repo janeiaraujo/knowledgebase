@@ -2,8 +2,16 @@
 
 **Base de conhecimento operacional orientada a incidentes.** Um "Notion para operações": registre incidentes durante a emergência, transforme-os em KBs revisadas e encontre soluções rapidamente na próxima ocorrência.
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
-[![Stack](https://img.shields.io/badge/stack-Node.js%20%7C%20React%20%7C%20MongoDB-informational)](#stack)
+<!-- Badges dinâmicos: os valores são lidos do repositório em tempo real. -->
+[![Versão](https://img.shields.io/github/package-json/v/janeiaraujo/knowledgebase?filename=backend%2Fpackage.json&style=flat-square&color=0aa344&label=vers%C3%A3o)](backend/package.json)
+[![Licença](https://img.shields.io/github/license/janeiaraujo/knowledgebase?style=flat-square&color=0aa344)](LICENSE)
+[![Estrelas](https://img.shields.io/github/stars/janeiaraujo/knowledgebase?style=flat-square&color=0aa344&label=estrelas)](https://github.com/janeiaraujo/knowledgebase/stargazers)
+[![Issues](https://img.shields.io/github/issues/janeiaraujo/knowledgebase?style=flat-square&color=0aa344)](https://github.com/janeiaraujo/knowledgebase/issues)
+[![Contribuidores](https://img.shields.io/github/contributors/janeiaraujo/knowledgebase?style=flat-square&color=0aa344&label=contribuidores)](https://github.com/janeiaraujo/knowledgebase/graphs/contributors)
+[![Último commit](https://img.shields.io/github/last-commit/janeiaraujo/knowledgebase?style=flat-square&color=0aa344&label=%C3%BAltimo%20commit)](https://github.com/janeiaraujo/knowledgebase/commits/main)
+
+[![Stack](https://img.shields.io/badge/stack-Node.js%20%7C%20React%20%7C%20MongoDB-informational?style=flat-square)](#stack)
+[![Autor](https://img.shields.io/badge/autor-Janei%20Araujo-0aa344?style=flat-square)](https://github.com/janeiaraujo)
 
 > **Status:** projeto em desenvolvimento ativo. A API pode sofrer mudanças incompatíveis entre versões.
 
@@ -19,6 +27,8 @@
 - [Scripts disponíveis](#scripts-disponíveis)
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Como contribuir](#como-contribuir)
+- [Contribuidores](#contribuidores)
+- [Autor](#autor)
 - [Licença](#licença)
 
 ---
@@ -215,8 +225,23 @@ Em modo de desenvolvimento, o CORS já aceita origens `*.ngrok-free.dev`, `*.ngr
 
 Contribuições são bem-vindas. Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para o fluxo de trabalho, padrões de código e como reportar bugs.
 
+Se este projeto te ajudou, considere deixar uma ⭐ — é o que aumenta o alcance dele.
+
+[![Estrelas ao longo do tempo](https://img.shields.io/github/stars/janeiaraujo/knowledgebase?style=social)](https://github.com/janeiaraujo/knowledgebase/stargazers)
+
+## Contribuidores
+
+Obrigado a todas as pessoas que já contribuíram com este projeto:
+
+<!-- Atualizado automaticamente a partir dos contribuidores do repositório. -->
+[![Contribuidores](https://contrib.rocks/image?repo=janeiaraujo/knowledgebase)](https://github.com/janeiaraujo/knowledgebase/graphs/contributors)
+
+## Autor
+
+**Janei Araujo** — [@janeiaraujo](https://github.com/janeiaraujo)
+
 ## Licença
 
-Distribuído sob a licença **GNU AGPL-3.0**. Veja [LICENSE](LICENSE).
+Distribuído sob a licença **GNU AGPL-3.0-or-later**. Veja [LICENSE](LICENSE).
 
 Em resumo: você pode usar, modificar e redistribuir o projeto, inclusive comercialmente. Porém, **se você o executar como serviço acessível pela rede**, precisa disponibilizar o código-fonte da sua versão modificada aos usuários desse serviço.
