@@ -252,8 +252,13 @@ fastify.setErrorHandler((error, request, reply) => {
     const statusCode = error.statusCode || 500;
     const message = error.message || 'Internal Server Error';
 
+    // `error` precisa ser a mensagem (string): todo o frontend le
+    // `error.response?.data?.error` esperando texto. Mandar `error: true`
+    // (booleano) fazia qualquer excecao nao tratada, em qualquer rota,
+    // aparecer como "...: true" para quem usa esse campo - ou, quando o
+    // fallback e usado, mascarava a causa real como "Erro desconhecido".
     reply.status(statusCode).send({
-        error: true,
+        error: message,
         message,
         statusCode
     });

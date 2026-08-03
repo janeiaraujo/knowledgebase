@@ -19,6 +19,17 @@ const isProbablyHtml = (value) => {
   return /<\/?[a-z][\s\S]*>/i.test(String(value));
 };
 
+// A API sempre manda { error: '<mensagem>' } em erros tratados, mas uma
+// excecao nao tratada no servidor, ou uma falha de rede (sem response
+// nenhum, ex.: CORS, timeout, servidor fora do ar) nao tem esse campo. Sem
+// esses fallbacks, tudo isso virava um "Erro desconhecido" que escondia a
+// causa real - inclusive de quem for depurar o problema depois.
+const getErrorMessage = (error) =>
+  error.response?.data?.error ||
+  error.response?.data?.message ||
+  (error.response ? `Erro ${error.response.status}` : error.message) ||
+  'Erro desconhecido';
+
 export default function KBView() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -68,7 +79,7 @@ export default function KBView() {
       await recordAPI.submitForReview(id);
       fetchRecord();
     } catch (error) {
-      alert('Falha ao enviar para revisão: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao enviar para revisão: ' + getErrorMessage(error));
     } finally {
       setActionLoading(false);
     }
@@ -80,7 +91,7 @@ export default function KBView() {
       await recordAPI.approve(id);
       fetchRecord();
     } catch (error) {
-      const errorMsg = error.response?.data?.error || 'Erro desconhecido';
+      const errorMsg = getErrorMessage(error);
       if (error.response?.status === 403) {
         if (errorMsg.includes('own KB')) {
           alert('Você não pode aprovar seu próprio KB.');
@@ -103,7 +114,7 @@ export default function KBView() {
       setRejectReason('');
       fetchRecord();
     } catch (error) {
-      alert('Falha ao rejeitar: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao rejeitar: ' + getErrorMessage(error));
     } finally {
       setActionLoading(false);
     }
@@ -115,7 +126,7 @@ export default function KBView() {
       await recordAPI.publish(id);
       fetchRecord();
     } catch (error) {
-      alert('Falha ao publicar: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao publicar: ' + getErrorMessage(error));
     } finally {
       setActionLoading(false);
     }
@@ -126,7 +137,7 @@ export default function KBView() {
       await recordAPI.delete(id);
       navigate('/kb');
     } catch (error) {
-      alert('Falha ao excluir: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao excluir: ' + getErrorMessage(error));
     }
   };
   
@@ -137,7 +148,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'text/markdown' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.md`);
     } catch (error) {
-      alert('Falha ao exportar: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao exportar: ' + getErrorMessage(error));
     }
   };
   
@@ -155,7 +166,7 @@ export default function KBView() {
         printWindow.print();
       };
     } catch (error) {
-      alert('Falha ao exportar PDF: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao exportar PDF: ' + getErrorMessage(error));
     }
   };
 
@@ -165,7 +176,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'application/json' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.json`);
     } catch (error) {
-      alert('Falha ao exportar JSON: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao exportar JSON: ' + getErrorMessage(error));
     }
   };
 
@@ -175,7 +186,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'application/vnd.ms-word' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.doc`);
     } catch (error) {
-      alert('Falha ao exportar Word: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao exportar Word: ' + getErrorMessage(error));
     }
   };
 
@@ -185,7 +196,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'text/plain' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.txt`);
     } catch (error) {
-      alert('Falha ao exportar texto: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert('Falha ao exportar texto: ' + getErrorMessage(error));
     }
   };
 
