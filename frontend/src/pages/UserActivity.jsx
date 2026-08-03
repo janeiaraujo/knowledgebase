@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 
 export default function UserActivity() {
+    const { t, i18n } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [tenantSummary, setTenantSummary] = useState(null);
@@ -28,7 +29,7 @@ export default function UserActivity() {
             setOnlineUsers(onlineRes.data);
             setError('');
         } catch (err) {
-            setError('Erro ao carregar dados de atividade');
+            setError(t('userActivity.loadError'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -61,8 +62,8 @@ export default function UserActivity() {
     };
 
     const formatDate = (dateString) => {
-        if (!dateString) return 'Nunca';
-        return new Date(dateString).toLocaleString('pt-BR');
+        if (!dateString) return t('reviews.never');
+        return new Date(dateString).toLocaleString(i18n.language === 'en' ? 'en-US' : 'pt-BR');
     };
 
     const formatDuration = (seconds) => {
@@ -74,23 +75,23 @@ export default function UserActivity() {
 
     const getActivityBadge = (user) => {
         if (user.is_active_today) {
-            return <span className="badge bg-success"><i className="bi bi-circle-fill me-1" style={{ fontSize: '0.5rem' }}></i>Online hoje</span>;
+            return <span className="badge bg-success"><i className="bi bi-circle-fill me-1" style={{ fontSize: '0.5rem' }}></i>{t('userActivity.onlineToday')}</span>;
         }
         if (user.last_activity) {
             const lastActivity = new Date(user.last_activity);
             const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
             if (lastActivity > weekAgo) {
-                return <span className="badge bg-warning text-dark">Ativo esta semana</span>;
+                return <span className="badge bg-warning text-dark">{t('userActivity.activeThisWeek')}</span>;
             }
         }
-        return <span className="badge bg-secondary">Inativo</span>;
+        return <span className="badge bg-secondary">{t('userActivity.inactive')}</span>;
     };
 
     if (loading && !tenantSummary) {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
                 <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Carregando...</span>
+                    <span className="visually-hidden">{t('common.loading')}</span>
                 </div>
             </div>
         );
@@ -103,10 +104,10 @@ export default function UserActivity() {
                 <div>
                     <h2 className="mb-1">
                         <i className="bi bi-activity me-2"></i>
-                        Atividade dos Usuários
+                        {t('userActivity.title')}
                     </h2>
                     <p className="text-muted mb-0">
-                        Monitore o uso da plataforma pelos analistas
+                        {t('userActivity.subtitle')}
                     </p>
                 </div>
                 <div className="d-flex gap-2">
@@ -116,9 +117,9 @@ export default function UserActivity() {
                         onChange={(e) => setPeriod(e.target.value)}
                         style={{ width: 'auto' }}
                     >
-                        <option value="7d">Últimos 7 dias</option>
-                        <option value="30d">Últimos 30 dias</option>
-                        <option value="90d">Últimos 90 dias</option>
+                        <option value="7d">{t('reports.periods.7d')}</option>
+                        <option value="30d">{t('reports.periods.30d')}</option>
+                        <option value="90d">{t('reports.periods.90d')}</option>
                     </select>
                     <button className="btn btn-outline-secondary" onClick={loadData}>
                         <i className="bi bi-arrow-clockwise"></i>
@@ -138,13 +139,13 @@ export default function UserActivity() {
                             <div className="card-body">
                                 <div className="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h6 className="card-subtitle mb-2 opacity-75">Usuários Online</h6>
+                                        <h6 className="card-subtitle mb-2 opacity-75">{t('userActivity.onlineUsers')}</h6>
                                         <h2 className="card-title mb-0">{onlineUsers.count}</h2>
                                     </div>
                                     <i className="bi bi-people-fill fs-1 opacity-25"></i>
                                 </div>
                                 <small className="opacity-75">
-                                    Últimos 15 minutos
+                                    {t('userActivity.last15min')}
                                 </small>
                             </div>
                         </div>
@@ -154,13 +155,13 @@ export default function UserActivity() {
                             <div className="card-body">
                                 <div className="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h6 className="card-subtitle mb-2 opacity-75">Ativos Hoje</h6>
+                                        <h6 className="card-subtitle mb-2 opacity-75">{t('userActivity.activeToday')}</h6>
                                         <h2 className="card-title mb-0">{tenantSummary.users.active_today}</h2>
                                     </div>
                                     <i className="bi bi-person-check-fill fs-1 opacity-25"></i>
                                 </div>
                                 <small className="opacity-75">
-                                    de {tenantSummary.users.total} usuários
+                                    {t('userActivity.ofTotalUsers', { count: tenantSummary.users.total })}
                                 </small>
                             </div>
                         </div>
@@ -170,13 +171,13 @@ export default function UserActivity() {
                             <div className="card-body">
                                 <div className="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h6 className="card-subtitle mb-2 opacity-75">Views Hoje</h6>
+                                        <h6 className="card-subtitle mb-2 opacity-75">{t('userActivity.viewsToday')}</h6>
                                         <h2 className="card-title mb-0">{tenantSummary.views.today}</h2>
                                     </div>
                                     <i className="bi bi-eye-fill fs-1 opacity-25"></i>
                                 </div>
                                 <small className="opacity-75">
-                                    {tenantSummary.views.this_week} esta semana
+                                    {t('userActivity.thisWeekViews', { count: tenantSummary.views.this_week })}
                                 </small>
                             </div>
                         </div>
@@ -186,13 +187,13 @@ export default function UserActivity() {
                             <div className="card-body">
                                 <div className="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h6 className="card-subtitle mb-2 opacity-75">Engajamento</h6>
+                                        <h6 className="card-subtitle mb-2 opacity-75">{t('userActivity.engagement')}</h6>
                                         <h2 className="card-title mb-0">{tenantSummary.users.engagement_rate}%</h2>
                                     </div>
                                     <i className="bi bi-graph-up-arrow fs-1 opacity-25"></i>
                                 </div>
                                 <small className="opacity-75">
-                                    Ativos na semana
+                                    {t('userActivity.activeInWeek')}
                                 </small>
                             </div>
                         </div>
@@ -208,7 +209,7 @@ export default function UserActivity() {
                         onClick={() => setActiveTab('overview')}
                     >
                         <i className="bi bi-graph-up me-1"></i>
-                        Visão Geral
+                        {t('userActivity.tabOverview')}
                     </button>
                 </li>
                 <li className="nav-item">
@@ -217,7 +218,7 @@ export default function UserActivity() {
                         onClick={() => setActiveTab('users')}
                     >
                         <i className="bi bi-people me-1"></i>
-                        Por Usuário
+                        {t('userActivity.tabByUser')}
                     </button>
                 </li>
                 <li className="nav-item">
@@ -226,7 +227,7 @@ export default function UserActivity() {
                         onClick={() => setActiveTab('kbs')}
                     >
                         <i className="bi bi-file-earmark-text me-1"></i>
-                        KBs Populares
+                        {t('userActivity.tabPopularKbs')}
                     </button>
                 </li>
                 <li className="nav-item">
@@ -235,7 +236,7 @@ export default function UserActivity() {
                         onClick={() => setActiveTab('online')}
                     >
                         <i className="bi bi-broadcast me-1"></i>
-                        Online Agora
+                        {t('userActivity.tabOnline')}
                         {onlineUsers.count > 0 && (
                             <span className="badge bg-success ms-2">{onlineUsers.count}</span>
                         )}
@@ -252,7 +253,7 @@ export default function UserActivity() {
                             <div className="card-header">
                                 <h5 className="mb-0">
                                     <i className="bi bi-trophy me-2"></i>
-                                    Top Visualizadores (Semana)
+                                    {t('userActivity.topViewers')}
                                 </h5>
                             </div>
                             <div className="card-body p-0">
@@ -261,7 +262,7 @@ export default function UserActivity() {
                                         <thead className="table-light">
                                             <tr>
                                                 <th>#</th>
-                                                <th>Usuário</th>
+                                                <th>{t('userActivity.user')}</th>
                                                 <th className="text-end">Views</th>
                                             </tr>
                                         </thead>
@@ -269,7 +270,7 @@ export default function UserActivity() {
                                             {tenantSummary.top_viewers.length === 0 ? (
                                                 <tr>
                                                     <td colSpan="3" className="text-center text-muted py-4">
-                                                        Nenhuma atividade registrada
+                                                        {t('userActivity.noActivity')}
                                                     </td>
                                                 </tr>
                                             ) : (
@@ -309,7 +310,7 @@ export default function UserActivity() {
                             <div className="card-header">
                                 <h5 className="mb-0">
                                     <i className="bi bi-fire me-2"></i>
-                                    KBs Mais Acessados (Semana)
+                                    {t('userActivity.topKbsWeek')}
                                 </h5>
                             </div>
                             <div className="card-body p-0">
@@ -319,14 +320,14 @@ export default function UserActivity() {
                                             <tr>
                                                 <th>KB</th>
                                                 <th className="text-center">Views</th>
-                                                <th className="text-center">Únicos</th>
+                                                <th className="text-center">{t('userActivity.unique')}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {tenantSummary.most_viewed_kbs.length === 0 ? (
                                                 <tr>
                                                     <td colSpan="3" className="text-center text-muted py-4">
-                                                        Nenhuma atividade registrada
+                                                        {t('userActivity.noActivity')}
                                                     </td>
                                                 </tr>
                                             ) : (
@@ -334,7 +335,7 @@ export default function UserActivity() {
                                                     <tr key={kb.kb_id?.toString()}>
                                                         <td>
                                                             <Link to={`/kb/${kb.kb_id}`} className="text-decoration-none">
-                                                                {kb.kb_title || 'KB sem título'}
+                                                                {kb.kb_title || t('userActivity.untitledKb')}
                                                             </Link>
                                                         </td>
                                                         <td className="text-center">
@@ -359,7 +360,7 @@ export default function UserActivity() {
                             <div className="card-header">
                                 <h5 className="mb-0">
                                     <i className="bi bi-clock me-2"></i>
-                                    Atividade por Hora (Últimas 24h)
+                                    {t('userActivity.byHour')}
                                 </h5>
                             </div>
                             <div className="card-body">
@@ -404,21 +405,21 @@ export default function UserActivity() {
                             <div className="card-header d-flex justify-content-between align-items-center">
                                 <h5 className="mb-0">
                                     <i className="bi bi-people me-2"></i>
-                                    Atividade por Usuário
+                                    {t('userActivity.activityByUser')}
                                 </h5>
-                                <span className="badge bg-secondary">{users.length} usuários</span>
+                                <span className="badge bg-secondary">{t('userActivity.usersCount', { count: users.length })}</span>
                             </div>
                             <div className="card-body p-0">
                                 <div className="table-responsive">
                                     <table className="table table-hover mb-0">
                                         <thead className="table-light">
                                             <tr>
-                                                <th>Usuário</th>
-                                                <th>Status</th>
+                                                <th>{t('userActivity.user')}</th>
+                                                <th>{t('common.status')}</th>
                                                 <th className="text-center">Views</th>
-                                                <th className="text-center">KBs Criados</th>
-                                                <th className="text-center">Comentários</th>
-                                                <th>Última Atividade</th>
+                                                <th className="text-center">{t('userActivity.kbsCreated')}</th>
+                                                <th className="text-center">{t('kbView.comments')}</th>
+                                                <th>{t('userActivity.lastActivity')}</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
@@ -426,7 +427,7 @@ export default function UserActivity() {
                                             {users.length === 0 ? (
                                                 <tr>
                                                     <td colSpan="7" className="text-center text-muted py-4">
-                                                        Nenhum usuário encontrado
+                                                        {t('userActivity.noUsers')}
                                                     </td>
                                                 </tr>
                                             ) : (
@@ -504,7 +505,7 @@ export default function UserActivity() {
                                     {/* Activity Graph */}
                                     {userDetails.activity_by_day.length > 0 && (
                                         <div className="mb-4">
-                                            <h6 className="text-muted mb-2">Atividade Diária</h6>
+                                            <h6 className="text-muted mb-2">{t('userActivity.dailyActivity')}</h6>
                                             <div className="d-flex align-items-end" style={{ height: '60px', gap: '2px' }}>
                                                 {userDetails.activity_by_day.slice(-30).map((day) => {
                                                     const maxCount = Math.max(...userDetails.activity_by_day.map(d => d.count), 1);
@@ -518,7 +519,7 @@ export default function UserActivity() {
                                                                 width: '100%',
                                                                 minHeight: '2px'
                                                             }}
-                                                            title={`${day.date}: ${day.count} ações`}
+                                                            title={`${day.date}: ${t('userActivity.actions', { count: day.count })}`}
                                                         ></div>
                                                     );
                                                 })}
@@ -528,9 +529,9 @@ export default function UserActivity() {
 
                                     {/* Top Viewed KBs */}
                                     <div className="mb-4">
-                                        <h6 className="text-muted mb-2">KBs Mais Acessados</h6>
+                                        <h6 className="text-muted mb-2">{t('userActivity.topKbs')}</h6>
                                         {userDetails.top_viewed_kbs.length === 0 ? (
-                                            <p className="text-muted small">Nenhum KB visualizado</p>
+                                            <p className="text-muted small">{t('userActivity.noKbViewed')}</p>
                                         ) : (
                                             <ul className="list-group list-group-flush">
                                                 {userDetails.top_viewed_kbs.slice(0, 5).map((kb) => (
@@ -547,16 +548,16 @@ export default function UserActivity() {
 
                                     {/* Recent Views */}
                                     <div>
-                                        <h6 className="text-muted mb-2">Views Recentes</h6>
+                                        <h6 className="text-muted mb-2">{t('userActivity.recentViews')}</h6>
                                         {userDetails.recent_views.length === 0 ? (
-                                            <p className="text-muted small">Nenhum view recente</p>
+                                            <p className="text-muted small">{t('userActivity.noRecentViews')}</p>
                                         ) : (
                                             <div className="list-group list-group-flush" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                                 {userDetails.recent_views.slice(0, 10).map((view, index) => (
                                                     <div key={`${view.kb_id}-${index}`} className="list-group-item px-0 py-2">
                                                         <div className="d-flex justify-content-between">
                                                             <Link to={`/kb/${view.kb_id}`} className="text-decoration-none text-truncate" style={{ maxWidth: '60%' }}>
-                                                                {view.kb_title || 'KB sem título'}
+                                                                {view.kb_title || t('userActivity.untitledKb')}
                                                             </Link>
                                                             {view.duration_seconds && (
                                                                 <small className="text-muted">
@@ -584,7 +585,7 @@ export default function UserActivity() {
                     <div className="card-header">
                         <h5 className="mb-0">
                             <i className="bi bi-file-earmark-text me-2"></i>
-                            KBs Mais Acessados
+                            {t('userActivity.topKbs')}
                         </h5>
                     </div>
                     <div className="card-body p-0">
@@ -594,8 +595,8 @@ export default function UserActivity() {
                                     <tr>
                                         <th>#</th>
                                         <th>KB</th>
-                                        <th className="text-center">Total de Views</th>
-                                        <th className="text-center">Visualizadores Únicos</th>
+                                        <th className="text-center">{t('userActivity.totalViews')}</th>
+                                        <th className="text-center">{t('userActivity.uniqueViewers')}</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -603,7 +604,7 @@ export default function UserActivity() {
                                     {tenantSummary.most_viewed_kbs.length === 0 ? (
                                         <tr>
                                             <td colSpan="5" className="text-center text-muted py-4">
-                                                Nenhuma atividade registrada no período
+                                                {t('userActivity.noActivityInPeriod')}
                                             </td>
                                         </tr>
                                     ) : (
@@ -614,7 +615,7 @@ export default function UserActivity() {
                                                 </td>
                                                 <td>
                                                     <Link to={`/kb/${kb.kb_id}`} className="text-decoration-none">
-                                                        <strong>{kb.kb_title || 'KB sem título'}</strong>
+                                                        <strong>{kb.kb_title || t('userActivity.untitledKb')}</strong>
                                                     </Link>
                                                 </td>
                                                 <td className="text-center">
@@ -626,7 +627,7 @@ export default function UserActivity() {
                                                 <td>
                                                     <Link to={`/kb/${kb.kb_id}`} className="btn btn-sm btn-outline-primary">
                                                         <i className="bi bi-eye me-1"></i>
-                                                        Ver KB
+                                                        {t('userActivity.viewKb')}
                                                     </Link>
                                                 </td>
                                             </tr>
@@ -644,7 +645,7 @@ export default function UserActivity() {
                     <div className="card-header d-flex justify-content-between align-items-center">
                         <h5 className="mb-0">
                             <i className="bi bi-broadcast me-2"></i>
-                            Usuários Online Agora
+                            {t('userActivity.onlineNow')}
                         </h5>
                         <span className="badge bg-success fs-5">{onlineUsers.count}</span>
                     </div>
@@ -652,7 +653,7 @@ export default function UserActivity() {
                         {onlineUsers.count === 0 ? (
                             <div className="text-center py-5">
                                 <i className="bi bi-moon-stars fs-1 text-muted"></i>
-                                <p className="text-muted mt-2">Nenhum usuário online no momento</p>
+                                <p className="text-muted mt-2">{t('userActivity.nobodyOnline')}</p>
                             </div>
                         ) : (
                             <div className="row g-3">
@@ -678,8 +679,8 @@ export default function UserActivity() {
                                                     } me-1`}>{user.role}</span>
                                                     {user.last_activity_type && (
                                                         <small className="text-muted">
-                                                            {user.last_activity_type === 'kb_view' ? '👁️ Visualizando KB' :
-                                                             user.last_activity_type === 'login' ? '🔑 Login' :
+                                                            {user.last_activity_type === 'kb_view' ? `👁️ ${t('userActivity.viewingKb')}` :
+                                                             user.last_activity_type === 'login' ? `🔑 ${t('userActivity.login')}` :
                                                              user.last_activity_type}
                                                         </small>
                                                     )}

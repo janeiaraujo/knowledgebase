@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Form, Button, Badge, Spinner, Alert, Tab, Tabs, ListGroup, ProgressBar } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { kbAPI, aiAPI, tagAPI, categoryAPI } from '../services/api';
@@ -17,6 +18,7 @@ const IconEye = () => <i className="bi bi-eye"></i>;
 const IconRobot = () => <i className="bi bi-robot"></i>;
 
 export default function Search() {
+  const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [searchType, setSearchType] = useState('text'); // 'text' or 'semantic'
   const [results, setResults] = useState([]);
@@ -80,7 +82,7 @@ export default function Search() {
     } catch (error) {
       setIndexMessage({ 
         type: 'danger', 
-        text: error.response?.data?.error || 'Falha ao indexar KBs' 
+        text: error.response?.data?.error || t('search.indexError') 
       });
     } finally {
       setIndexing(false);
@@ -116,7 +118,7 @@ export default function Search() {
       }
     } catch (err) {
       console.error('Search error:', err);
-      setError(err.response?.data?.error || 'Search failed. Please try again.');
+      setError(err.response?.data?.error || t('search.searchError'));
       setResults([]);
     } finally {
       setLoading(false);
@@ -165,7 +167,7 @@ export default function Search() {
     }
     if (filters.tags.length > 0) {
       filteredResults = filteredResults.filter(r => 
-        r.tags?.some(t => filters.tags.includes(t.toString()))
+        r.tags?.some(tag => filters.tags.includes(tag.toString()))
       );
     }
     
@@ -181,7 +183,7 @@ export default function Search() {
     setFilters(prev => ({
       ...prev,
       tags: prev.tags.includes(tagId)
-        ? prev.tags.filter(t => t !== tagId)
+        ? prev.tags.filter(id => id !== tagId)
         : [...prev.tags, tagId]
     }));
   };
@@ -210,7 +212,7 @@ export default function Search() {
   };
   
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
+    return new Date(date).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'pt-BR', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
@@ -230,10 +232,10 @@ export default function Search() {
         <Col>
           <h2 className="mb-1">
             <IconSearch className="me-2" />
-            Advanced Search
+            {t('search.title')}
           </h2>
           <p className="text-muted">
-            Search knowledge base articles using text or AI-powered semantic search
+            {t('search.subtitle')}
           </p>
         </Col>
       </Row>
@@ -247,13 +249,13 @@ export default function Search() {
                 <Row className="align-items-end g-3">
                   <Col md={7}>
                     <Form.Group>
-                      <Form.Label className="small text-muted">Search Query</Form.Label>
+                      <Form.Label className="small text-muted">{t('search.query')}</Form.Label>
                       <Form.Control
                         type="text"
                         size="lg"
-                        placeholder={searchType === 'semantic' 
-                          ? "Describe what you're looking for in natural language..." 
-                          : "Enter keywords to search..."
+                        placeholder={searchType === 'semantic'
+                          ? t('search.placeholderSemantic')
+                          : t('search.placeholderText')
                         }
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
@@ -263,15 +265,15 @@ export default function Search() {
                   
                   <Col md={3}>
                     <Form.Group>
-                      <Form.Label className="small text-muted">Search Type</Form.Label>
+                      <Form.Label className="small text-muted">{t('search.type')}</Form.Label>
                       <Form.Select
                         size="lg"
                         value={searchType}
                         onChange={(e) => setSearchType(e.target.value)}
                       >
-                        <option value="text">Text Search</option>
+                        <option value="text">{t('search.typeText')}</option>
                         <option value="semantic">
-                          🧠 AI Semantic Search
+                          🧠 {t('search.typeSemantic')}
                         </option>
                       </Form.Select>
                     </Form.Group>
@@ -290,7 +292,7 @@ export default function Search() {
                         ) : (
                           <>
                             <IconSearch className="me-2" />
-                            Search
+                            {t('search.submit')}
                           </>
                         )}
                       </Button>
@@ -306,7 +308,7 @@ export default function Search() {
                     onClick={() => setShowFilters(!showFilters)}
                   >
                     <IconFilter className="me-1" />
-                    {showFilters ? 'Hide Filters' : 'Show Filters'}
+                    {showFilters ? t('search.hideFilters') : t('search.showFilters')}
                     {(filters.status || filters.category_id || filters.tags.length > 0) && (
                       <Badge bg="primary" className="ms-2">
                         {[
@@ -325,29 +327,29 @@ export default function Search() {
                     <Row className="g-3">
                       <Col md={3}>
                         <Form.Group>
-                          <Form.Label className="small">Status</Form.Label>
+                          <Form.Label className="small">{t('common.status')}</Form.Label>
                           <Form.Select
                             value={filters.status}
                             onChange={(e) => handleFilterChange('status', e.target.value)}
                           >
-                            <option value="">All Statuses</option>
-                            <option value="draft">Draft</option>
-                            <option value="in_review">In Review</option>
-                            <option value="approved">Approved</option>
-                            <option value="published">Published</option>
-                            <option value="deprecated">Deprecated</option>
+                            <option value="">{t('search.allStatuses')}</option>
+                            <option value="draft">{t('kb.status.draft')}</option>
+                            <option value="in_review">{t('kb.status.in_review')}</option>
+                            <option value="approved">{t('kb.status.approved')}</option>
+                            <option value="published">{t('kb.status.published')}</option>
+                            <option value="deprecated">{t('kb.status.deprecated')}</option>
                           </Form.Select>
                         </Form.Group>
                       </Col>
                       
                       <Col md={3}>
                         <Form.Group>
-                          <Form.Label className="small">Category</Form.Label>
+                          <Form.Label className="small">{t('search.category')}</Form.Label>
                           <Form.Select
                             value={filters.category_id}
                             onChange={(e) => handleFilterChange('category_id', e.target.value)}
                           >
-                            <option value="">All Categories</option>
+                            <option value="">{t('kb.allCategories')}</option>
                             {categories.map(cat => (
                               <option key={cat._id} value={cat._id}>
                                 {cat.name}
@@ -381,7 +383,7 @@ export default function Search() {
                       
                       <Col md={9}>
                         <Form.Group>
-                          <Form.Label className="small">Tags</Form.Label>
+                          <Form.Label className="small">{t('search.tags')}</Form.Label>
                           <div className="d-flex flex-wrap gap-2">
                             {availableTags.map(tag => (
                               <Badge
@@ -405,16 +407,16 @@ export default function Search() {
                       
                       <Col md={3}>
                         <Form.Group>
-                          <Form.Label className="small">Sort By</Form.Label>
+                          <Form.Label className="small">{t('search.sortBy')}</Form.Label>
                           <Form.Select
                             value={filters.sortBy}
                             onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                           >
-                            <option value="relevance">Relevance</option>
-                            <option value="date_desc">Newest First</option>
-                            <option value="date_asc">Oldest First</option>
-                            <option value="title">Title A-Z</option>
-                            <option value="views">Most Viewed</option>
+                            <option value="relevance">{t('search.sortRelevance')}</option>
+                            <option value="date_desc">{t('search.sortNewest')}</option>
+                            <option value="date_asc">{t('search.sortOldest')}</option>
+                            <option value="title">{t('search.sortTitle')}</option>
+                            <option value="views">{t('search.sortViews')}</option>
                           </Form.Select>
                         </Form.Group>
                       </Col>
@@ -426,7 +428,7 @@ export default function Search() {
                           onClick={clearFilters}
                         >
                           <IconTimes className="me-1" />
-                          Limpar Filtros
+                          {t('kb.clearFilters')}
                         </Button>
                       </Col>
                     </Row>
@@ -443,13 +445,15 @@ export default function Search() {
             <Card.Body>
               <h6 className="text-muted mb-3">
                 <IconBrain className="me-2" />
-                Dicas de Busca
+                {t('search.tips')}
               </h6>
               <ul className="small text-muted mb-0" style={{ paddingLeft: '1.2rem' }}>
-                <li className="mb-2">Use <strong>busca semântica</strong> para consultas em linguagem natural</li>
-                <li className="mb-2">Busca por texto funciona melhor com palavras-chave específicas</li>
-                <li className="mb-2">Combine filtros para refinar os resultados</li>
-                <li>Tente diferentes formulações se os resultados não forem relevantes</li>
+                <li className="mb-2">
+                  <Trans i18nKey="search.tip1" components={{ b: <strong /> }} />
+                </li>
+                <li className="mb-2">{t('search.tip2')}</li>
+                <li className="mb-2">{t('search.tip3')}</li>
+                <li>{t('search.tip4')}</li>
               </ul>
             </Card.Body>
           </Card>
@@ -459,12 +463,12 @@ export default function Search() {
             <Card.Body>
               <h6 className="text-muted mb-3">
                 <IconRobot className="me-2" />
-                Indexação IA
+                {t('search.aiIndexing')}
               </h6>
               {indexStatus && (
                 <>
                   <div className="small mb-2">
-                    <span className="text-muted">KBs indexados:</span>
+                    <span className="text-muted">{t('search.indexedKbs')}</span>
                     <strong className="ms-1">{indexStatus.indexed}/{indexStatus.total}</strong>
                   </div>
                   <ProgressBar 
@@ -484,12 +488,12 @@ export default function Search() {
                       {indexing ? (
                         <>
                           <Spinner size="sm" animation="border" className="me-1" />
-                          Indexando...
+                          {t('search.indexing')}
                         </>
                       ) : (
                         <>
                           <IconBrain className="me-1" />
-                          Indexar ({indexStatus.pending})
+                          {t('search.indexNow', { count: indexStatus.pending })}
                         </>
                       )}
                     </Button>
@@ -497,7 +501,7 @@ export default function Search() {
                   {indexStatus.percentage === 100 && (
                     <Badge bg="success" className="w-100">
                       <i className="bi bi-check-circle me-1"></i>
-                      Totalmente indexado
+                      {t('search.fullyIndexed')}
                     </Badge>
                   )}
                 </>
@@ -533,14 +537,18 @@ export default function Search() {
               <Card.Header className="bg-white border-bottom">
                 <div className="d-flex justify-content-between align-items-center">
                   <span>
-                    <strong>{totalResults}</strong> resultado{totalResults !== 1 ? 's' : ''} encontrado{totalResults !== 1 ? 's' : ''}
+                    <Trans
+                      i18nKey="search.resultsFound"
+                      count={totalResults}
+                      components={{ b: <strong /> }}
+                    />
                     {searchType === 'semantic' && (
                       <Badge bg="info" className="ms-2">IA</Badge>
                     )}
                   </span>
                   {query && (
                     <span className="text-muted">
-                      para "<strong>{query}</strong>"
+                      <Trans i18nKey="search.forQuery" values={{ query }} components={{ b: <strong /> }} />
                     </span>
                   )}
                 </div>
@@ -551,7 +559,7 @@ export default function Search() {
                   <div className="text-center py-5">
                     <Spinner animation="border" variant="primary" />
                     <p className="text-muted mt-3">
-                      {searchType === 'semantic' ? 'IA está analisando sua consulta...' : 'Buscando...'}
+                      {searchType === 'semantic' ? t('search.analyzing') : t('search.searching')}
                     </p>
                   </div>
                 ) : results.length > 0 ? (
@@ -572,9 +580,9 @@ export default function Search() {
                                 <Badge 
                                   bg={getSimilarityColor(result.similarity)} 
                                   className="ms-2"
-                                  title="Score de Similaridade IA"
+                                  title={t('search.similarityScore')}
                                 >
-                                  {(result.similarity * 100).toFixed(0)}% relevante
+                                  {t('search.relevantPct', { pct: (result.similarity * 100).toFixed(0) })}
                                 </Badge>
                               )}
                             </h5>
@@ -594,7 +602,7 @@ export default function Search() {
                               {result.views > 0 && (
                                 <span className="me-3">
                                   <IconEye className="me-1" />
-                                  {result.views} visualizações
+                                  {t('search.views', { count: result.views })}
                                 </span>
                               )}
                             </div>
@@ -644,9 +652,9 @@ export default function Search() {
                 ) : (
                   <div className="text-center py-5">
                     <IconSearch size={48} className="text-muted mb-3" />
-                    <h5 className="text-muted">Nenhum resultado encontrado</h5>
+                    <h5 className="text-muted">{t('search.noResults')}</h5>
                     <p className="text-muted">
-                      Tente palavras-chave diferentes ou ajuste seus filtros
+                      {t('search.noResultsHelp')}
                     </p>
                   </div>
                 )}
@@ -657,7 +665,7 @@ export default function Search() {
                 <Card.Footer className="bg-white">
                   <div className="d-flex justify-content-between align-items-center">
                     <span className="text-muted small">
-                      Página {page} de {Math.ceil(totalResults / limit)}
+                      {t('search.pageOf', { page, total: Math.ceil(totalResults / limit) })}
                     </span>
                     <div className="btn-group">
                       <Button
@@ -669,7 +677,7 @@ export default function Search() {
                           handleSearch();
                         }}
                       >
-                        Anterior
+                        {t('search.previous')}
                       </Button>
                       <Button
                         variant="outline-primary"
@@ -680,7 +688,7 @@ export default function Search() {
                           handleSearch();
                         }}
                       >
-                        Próximo
+                        {t('search.next')}
                       </Button>
                     </div>
                   </div>
@@ -698,9 +706,9 @@ export default function Search() {
             <Card className="border-0 shadow-sm text-center py-5">
               <Card.Body>
                 <IconSearch size={64} className="text-muted mb-4" />
-                <h4 className="text-muted">Inicie sua busca</h4>
+                <h4 className="text-muted">{t('search.startTitle')}</h4>
                 <p className="text-muted">
-                  Digite uma consulta acima para pesquisar na base de conhecimento
+                  {t('search.startHelp')}
                 </p>
                 
                 <div className="mt-4">
@@ -709,9 +717,9 @@ export default function Search() {
                       <Card className="bg-light border-0 h-100">
                         <Card.Body>
                           <IconSearch className="text-primary mb-2" size={24} />
-                          <h6>Busca por Texto</h6>
+                          <h6>{t('search.typeText')}</h6>
                           <small className="text-muted">
-                            Busca rápida por palavras-chave em títulos e conteúdo
+                            {t('search.textCardHelp')}
                           </small>
                         </Card.Body>
                       </Card>
@@ -720,9 +728,9 @@ export default function Search() {
                       <Card className="bg-light border-0 h-100">
                         <Card.Body>
                           <IconBrain className="text-success mb-2" size={24} />
-                          <h6>Busca Semântica</h6>
+                          <h6>{t('search.typeSemantic')}</h6>
                           <small className="text-muted">
-                            Busca com IA que entende significado e contexto
+                            {t('search.semanticCardHelp')}
                           </small>
                         </Card.Body>
                       </Card>

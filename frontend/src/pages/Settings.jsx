@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Nav, Row, Col, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import { Trans, useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import { organizationAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,6 +9,7 @@ import TagsSettings from './settings/TagsSettings';
 import CategoriesSettings from './settings/CategoriesSettings';
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { theme, setThemeMode, isDark } = useTheme();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('appearance');
@@ -29,7 +31,7 @@ export default function Settings() {
           default_language: data.organization?.settings?.default_language || 'pt'
         });
       })
-      .catch(() => active && setOrgError('Falha ao carregar as configurações da organização.'))
+      .catch(() => active && setOrgError(t('settings.loadOrgError')))
       .finally(() => active && setLoadingOrg(false));
     return () => { active = false; };
   }, []);
@@ -47,9 +49,9 @@ export default function Settings() {
         name: data.organization?.name || org.name,
         default_language: data.organization?.settings?.default_language || org.default_language
       });
-      toast.success('Configurações salvas');
+      toast.success(t('settings.saved'));
     } catch (err) {
-      setOrgError(err.response?.data?.error || 'Não foi possível salvar. Tente novamente.');
+      setOrgError(err.response?.data?.error || t('settings.saveError'));
     } finally {
       setSavingOrg(false);
     }
@@ -63,11 +65,11 @@ export default function Settings() {
             <Card.Header className="bg-white">
               <h5 className="mb-0">
                 <i className="bi bi-palette me-2"></i>
-                Aparência
+                {t('settings.appearance')}
               </h5>
             </Card.Header>
             <Card.Body>
-              <h6 className="mb-3">Tema da Interface</h6>
+              <h6 className="mb-3">{t('settings.uiTheme')}</h6>
               <div className="d-flex gap-3 mb-4">
                 <Card 
                   className={`cursor-pointer ${theme === 'light' ? 'border-primary border-2' : ''}`}
@@ -78,7 +80,7 @@ export default function Settings() {
                     <div className="bg-light border rounded p-3 mb-2">
                       <i className="bi bi-sun-fill fs-3 text-warning"></i>
                     </div>
-                    <small className="fw-semibold">Claro</small>
+                    <small className="fw-semibold">{t('settings.themeLight')}</small>
                     {theme === 'light' && (
                       <i className="bi bi-check-circle-fill text-primary ms-2"></i>
                     )}
@@ -93,7 +95,7 @@ export default function Settings() {
                     <div className="bg-dark border rounded p-3 mb-2">
                       <i className="bi bi-moon-fill fs-3 text-light"></i>
                     </div>
-                    <small className="fw-semibold">Escuro</small>
+                    <small className="fw-semibold">{t('settings.themeDark')}</small>
                     {theme === 'dark' && (
                       <i className="bi bi-check-circle-fill text-primary ms-2"></i>
                     )}
@@ -108,7 +110,7 @@ export default function Settings() {
                     <div className="bg-secondary border rounded p-3 mb-2">
                       <i className="bi bi-display fs-3 text-light"></i>
                     </div>
-                    <small className="fw-semibold">Sistema</small>
+                    <small className="fw-semibold">{t('settings.themeSystem')}</small>
                     {theme === 'system' && (
                       <i className="bi bi-check-circle-fill text-primary ms-2"></i>
                     )}
@@ -117,8 +119,9 @@ export default function Settings() {
               </div>
               <Alert variant="info">
                 <i className="bi bi-info-circle me-2"></i>
-                <strong>Tema atual:</strong> {isDark ? 'Escuro' : 'Claro'}
-                {theme === 'system' && ' (seguindo preferência do sistema)'}
+                <strong>{t('settings.currentTheme')}</strong>{' '}
+                {isDark ? t('settings.themeDark') : t('settings.themeLight')}
+                {theme === 'system' && ` (${t('settings.followingSystem')})`}
               </Alert>
             </Card.Body>
           </Card>
@@ -133,7 +136,7 @@ export default function Settings() {
             <Card.Header className="bg-white">
               <h5 className="mb-0">
                 <i className="bi bi-gear me-2"></i>
-                Configurações Gerais
+                {t('settings.general')}
               </h5>
             </Card.Header>
             <Card.Body>
@@ -145,14 +148,14 @@ export default function Settings() {
                   {!canEditOrg && (
                     <Alert variant="secondary">
                       <i className="bi bi-info-circle me-2"></i>
-                      Apenas owners e admins podem alterar estas configurações.
+                      {t('settings.adminOnly')}
                     </Alert>
                   )}
 
                   <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Nome da Organização</Form.Label>
+                        <Form.Label>{t('settings.orgName')}</Form.Label>
                         <Form.Control
                           type="text"
                           value={org.name}
@@ -164,7 +167,7 @@ export default function Settings() {
                     </Col>
                     <Col md={6}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Idioma padrão</Form.Label>
+                        <Form.Label>{t('settings.defaultLanguage')}</Form.Label>
                         <Form.Select
                           value={org.default_language}
                           disabled={!canEditOrg}
@@ -174,8 +177,10 @@ export default function Settings() {
                           <option value="en">English</option>
                         </Form.Select>
                         <Form.Text className="text-muted">
-                          Aplicado a novos usuários da organização. Cada pessoa pode trocar
-                          o próprio idioma em <a href="/profile">Meu Perfil</a>.
+                          <Trans i18nKey="settings.defaultLanguageHelp">
+                            Aplicado a novos usuários da organização. Cada pessoa pode trocar
+                            o próprio idioma em <a href="/profile">Meu Perfil</a>.
+                          </Trans>
                         </Form.Text>
                       </Form.Group>
                     </Col>
@@ -185,7 +190,7 @@ export default function Settings() {
                     <div className="mt-3">
                       <Button variant="primary" type="submit" disabled={savingOrg || !org.name.trim()}>
                         {savingOrg ? <Spinner size="sm" animation="border" /> : (
-                          <><i className="bi bi-check-lg me-1"></i>Salvar Configurações</>
+                          <><i className="bi bi-check-lg me-1"></i>{t('settings.save')}</>
                         )}
                       </Button>
                     </div>
@@ -202,13 +207,15 @@ export default function Settings() {
             <Card.Header className="bg-white">
               <h5 className="mb-0">
                 <i className="bi bi-people me-2"></i>
-                Equipe
+                {t('settings.team')}
               </h5>
             </Card.Header>
             <Card.Body>
               <Alert variant="info">
                 <i className="bi bi-info-circle me-2"></i>
-                Gerencie os membros da equipe na página de <a href="/users">Usuários</a>.
+                <Trans i18nKey="settings.teamHelp">
+                  Gerencie os membros da equipe na página de <a href="/users">Usuários</a>.
+                </Trans>
               </Alert>
             </Card.Body>
           </Card>
@@ -222,7 +229,7 @@ export default function Settings() {
     <>
       <h2 className="mb-4">
         <i className="bi bi-sliders me-2"></i>
-        Configurações
+        {t('settings.title')}
       </h2>
       
       <Row>
@@ -237,7 +244,7 @@ export default function Settings() {
                     className="rounded-0 border-bottom"
                   >
                     <i className="bi bi-palette me-2"></i>
-                    Aparência
+                    {t('settings.appearance')}
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
@@ -247,7 +254,7 @@ export default function Settings() {
                     className="rounded-0 border-bottom"
                   >
                     <i className="bi bi-tags me-2"></i>
-                    Tags
+                    {t('settings.tabTags')}
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
@@ -257,7 +264,7 @@ export default function Settings() {
                     className="rounded-0 border-bottom"
                   >
                     <i className="bi bi-folder me-2"></i>
-                    Categorias
+                    {t('settings.tabCategories')}
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
@@ -267,7 +274,7 @@ export default function Settings() {
                     className="rounded-0 border-bottom"
                   >
                     <i className="bi bi-gear me-2"></i>
-                    Geral
+                    {t('settings.tabGeneral')}
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
@@ -277,7 +284,7 @@ export default function Settings() {
                     className="rounded-0"
                   >
                     <i className="bi bi-people me-2"></i>
-                    Equipe
+                    {t('settings.team')}
                   </Nav.Link>
                 </Nav.Item>
               </Nav>

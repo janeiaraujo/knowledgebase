@@ -9,10 +9,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Button, Form, Modal, Badge, Table, Tabs, Tab, Spinner, Alert, ListGroup, ProgressBar } from 'react-bootstrap';
 import { FaFilePdf, FaFileExcel, FaFileCsv, FaDownload, FaCalendarAlt, FaClock, FaPlay, FaHistory, FaPlus, FaTrash, FaEdit, FaEnvelope } from 'react-icons/fa';
 import { formatDistanceToNow, format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ptBR, enUS } from 'date-fns/locale';
 import api from '../services/api';
 import { toast } from 'react-toastify';
 
@@ -37,30 +38,32 @@ const formatIcons = {
 
 // Period options
 const periodOptions = [
-    { value: '7d', label: 'Últimos 7 dias' },
-    { value: '30d', label: 'Últimos 30 dias' },
-    { value: '90d', label: 'Últimos 90 dias' },
-    { value: '1y', label: 'Último ano' }
+    { value: '7d' },
+    { value: '30d' },
+    { value: '90d' },
+    { value: '1y' }
 ];
 
 // Frequency options for scheduling
 const frequencyOptions = [
-    { value: 'daily', label: 'Diariamente' },
-    { value: 'weekly', label: 'Semanalmente' },
-    { value: 'monthly', label: 'Mensalmente' }
+    { value: 'daily' },
+    { value: 'weekly' },
+    { value: 'monthly' }
 ];
 
 const dayOfWeekOptions = [
-    { value: 0, label: 'Domingo' },
-    { value: 1, label: 'Segunda-feira' },
-    { value: 2, label: 'Terça-feira' },
-    { value: 3, label: 'Quarta-feira' },
-    { value: 4, label: 'Quinta-feira' },
-    { value: 5, label: 'Sexta-feira' },
-    { value: 6, label: 'Sábado' }
+    { value: 0 },
+    { value: 1 },
+    { value: 2 },
+    { value: 3 },
+    { value: 4 },
+    { value: 5 },
+    { value: 6 }
 ];
 
 export default function Reports() {
+    const { t, i18n } = useTranslation();
+    const dateLocale = i18n.language === 'en' ? enUS : ptBR;
     const [activeTab, setActiveTab] = useState('templates');
     const [templates, setTemplates] = useState([]);
     const [schedules, setSchedules] = useState([]);
@@ -110,7 +113,7 @@ export default function Reports() {
             setHistory(historyRes.data.reports || []);
         } catch (error) {
             console.error('Error loading reports data:', error);
-            toast.error('Erro ao carregar dados de relatórios');
+            toast.error(t('reports.loadError'));
         } finally {
             setLoading(false);
         }
@@ -162,12 +165,12 @@ export default function Reports() {
                 downloadReport(response.data.data, selectedTemplate.name, generateForm.format);
             }
 
-            toast.success('Relatório gerado com sucesso!');
+            toast.success(t('reports.generated'));
             setShowGenerateModal(false);
             loadData(); // Refresh history
         } catch (error) {
             console.error('Error generating report:', error);
-            toast.error('Erro ao gerar relatório');
+            toast.error(t('reports.generateError'));
         } finally {
             setGenerating(false);
         }
@@ -232,7 +235,7 @@ export default function Reports() {
     // Create schedule
     const createSchedule = async () => {
         if (!selectedTemplate || !scheduleForm.name.trim()) {
-            toast.warning('Preencha o nome do agendamento');
+            toast.warning(t('reports.fillScheduleName'));
             return;
         }
         
@@ -252,25 +255,25 @@ export default function Reports() {
                 recipients: scheduleForm.recipients.split(',').map(e => e.trim()).filter(Boolean)
             });
             
-            toast.success('Agendamento criado com sucesso!');
+            toast.success(t('reports.scheduleCreated'));
             setShowScheduleModal(false);
             loadData();
         } catch (error) {
             console.error('Error creating schedule:', error);
-            toast.error('Erro ao criar agendamento');
+            toast.error(t('reports.scheduleCreateError'));
         }
     };
 
     // Delete schedule
     const deleteSchedule = async (scheduleId) => {
-        if (!window.confirm('Excluir este agendamento?')) return;
+        if (!window.confirm(t('reports.confirmDeleteSchedule'))) return;
         
         try {
             await api.delete(`/reports/schedules/${scheduleId}`);
-            toast.success('Agendamento excluído');
+            toast.success(t('reports.scheduleDeleted'));
             loadData();
         } catch (error) {
-            toast.error('Erro ao excluir agendamento');
+            toast.error(t('reports.scheduleDeleteError'));
         }
     };
 
@@ -280,10 +283,10 @@ export default function Reports() {
             await api.put(`/reports/schedules/${schedule._id}`, {
                 enabled: !schedule.enabled
             });
-            toast.success(schedule.enabled ? 'Agendamento pausado' : 'Agendamento ativado');
+            toast.success(schedule.enabled ? t('reports.schedulePaused') : t('reports.scheduleEnabled'));
             loadData();
         } catch (error) {
-            toast.error('Erro ao atualizar agendamento');
+            toast.error(t('reports.scheduleUpdateError'));
         }
     };
 
@@ -291,7 +294,7 @@ export default function Reports() {
         return (
             <div className="text-center py-5">
                 <Spinner animation="border" />
-                <p className="mt-2">Carregando relatórios...</p>
+                <p className="mt-2">{t('reports.loading')}</p>
             </div>
         );
     }
@@ -302,14 +305,14 @@ export default function Reports() {
                 <Col>
                     <h2 className="mb-1">
                         <i className="bi bi-file-earmark-bar-graph me-2"></i>
-                        Relatórios
+                        {t('reports.title')}
                     </h2>
-                    <p className="text-muted">Gere e agende relatórios personalizados</p>
+                    <p className="text-muted">{t('reports.subtitle')}</p>
                 </Col>
             </Row>
 
             <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-4">
-                <Tab eventKey="templates" title={<span><i className="bi bi-grid me-2"></i>Templates</span>}>
+                <Tab eventKey="templates" title={<span><i className="bi bi-grid me-2"></i>{t('reports.tabTemplates')}</span>}>
                     <Row xs={1} md={2} lg={3} xl={4} className="g-4">
                         {templates.map(template => (
                             <Col key={template.id}>
@@ -352,13 +355,13 @@ export default function Reports() {
                                                 className="flex-grow-1"
                                                 onClick={() => openGenerateModal(template)}
                                             >
-                                                <FaPlay className="me-1" /> Gerar
+                                                <FaPlay className="me-1" /> {t('reports.generate')}
                                             </Button>
                                             <Button 
                                                 variant="outline-secondary" 
                                                 size="sm"
                                                 onClick={() => openScheduleModal(template)}
-                                                title="Agendar"
+                                                title={t('reports.schedule')}
                                             >
                                                 <FaCalendarAlt />
                                             </Button>
@@ -370,23 +373,23 @@ export default function Reports() {
                     </Row>
                 </Tab>
 
-                <Tab eventKey="schedules" title={<span><i className="bi bi-calendar-check me-2"></i>Agendamentos</span>}>
+                <Tab eventKey="schedules" title={<span><i className="bi bi-calendar-check me-2"></i>{t('reports.tabSchedules')}</span>}>
                     {schedules.length === 0 ? (
                         <Alert variant="info">
                             <i className="bi bi-info-circle me-2"></i>
-                            Nenhum relatório agendado. Selecione um template e clique em "Agendar".
+                            {t('reports.noSchedules')}
                         </Alert>
                     ) : (
                         <Card className="shadow-sm border-0">
                             <Table responsive hover className="mb-0">
                                 <thead className="bg-light">
                                     <tr>
-                                        <th>Nome</th>
-                                        <th>Template</th>
-                                        <th>Frequência</th>
-                                        <th>Próxima Execução</th>
-                                        <th>Status</th>
-                                        <th width="120">Ações</th>
+                                        <th>{t('reports.name')}</th>
+                                        <th>{t('reports.template')}</th>
+                                        <th>{t('reports.frequency')}</th>
+                                        <th>{t('reports.nextRun')}</th>
+                                        <th>{t('common.status')}</th>
+                                        <th width="120">{t('reviews.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -403,22 +406,22 @@ export default function Reports() {
                                             </td>
                                             <td>
                                                 <i className="bi bi-clock me-1"></i>
-                                                {frequencyOptions.find(f => f.value === schedule.schedule?.frequency)?.label}
-                                                {' às '}{schedule.schedule?.time}
+                                                {t(`reports.frequencies.${schedule.schedule?.frequency}`)}
+                                                {` ${t('reports.at')} `}{schedule.schedule?.time}
                                             </td>
                                             <td>
                                                 {schedule.next_run && (
-                                                    <span title={format(new Date(schedule.next_run), 'PPpp', { locale: ptBR })}>
+                                                    <span title={format(new Date(schedule.next_run), 'PPpp', { locale: dateLocale })}>
                                                         {formatDistanceToNow(new Date(schedule.next_run), { 
                                                             addSuffix: true, 
-                                                            locale: ptBR 
+                                                            locale: dateLocale 
                                                         })}
                                                     </span>
                                                 )}
                                             </td>
                                             <td>
                                                 <Badge bg={schedule.enabled ? 'success' : 'secondary'}>
-                                                    {schedule.enabled ? 'Ativo' : 'Pausado'}
+                                                    {schedule.enabled ? t('reports.active') : t('reports.paused')}
                                                 </Badge>
                                             </td>
                                             <td>
@@ -426,7 +429,7 @@ export default function Reports() {
                                                     variant="link" 
                                                     size="sm"
                                                     onClick={() => toggleSchedule(schedule)}
-                                                    title={schedule.enabled ? 'Pausar' : 'Ativar'}
+                                                    title={schedule.enabled ? t('reports.pause') : t('reports.activate')}
                                                 >
                                                     <i className={`bi bi-${schedule.enabled ? 'pause' : 'play'}`}></i>
                                                 </Button>
@@ -435,7 +438,7 @@ export default function Reports() {
                                                     size="sm"
                                                     className="text-danger"
                                                     onClick={() => deleteSchedule(schedule._id)}
-                                                    title="Excluir"
+                                                    title={t('common.delete')}
                                                 >
                                                     <FaTrash />
                                                 </Button>
@@ -448,22 +451,22 @@ export default function Reports() {
                     )}
                 </Tab>
 
-                <Tab eventKey="history" title={<span><i className="bi bi-clock-history me-2"></i>Histórico</span>}>
+                <Tab eventKey="history" title={<span><i className="bi bi-clock-history me-2"></i>{t('reports.tabHistory')}</span>}>
                     {history.length === 0 ? (
                         <Alert variant="info">
                             <i className="bi bi-info-circle me-2"></i>
-                            Nenhum relatório gerado ainda.
+                            {t('reports.noHistory')}
                         </Alert>
                     ) : (
                         <Card className="shadow-sm border-0">
                             <Table responsive hover className="mb-0">
                                 <thead className="bg-light">
                                     <tr>
-                                        <th>Relatório</th>
-                                        <th>Formato</th>
-                                        <th>Gerado por</th>
-                                        <th>Data</th>
-                                        <th>Status</th>
+                                        <th>{t('reports.report')}</th>
+                                        <th>{t('reports.format')}</th>
+                                        <th>{t('reports.generatedBy')}</th>
+                                        <th>{t('reports.date')}</th>
+                                        <th>{t('common.status')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -480,7 +483,7 @@ export default function Reports() {
                                             </td>
                                             <td>{report.generated_by_name}</td>
                                             <td>
-                                                {format(new Date(report.created_at), 'PPp', { locale: ptBR })}
+                                                {format(new Date(report.created_at), 'PPp', { locale: dateLocale })}
                                             </td>
                                             <td>
                                                 <Badge bg={report.status === 'completed' ? 'success' : 'warning'}>
@@ -501,7 +504,7 @@ export default function Reports() {
                 <Modal.Header closeButton>
                     <Modal.Title>
                         <i className={`bi ${templateIcons[selectedTemplate?.id] || 'bi-file-text'} me-2`}></i>
-                        Gerar Relatório
+                        {t('reports.generateReport')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -511,7 +514,7 @@ export default function Reports() {
                             <p className="text-muted small">{selectedTemplate.description}</p>
                             
                             <Form.Group className="mb-3">
-                                <Form.Label>Formato</Form.Label>
+                                <Form.Label>{t('reports.format')}</Form.Label>
                                 <div className="d-flex gap-2">
                                     {selectedTemplate.formats.map(fmt => {
                                         const FormatIcon = formatIcons[fmt]?.icon || FaFilePdf;
@@ -531,26 +534,26 @@ export default function Reports() {
                             </Form.Group>
                             
                             <Form.Group className="mb-3">
-                                <Form.Label>Período</Form.Label>
+                                <Form.Label>{t('reports.period')}</Form.Label>
                                 <Form.Select
                                     value={generateForm.period}
                                     onChange={(e) => setGenerateForm(prev => ({ ...prev, period: e.target.value }))}
                                 >
                                     {periodOptions.map(opt => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        <option key={opt.value} value={opt.value}>{t(`reports.periods.${opt.value}`)}</option>
                                     ))}
                                 </Form.Select>
                             </Form.Group>
                             
                             <Form.Group>
-                                <Form.Label>Entrega</Form.Label>
+                                <Form.Label>{t('reports.delivery')}</Form.Label>
                                 <Form.Select
                                     value={generateForm.delivery}
                                     onChange={(e) => setGenerateForm(prev => ({ ...prev, delivery: e.target.value }))}
                                 >
-                                    <option value="download">Download direto</option>
-                                    <option value="email">Enviar por email</option>
-                                    <option value="save">Salvar no histórico</option>
+                                    <option value="download">{t('reports.deliveryDownload')}</option>
+                                    <option value="email">{t('reports.deliveryEmail')}</option>
+                                    <option value="save">{t('reports.deliverySave')}</option>
                                 </Form.Select>
                             </Form.Group>
                         </>
@@ -558,18 +561,18 @@ export default function Reports() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowGenerateModal(false)}>
-                        Cancelar
+                        {t('common.cancel')}
                     </Button>
                     <Button variant="primary" onClick={generateReport} disabled={generating}>
                         {generating ? (
                             <>
                                 <Spinner size="sm" className="me-2" />
-                                Gerando...
+                                {t('reports.generating')}
                             </>
                         ) : (
                             <>
                                 <FaDownload className="me-2" />
-                                Gerar Relatório
+                                {t('reports.generateReport')}
                             </>
                         )}
                     </Button>
@@ -581,26 +584,26 @@ export default function Reports() {
                 <Modal.Header closeButton>
                     <Modal.Title>
                         <FaCalendarAlt className="me-2" />
-                        Agendar Relatório
+                        {t('reports.scheduleReport')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {selectedTemplate && (
                         <>
                             <Form.Group className="mb-3">
-                                <Form.Label>Nome do Agendamento</Form.Label>
+                                <Form.Label>{t('reports.scheduleName')}</Form.Label>
                                 <Form.Control
                                     type="text"
                                     value={scheduleForm.name}
                                     onChange={(e) => setScheduleForm(prev => ({ ...prev, name: e.target.value }))}
-                                    placeholder="Ex: Relatório Semanal de KBs"
+                                    placeholder={t('reports.scheduleNamePlaceholder')}
                                 />
                             </Form.Group>
                             
                             <Row className="mb-3">
                                 <Col md={6}>
                                     <Form.Group>
-                                        <Form.Label>Formato</Form.Label>
+                                        <Form.Label>{t('reports.format')}</Form.Label>
                                         <Form.Select
                                             value={scheduleForm.format}
                                             onChange={(e) => setScheduleForm(prev => ({ ...prev, format: e.target.value }))}
@@ -613,13 +616,13 @@ export default function Reports() {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group>
-                                        <Form.Label>Período dos Dados</Form.Label>
+                                        <Form.Label>{t('reports.dataPeriod')}</Form.Label>
                                         <Form.Select
                                             value={scheduleForm.period}
                                             onChange={(e) => setScheduleForm(prev => ({ ...prev, period: e.target.value }))}
                                         >
                                             {periodOptions.map(opt => (
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                <option key={opt.value} value={opt.value}>{t(`reports.periods.${opt.value}`)}</option>
                                             ))}
                                         </Form.Select>
                                     </Form.Group>
@@ -629,13 +632,13 @@ export default function Reports() {
                             <Row className="mb-3">
                                 <Col md={4}>
                                     <Form.Group>
-                                        <Form.Label>Frequência</Form.Label>
+                                        <Form.Label>{t('reports.frequency')}</Form.Label>
                                         <Form.Select
                                             value={scheduleForm.frequency}
                                             onChange={(e) => setScheduleForm(prev => ({ ...prev, frequency: e.target.value }))}
                                         >
                                             {frequencyOptions.map(opt => (
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                <option key={opt.value} value={opt.value}>{t(`reports.frequencies.${opt.value}`)}</option>
                                             ))}
                                         </Form.Select>
                                     </Form.Group>
@@ -643,13 +646,13 @@ export default function Reports() {
                                 {scheduleForm.frequency === 'weekly' && (
                                     <Col md={4}>
                                         <Form.Group>
-                                            <Form.Label>Dia da Semana</Form.Label>
+                                            <Form.Label>{t('reports.weekday')}</Form.Label>
                                             <Form.Select
                                                 value={scheduleForm.day}
                                                 onChange={(e) => setScheduleForm(prev => ({ ...prev, day: parseInt(e.target.value) }))}
                                             >
                                                 {dayOfWeekOptions.map(opt => (
-                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    <option key={opt.value} value={opt.value}>{t(`reports.weekdays.${opt.value}`)}</option>
                                                 ))}
                                             </Form.Select>
                                         </Form.Group>
@@ -658,7 +661,7 @@ export default function Reports() {
                                 {scheduleForm.frequency === 'monthly' && (
                                     <Col md={4}>
                                         <Form.Group>
-                                            <Form.Label>Dia do Mês</Form.Label>
+                                            <Form.Label>{t('reports.monthDay')}</Form.Label>
                                             <Form.Select
                                                 value={scheduleForm.day}
                                                 onChange={(e) => setScheduleForm(prev => ({ ...prev, day: parseInt(e.target.value) }))}
@@ -672,7 +675,7 @@ export default function Reports() {
                                 )}
                                 <Col md={4}>
                                     <Form.Group>
-                                        <Form.Label>Horário</Form.Label>
+                                        <Form.Label>{t('reports.time')}</Form.Label>
                                         <Form.Control
                                             type="time"
                                             value={scheduleForm.time}
@@ -685,7 +688,7 @@ export default function Reports() {
                             <Form.Group>
                                 <Form.Label>
                                     <FaEnvelope className="me-2" />
-                                    Destinatários (emails separados por vírgula)
+                                    {t('reports.recipients')}
                                 </Form.Label>
                                 <Form.Control
                                     type="text"
@@ -694,7 +697,7 @@ export default function Reports() {
                                     placeholder="email1@empresa.com, email2@empresa.com"
                                 />
                                 <Form.Text className="text-muted">
-                                    Deixe em branco para enviar apenas para você
+                                    {t('reports.recipientsHelp')}
                                 </Form.Text>
                             </Form.Group>
                         </>
@@ -702,11 +705,11 @@ export default function Reports() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowScheduleModal(false)}>
-                        Cancelar
+                        {t('common.cancel')}
                     </Button>
                     <Button variant="primary" onClick={createSchedule}>
                         <FaCalendarAlt className="me-2" />
-                        Criar Agendamento
+                        {t('reports.createSchedule')}
                     </Button>
                 </Modal.Footer>
             </Modal>

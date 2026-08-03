@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { gpsAPI } from '../../services/api';
 
 const GPSFlowEditor = () => {
+    const { t } = useTranslation();
     const { flowId } = useParams();
     const navigate = useNavigate();
     const [flow, setFlow] = useState(null);
@@ -13,22 +15,22 @@ const GPSFlowEditor = () => {
     const [showStepModal, setShowStepModal] = useState(false);
 
     const stepTypes = {
-        question: { label: 'Pergunta', icon: 'bi-question-circle', color: 'primary' },
-        action: { label: 'Ação', icon: 'bi-lightning', color: 'warning' },
-        evidence: { label: 'Evidência', icon: 'bi-camera', color: 'info' },
-        condition: { label: 'Condição', icon: 'bi-signpost-split', color: 'secondary' },
-        end: { label: 'Fim', icon: 'bi-flag', color: 'success' }
+        question: { icon: 'bi-question-circle', color: 'primary' },
+        action: { icon: 'bi-lightning', color: 'warning' },
+        evidence: { icon: 'bi-camera', color: 'info' },
+        condition: { icon: 'bi-signpost-split', color: 'secondary' },
+        end: { icon: 'bi-flag', color: 'success' }
     };
 
     const inputTypes = [
-        { value: 'text', label: 'Texto curto' },
-        { value: 'textarea', label: 'Texto longo' },
-        { value: 'select', label: 'Seleção única' },
-        { value: 'checkbox', label: 'Múltipla escolha' },
-        { value: 'yesno', label: 'Sim/Não' },
-        { value: 'number', label: 'Número' },
-        { value: 'file', label: 'Arquivo' },
-        { value: 'image', label: 'Imagem/Screenshot' }
+        { value: 'text' },
+        { value: 'textarea' },
+        { value: 'select' },
+        { value: 'checkbox' },
+        { value: 'yesno' },
+        { value: 'number' },
+        { value: 'file' },
+        { value: 'image' }
     ];
 
     useEffect(() => {
@@ -42,7 +44,7 @@ const GPSFlowEditor = () => {
             setFlow(res.data.flow);
         } catch (error) {
             console.error('Error loading flow:', error);
-            alert('Erro ao carregar fluxo');
+            alert(t('gpsEditor.loadError'));
             navigate('/gps');
         } finally {
             setLoading(false);
@@ -54,10 +56,10 @@ const GPSFlowEditor = () => {
             setSaving(true);
             await gpsAPI.updateFlow(flowId, flow);
             setHasChanges(false);
-            alert('Fluxo salvo com sucesso!');
+            alert(t('gpsEditor.saved'));
         } catch (error) {
             console.error('Error saving flow:', error);
-            alert('Erro ao salvar fluxo');
+            alert(t('gpsEditor.saveError'));
         } finally {
             setSaving(false);
         }
@@ -95,7 +97,7 @@ const GPSFlowEditor = () => {
 
     const saveStep = () => {
         if (!selectedStep.title) {
-            alert('Título é obrigatório');
+            alert(t('gpsEditor.titleRequired'));
             return;
         }
 
@@ -121,11 +123,11 @@ const GPSFlowEditor = () => {
 
     const deleteStep = (stepId) => {
         if (stepId === 'start' || stepId === 'end') {
-            alert('Não é possível remover etapas de início/fim');
+            alert(t('gpsEditor.cannotRemoveEnds'));
             return;
         }
         
-        if (!confirm('Deseja remover esta etapa?')) return;
+        if (!confirm(t('gpsEditor.confirmRemoveStep'))) return;
         
         const steps = flow.steps.filter(s => s.id !== stepId);
         
@@ -194,18 +196,16 @@ const GPSFlowEditor = () => {
     if (!flow) {
         return (
             <div className="container-fluid py-5 text-center">
-                <h5>Fluxo não encontrado</h5>
+                <h5>{t('gpsEditor.notFound')}</h5>
                 <button className="btn btn-primary" onClick={() => navigate('/gps')}>
-                    Voltar
+                    {t('common.back')}
                 </button>
             </div>
         );
     }
 
-    const categoryLabels = {
-        general: 'Geral', network: 'Rede', hardware: 'Hardware', software: 'Software',
-        access: 'Acesso', email: 'E-mail', database: 'Banco de Dados', security: 'Segurança'
-    };
+    const categories = ['general', 'network', 'hardware', 'software',
+        'access', 'email', 'database', 'security'];
 
     return (
         <div className="container-fluid py-4">
@@ -217,17 +217,17 @@ const GPSFlowEditor = () => {
                         onClick={() => navigate('/gps')}
                     >
                         <i className="bi bi-arrow-left me-2"></i>
-                        Voltar aos Fluxos
+                        {t('gpsEditor.backToFlows')}
                     </button>
                     <h2 className="mb-1">
                         <i className="bi bi-pencil-square me-2 text-primary"></i>
-                        Editar Fluxo GPS
+                        {t('gpsEditor.title')}
                     </h2>
                 </div>
                 <div className="d-flex gap-2">
                     {hasChanges && (
                         <span className="badge bg-warning text-dark align-self-center">
-                            Alterações não salvas
+                            {t('gpsEditor.unsavedChanges')}
                         </span>
                     )}
                     <button 
@@ -238,12 +238,12 @@ const GPSFlowEditor = () => {
                         {saving ? (
                             <>
                                 <span className="spinner-border spinner-border-sm me-2" />
-                                Salvando...
+                                {t('gpsEditor.saving')}
                             </>
                         ) : (
                             <>
                                 <i className="bi bi-check-lg me-2"></i>
-                                Salvar
+                                {t('gpsEditor.save')}
                             </>
                         )}
                     </button>
@@ -257,12 +257,12 @@ const GPSFlowEditor = () => {
                         <div className="card-header">
                             <h6 className="mb-0">
                                 <i className="bi bi-gear me-2"></i>
-                                Propriedades do Fluxo
+                                {t('gpsEditor.flowProperties')}
                             </h6>
                         </div>
                         <div className="card-body">
                             <div className="mb-3">
-                                <label className="form-label">Nome *</label>
+                                <label className="form-label">{t('gpsEditor.name')} *</label>
                                 <input
                                     type="text"
                                     className="form-control"
@@ -271,7 +271,7 @@ const GPSFlowEditor = () => {
                                 />
                             </div>
                             <div className="mb-3">
-                                <label className="form-label">Descrição</label>
+                                <label className="form-label">{t('common.description')}</label>
                                 <textarea
                                     className="form-control"
                                     rows="2"
@@ -280,14 +280,14 @@ const GPSFlowEditor = () => {
                                 />
                             </div>
                             <div className="mb-3">
-                                <label className="form-label">Categoria</label>
+                                <label className="form-label">{t('search.category')}</label>
                                 <select
                                     className="form-select"
                                     value={flow.category || 'general'}
                                     onChange={(e) => updateFlow({ category: e.target.value })}
                                 >
-                                    {Object.entries(categoryLabels).map(([value, label]) => (
-                                        <option key={value} value={value}>{label}</option>
+                                    {categories.map(value => (
+                                        <option key={value} value={value}>{t(`gpsEditor.categories.${value}`)}</option>
                                     ))}
                                 </select>
                             </div>
@@ -300,7 +300,7 @@ const GPSFlowEditor = () => {
                                     onChange={(e) => updateFlow({ is_active: e.target.checked })}
                                 />
                                 <label className="form-check-label" htmlFor="isActive">
-                                    Fluxo Ativo
+                                    {t('gpsEditor.flowActive')}
                                 </label>
                             </div>
                         </div>
@@ -311,7 +311,7 @@ const GPSFlowEditor = () => {
                         <div className="card-header">
                             <h6 className="mb-0">
                                 <i className="bi bi-plus-circle me-2"></i>
-                                Adicionar Etapa
+                                {t('gpsEditor.addStep')}
                             </h6>
                         </div>
                         <div className="card-body">
@@ -323,7 +323,7 @@ const GPSFlowEditor = () => {
                                         onClick={() => addStep(type)}
                                     >
                                         <i className={`bi ${config.icon} me-2`}></i>
-                                        {config.label}
+                                        {t(`gpsEditor.stepTypes.${type}`)}
                                     </button>
                                 ))}
                             </div>
@@ -337,7 +337,7 @@ const GPSFlowEditor = () => {
                         <div className="card-header d-flex justify-content-between align-items-center">
                             <h6 className="mb-0">
                                 <i className="bi bi-diagram-3 me-2"></i>
-                                Etapas do Fluxo ({flow.steps?.length || 0})
+                                {t('gpsEditor.flowSteps', { count: flow.steps?.length || 0 })}
                             </h6>
                         </div>
                         <div className="card-body p-0">
@@ -381,18 +381,18 @@ const GPSFlowEditor = () => {
                                             {/* Step info */}
                                             <div className="flex-grow-1 me-3">
                                                 <div className="fw-semibold">
-                                                    {step.title || '(Sem título)'}
+                                                    {step.title || t('gpsEditor.untitledStep')}
                                                 </div>
                                                 <small className="text-muted">
-                                                    {stepTypes[step.type]?.label}
-                                                    {step.input_type && ` • ${inputTypes.find(t => t.value === step.input_type)?.label || step.input_type}`}
-                                                    {step.required && ' • Obrigatório'}
+                                                    {t(`gpsEditor.stepTypes.${step.type}`)}
+                                                    {step.input_type && ` • ${t(`gpsEditor.inputTypes.${step.input_type}`)}`}
+                                                    {step.required && ` • ${t('gpsEditor.required')}`}
                                                 </small>
                                                 {step.next_step && step.type !== 'end' && (
                                                     <div>
                                                         <small className="text-muted">
                                                             <i className="bi bi-arrow-right me-1"></i>
-                                                            Próximo: {flow.steps.find(s => s.id === step.next_step)?.title || step.next_step}
+                                                            {t('gpsEditor.next')}: {flow.steps.find(s => s.id === step.next_step)?.title || step.next_step}
                                                         </small>
                                                     </div>
                                                 )}
@@ -403,7 +403,7 @@ const GPSFlowEditor = () => {
                                                 <button
                                                     className="btn btn-sm btn-outline-primary"
                                                     onClick={() => editStep(step)}
-                                                    title="Editar"
+                                                    title={t('common.edit')}
                                                 >
                                                     <i className="bi bi-pencil"></i>
                                                 </button>
@@ -411,7 +411,7 @@ const GPSFlowEditor = () => {
                                                     <button
                                                         className="btn btn-sm btn-outline-danger"
                                                         onClick={() => deleteStep(step.id)}
-                                                        title="Remover"
+                                                        title={t('integrations.remove')}
                                                     >
                                                         <i className="bi bi-trash"></i>
                                                     </button>
@@ -435,8 +435,8 @@ const GPSFlowEditor = () => {
                                 <h5 className="modal-title">
                                     <i className={`bi ${stepTypes[selectedStep.type]?.icon} me-2`}></i>
                                     {selectedStep.id === 'start' || flow.steps.some(s => s.id === selectedStep.id) 
-                                        ? 'Editar Etapa' 
-                                        : 'Nova Etapa'
+                                        ? t('gpsEditor.editStep')
+                                        : t('gpsEditor.newStep')
                                     }
                                 </h5>
                                 <button 
@@ -448,17 +448,17 @@ const GPSFlowEditor = () => {
                             <div className="modal-body">
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
-                                        <label className="form-label">Título *</label>
+                                        <label className="form-label">{t('common.title')} *</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            placeholder="Ex: Qual é o problema?"
+                                            placeholder={t('gpsEditor.titlePlaceholder')}
                                             value={selectedStep.title || ''}
                                             onChange={(e) => setSelectedStep(prev => ({ ...prev, title: e.target.value }))}
                                         />
                                     </div>
                                     <div className="col-md-6 mb-3">
-                                        <label className="form-label">Tipo</label>
+                                        <label className="form-label">{t('gpsEditor.type')}</label>
                                         <select
                                             className="form-select"
                                             value={selectedStep.type || 'question'}
@@ -469,19 +469,19 @@ const GPSFlowEditor = () => {
                                             }))}
                                             disabled={selectedStep.id === 'start' || selectedStep.id === 'end'}
                                         >
-                                            {Object.entries(stepTypes).map(([value, config]) => (
-                                                <option key={value} value={value}>{config.label}</option>
+                                            {Object.keys(stepTypes).map(value => (
+                                                <option key={value} value={value}>{t(`gpsEditor.stepTypes.${value}`)}</option>
                                             ))}
                                         </select>
                                     </div>
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="form-label">Descrição/Instrução</label>
+                                    <label className="form-label">{t('gpsEditor.instruction')}</label>
                                     <textarea
                                         className="form-control"
                                         rows="2"
-                                        placeholder="Instruções ou explicação para o operador..."
+                                        placeholder={t('gpsEditor.instructionPlaceholder')}
                                         value={selectedStep.description || ''}
                                         onChange={(e) => setSelectedStep(prev => ({ ...prev, description: e.target.value }))}
                                     />
@@ -491,7 +491,7 @@ const GPSFlowEditor = () => {
                                     <>
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
-                                                <label className="form-label">Tipo de Entrada</label>
+                                                <label className="form-label">{t('gpsEditor.inputType')}</label>
                                                 <select
                                                     className="form-select"
                                                     value={selectedStep.input_type || 'text'}
@@ -504,7 +504,7 @@ const GPSFlowEditor = () => {
                                                     }))}
                                                 >
                                                     {inputTypes.map(type => (
-                                                        <option key={type.value} value={type.value}>{type.label}</option>
+                                                        <option key={type.value} value={type.value}>{t(`gpsEditor.inputTypes.${type.value}`)}</option>
                                                     ))}
                                                 </select>
                                             </div>
@@ -518,7 +518,7 @@ const GPSFlowEditor = () => {
                                                         onChange={(e) => setSelectedStep(prev => ({ ...prev, required: e.target.checked }))}
                                                     />
                                                     <label className="form-check-label" htmlFor="stepRequired">
-                                                        Campo obrigatório
+                                                        {t('gpsEditor.requiredField')}
                                                     </label>
                                                 </div>
                                             </div>
@@ -528,7 +528,7 @@ const GPSFlowEditor = () => {
                                         {['select', 'checkbox', 'yesno'].includes(selectedStep.input_type) && (
                                             <div className="mb-3">
                                                 <label className="form-label d-flex justify-content-between">
-                                                    <span>Opções</span>
+                                                    <span>{t('gpsEditor.options')}</span>
                                                     {selectedStep.input_type !== 'yesno' && (
                                                         <button 
                                                             type="button" 
@@ -536,7 +536,7 @@ const GPSFlowEditor = () => {
                                                             onClick={addOption}
                                                         >
                                                             <i className="bi bi-plus-lg me-1"></i>
-                                                            Adicionar opção
+                                                            {t('gpsEditor.addOption')}
                                                         </button>
                                                     )}
                                                 </label>
@@ -544,7 +544,7 @@ const GPSFlowEditor = () => {
                                                 {selectedStep.input_type === 'yesno' ? (
                                                     <div className="alert alert-info small mb-0">
                                                         <i className="bi bi-info-circle me-2"></i>
-                                                        Tipo Sim/Não gera automaticamente as opções. Configure o próximo passo para cada resposta.
+                                                        {t('gpsEditor.yesnoHelp')}
                                                     </div>
                                                 ) : (
                                                     <div className="border rounded p-2">
@@ -553,7 +553,7 @@ const GPSFlowEditor = () => {
                                                                 <input
                                                                     type="text"
                                                                     className="form-control form-control-sm"
-                                                                    placeholder="Rótulo da opção"
+                                                                    placeholder={t('gpsEditor.optionLabel')}
                                                                     value={opt.label || ''}
                                                                     onChange={(e) => updateOption(index, 'label', e.target.value)}
                                                                 />
@@ -580,7 +580,7 @@ const GPSFlowEditor = () => {
                                                         ))}
                                                         {(!selectedStep.options || selectedStep.options.length === 0) && (
                                                             <div className="text-muted small text-center py-2">
-                                                                Clique em "Adicionar opção" para criar opções
+                                                                {t('gpsEditor.noOptions')}
                                                             </div>
                                                         )}
                                                     </div>
@@ -592,23 +592,23 @@ const GPSFlowEditor = () => {
 
                                 {selectedStep.type === 'evidence' && (
                                     <div className="mb-3">
-                                        <label className="form-label">Tipo de Evidência</label>
+                                        <label className="form-label">{t('gpsEditor.evidenceType')}</label>
                                         <select
                                             className="form-select"
                                             value={selectedStep.evidence_type || 'any'}
                                             onChange={(e) => setSelectedStep(prev => ({ ...prev, evidence_type: e.target.value }))}
                                         >
-                                            <option value="any">Qualquer (texto, arquivo ou imagem)</option>
-                                            <option value="text">Somente texto</option>
-                                            <option value="image">Somente imagem/screenshot</option>
-                                            <option value="file">Somente arquivo</option>
+                                            <option value="any">{t('gpsEditor.evidenceAny')}</option>
+                                            <option value="text">{t('gpsEditor.evidenceText')}</option>
+                                            <option value="image">{t('gpsEditor.evidenceImage')}</option>
+                                            <option value="file">{t('gpsEditor.evidenceFile')}</option>
                                         </select>
                                     </div>
                                 )}
 
                                 {selectedStep.type !== 'end' && !['select', 'checkbox', 'yesno'].includes(selectedStep.input_type) && (
                                     <div className="mb-3">
-                                        <label className="form-label">Próximo Passo (padrão)</label>
+                                        <label className="form-label">{t('gpsEditor.defaultNextStep')}</label>
                                         <select
                                             className="form-select"
                                             value={selectedStep.next_step || 'end'}
@@ -629,7 +629,7 @@ const GPSFlowEditor = () => {
                                     className="btn btn-secondary"
                                     onClick={() => { setShowStepModal(false); setSelectedStep(null); }}
                                 >
-                                    Cancelar
+                                    {t('common.cancel')}
                                 </button>
                                 <button 
                                     type="button" 
@@ -637,7 +637,7 @@ const GPSFlowEditor = () => {
                                     onClick={saveStep}
                                 >
                                     <i className="bi bi-check-lg me-2"></i>
-                                    Salvar Etapa
+                                    {t('gpsEditor.saveStep')}
                                 </button>
                             </div>
                         </div>

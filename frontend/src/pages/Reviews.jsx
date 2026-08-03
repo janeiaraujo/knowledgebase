@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Button, Form, Row, Col, Alert, Spinner, Badge, ListGroup, Tabs, Tab, Modal, Table, ProgressBar } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
@@ -58,7 +59,7 @@ const Reviews = () => {
       setPagination(prev => ({ ...prev, ...data.pagination }));
       setSummary(data.summary || { overdue: 0, urgent: 0, upcoming: 0 });
     } catch (err) {
-      setError('Erro ao carregar revisões pendentes');
+      setError(t('reviews.loadPendingError'));
     } finally {
       setLoading(false);
     }
@@ -72,7 +73,7 @@ const Reviews = () => {
       });
       setStaleKBs(data.records || []);
     } catch (err) {
-      setError('Erro ao carregar KBs desatualizados');
+      setError(t('reviews.loadStaleError'));
     } finally {
       setLoading(false);
     }
@@ -83,7 +84,7 @@ const Reviews = () => {
       await api.put('/review/settings', settings);
       setShowSettingsModal(false);
     } catch (err) {
-      setError('Erro ao salvar configurações');
+      setError(t('reviews.saveSettingsError'));
     }
   };
 
@@ -100,12 +101,12 @@ const Reviews = () => {
       fetchPendingReviews();
       if (activeTab === 'stale') fetchStaleKBs();
     } catch (err) {
-      setError('Erro ao agendar revisão');
+      setError(t('reviews.scheduleError'));
     }
   };
 
   const handleCompleteReview = async (recordId) => {
-    if (!window.confirm('Marcar este KB como revisado?')) return;
+    if (!window.confirm(t('reviews.confirmComplete'))) return;
     
     try {
       await api.post(`/review/records/${recordId}/complete`, {
@@ -113,7 +114,7 @@ const Reviews = () => {
       });
       fetchPendingReviews();
     } catch (err) {
-      setError('Erro ao completar revisão');
+      setError(t('reviews.completeError'));
     }
   };
 
@@ -128,29 +129,29 @@ const Reviews = () => {
       fetchStaleKBs();
       fetchPendingReviews();
     } catch (err) {
-      setError('Erro ao agendar revisões em lote');
+      setError(t('reviews.bulkScheduleError'));
     }
   };
 
   const getStatusBadge = (status) => {
     const badges = {
-      overdue: { bg: 'danger', label: 'Atrasado' },
-      urgent: { bg: 'warning', label: 'Urgente' },
-      upcoming: { bg: 'info', label: 'Próximo' },
-      scheduled: { bg: 'secondary', label: 'Agendado' }
+      overdue: { bg: 'danger', labelKey: 'reviews.statusOverdue' },
+      urgent: { bg: 'warning', labelKey: 'reviews.statusUrgent' },
+      upcoming: { bg: 'info', labelKey: 'reviews.statusSoon' },
+      scheduled: { bg: 'secondary', labelKey: 'reviews.statusScheduled' }
     };
     return badges[status] || badges.scheduled;
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('pt-BR');
+    return new Date(dateStr).toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'pt-BR');
   };
 
   const formatDaysUntil = (days) => {
-    if (days < 0) return `${Math.abs(days)} dias atrasado`;
-    if (days === 0) return 'Hoje';
-    if (days === 1) return 'Amanhã';
-    return `Em ${days} dias`;
+    if (days < 0) return t('reviews.daysOverdue', { count: Math.abs(days) });
+    if (days === 0) return t('reviews.today');
+    if (days === 1) return t('reviews.tomorrow');
+    return t('reviews.inDays', { count: days });
   };
 
   return (
@@ -159,15 +160,15 @@ const Reviews = () => {
         <div>
           <h2 className="mb-1">
             <i className="bi bi-calendar-check me-2"></i>
-            Revisões Periódicas
+            {t('reviews.title')}
           </h2>
           <p className="text-muted mb-0">
-            Gerencie a revisão periódica de KBs para manter o conteúdo atualizado
+            {t('reviews.subtitle')}
           </p>
         </div>
         <Button variant="outline-primary" onClick={() => setShowSettingsModal(true)}>
           <i className="bi bi-gear me-2"></i>
-          Configurações
+          {t('reviews.settings')}
         </Button>
       </div>
 
@@ -183,7 +184,7 @@ const Reviews = () => {
           <Card className="border-0 shadow-sm text-center h-100" style={{ borderLeft: '4px solid #dc3545' }}>
             <Card.Body>
               <h3 className="text-danger mb-0">{summary.overdue}</h3>
-              <small className="text-muted">Atrasados</small>
+              <small className="text-muted">{t('reviews.overdue')}</small>
             </Card.Body>
           </Card>
         </Col>
@@ -191,7 +192,7 @@ const Reviews = () => {
           <Card className="border-0 shadow-sm text-center h-100" style={{ borderLeft: '4px solid #ffc107' }}>
             <Card.Body>
               <h3 className="text-warning mb-0">{summary.urgent}</h3>
-              <small className="text-muted">Esta semana</small>
+              <small className="text-muted">{t('reviews.thisWeek')}</small>
             </Card.Body>
           </Card>
         </Col>
@@ -199,7 +200,7 @@ const Reviews = () => {
           <Card className="border-0 shadow-sm text-center h-100" style={{ borderLeft: '4px solid #0dcaf0' }}>
             <Card.Body>
               <h3 className="text-info mb-0">{summary.upcoming}</h3>
-              <small className="text-muted">Este mês</small>
+              <small className="text-muted">{t('reviews.thisMonth')}</small>
             </Card.Body>
           </Card>
         </Col>
@@ -211,7 +212,7 @@ const Reviews = () => {
           <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
             
             {/* Pending Reviews Tab */}
-            <Tab eventKey="pending" title={<><i className="bi bi-clock me-2"></i>Pendentes</>}>
+            <Tab eventKey="pending" title={<><i className="bi bi-clock me-2"></i>{t('reviews.tabPending')}</>}>
               {/* Filters */}
               <div className="d-flex gap-2 mb-3">
                 <Form.Select 
@@ -220,11 +221,11 @@ const Reviews = () => {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <option value="all">Todos os status</option>
-                  <option value="overdue">Atrasados</option>
-                  <option value="this_week">Esta semana</option>
-                  <option value="this_month">Este mês</option>
-                  <option value="upcoming">Futuros</option>
+                  <option value="all">{t('reviews.filterAll')}</option>
+                  <option value="overdue">{t('reviews.overdue')}</option>
+                  <option value="this_week">{t('reviews.thisWeek')}</option>
+                  <option value="this_month">{t('reviews.thisMonth')}</option>
+                  <option value="upcoming">{t('reviews.upcoming')}</option>
                 </Form.Select>
               </div>
 
@@ -235,18 +236,18 @@ const Reviews = () => {
               ) : pendingReviews.length === 0 ? (
                 <Alert variant="success">
                   <i className="bi bi-check-circle me-2"></i>
-                  Nenhuma revisão pendente!
+                  {t('reviews.nonePending')}
                 </Alert>
               ) : (
                 <Table responsive hover>
                   <thead className="bg-light">
                     <tr>
                       <th>KB</th>
-                      <th>Categoria</th>
-                      <th>Última Revisão</th>
-                      <th>Próxima Revisão</th>
-                      <th>Status</th>
-                      <th>Ações</th>
+                      <th>{t('reviews.category')}</th>
+                      <th>{t('reviews.lastReview')}</th>
+                      <th>{t('reviews.nextReview')}</th>
+                      <th>{t('common.status')}</th>
+                      <th>{t('reviews.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -260,7 +261,7 @@ const Reviews = () => {
                               {record.title}
                             </Link>
                             <br />
-                            <small className="text-muted">por {record.owner?.name || 'Desconhecido'}</small>
+                            <small className="text-muted">{t('reviews.by', { name: record.owner?.name || t('reviews.unknownAuthor') })}</small>
                           </td>
                           <td>
                             <Badge bg="light" text="dark">
@@ -270,7 +271,7 @@ const Reviews = () => {
                           <td>
                             {record.last_reviewed_at 
                               ? formatDate(record.last_reviewed_at)
-                              : <span className="text-muted">Nunca</span>
+                              : <span className="text-muted">{t('reviews.never')}</span>
                             }
                           </td>
                           <td>
@@ -281,7 +282,7 @@ const Reviews = () => {
                             </small>
                           </td>
                           <td>
-                            <Badge bg={statusBadge.bg}>{statusBadge.label}</Badge>
+                            <Badge bg={statusBadge.bg}>{t(statusBadge.labelKey)}</Badge>
                           </td>
                           <td>
                             <Button
@@ -289,7 +290,7 @@ const Reviews = () => {
                               size="sm"
                               className="me-1"
                               onClick={() => handleCompleteReview(record._id)}
-                              title="Marcar como revisado"
+                              title={t('reviews.markReviewed')}
                             >
                               <i className="bi bi-check"></i>
                             </Button>
@@ -300,7 +301,7 @@ const Reviews = () => {
                                 setSelectedRecord(record);
                                 setShowScheduleModal(true);
                               }}
-                              title="Reagendar"
+                              title={t('reviews.reschedule')}
                             >
                               <i className="bi bi-calendar"></i>
                             </Button>
@@ -314,7 +315,7 @@ const Reviews = () => {
             </Tab>
 
             {/* Stale KBs Tab */}
-            <Tab eventKey="stale" title={<><i className="bi bi-exclamation-triangle me-2"></i>Sem Revisão</>}>
+            <Tab eventKey="stale" title={<><i className="bi bi-exclamation-triangle me-2"></i>{t('reviews.tabStale')}</>}>
               {loading ? (
                 <div className="text-center py-5">
                   <Spinner animation="border" />
@@ -322,7 +323,7 @@ const Reviews = () => {
               ) : staleKBs.length === 0 ? (
                 <Alert variant="success">
                   <i className="bi bi-check-circle me-2"></i>
-                  Todos os KBs têm revisão agendada!
+                  {t('reviews.allScheduled')}
                 </Alert>
               ) : (
                 <>
@@ -333,7 +334,7 @@ const Reviews = () => {
                       onClick={() => handleBulkSchedule(staleKBs.map(r => r._id))}
                     >
                       <i className="bi bi-calendar-plus me-2"></i>
-                      Agendar todos ({staleKBs.length})
+                      {t('reviews.scheduleAll', { count: staleKBs.length })}
                     </Button>
                   </div>
                   
@@ -349,8 +350,8 @@ const Reviews = () => {
                           </Link>
                           <br />
                           <small className="text-muted">
-                            Atualizado há {record.days_since_update} dias • 
-                            por {record.owner?.name || 'Desconhecido'}
+                            {t('reviews.updatedAgo', { count: record.days_since_update })}{' • '}
+                            {t('reviews.by', { name: record.owner?.name || t('reviews.unknownAuthor') })}
                           </small>
                         </div>
                         <Button
@@ -362,7 +363,7 @@ const Reviews = () => {
                           }}
                         >
                           <i className="bi bi-calendar-plus me-1"></i>
-                          Agendar
+                          {t('reviews.schedule')}
                         </Button>
                       </ListGroup.Item>
                     ))}
@@ -379,14 +380,14 @@ const Reviews = () => {
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="bi bi-gear me-2"></i>
-            Configurações de Revisão
+            {t('reviews.settingsTitle')}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {settings && (
             <Form>
               <Form.Group className="mb-3">
-                <Form.Label>Período padrão de revisão (dias)</Form.Label>
+                <Form.Label>{t('reviews.defaultPeriod')}</Form.Label>
                 <Form.Control
                   type="number"
                   min="1"
@@ -399,7 +400,7 @@ const Reviews = () => {
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Lembretes (dias antes)</Form.Label>
+                <Form.Label>{t('reviews.reminders')}</Form.Label>
                 <Form.Control
                   type="text"
                   value={(settings.reminder_days_before || []).join(', ')}
@@ -410,14 +411,14 @@ const Reviews = () => {
                   placeholder="30, 7, 1"
                 />
                 <Form.Text className="text-muted">
-                  Dias antes da revisão para enviar lembretes (separados por vírgula)
+                  {t('reviews.remindersHelp')}
                 </Form.Text>
               </Form.Group>
 
               <Form.Check
                 type="switch"
                 id="notify-owner"
-                label="Notificar o autor do KB"
+                label={t('reviews.notifyOwner')}
                 checked={settings.notify_owner}
                 onChange={(e) => setSettings(prev => ({
                   ...prev,
@@ -429,7 +430,7 @@ const Reviews = () => {
               <Form.Check
                 type="switch"
                 id="notify-admins"
-                label="Notificar administradores"
+                label={t('reviews.notifyAdmins')}
                 checked={settings.notify_admins}
                 onChange={(e) => setSettings(prev => ({
                   ...prev,
@@ -441,7 +442,7 @@ const Reviews = () => {
               <Form.Check
                 type="switch"
                 id="enabled"
-                label="Sistema de revisão ativado"
+                label={t('reviews.enabled')}
                 checked={settings.enabled}
                 onChange={(e) => setSettings(prev => ({
                   ...prev,
@@ -453,10 +454,10 @@ const Reviews = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowSettingsModal(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" onClick={handleSaveSettings}>
-            Salvar
+            {t('reviews.save')}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -466,7 +467,7 @@ const Reviews = () => {
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="bi bi-calendar-plus me-2"></i>
-            Agendar Revisão
+            {t('reviews.scheduleTitle')}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -478,7 +479,7 @@ const Reviews = () => {
               
               <Form>
                 <Form.Group className="mb-3">
-                  <Form.Label>Revisar em (dias)</Form.Label>
+                  <Form.Label>{t('reviews.reviewInDays')}</Form.Label>
                   <Form.Control
                     type="number"
                     min="1"
@@ -491,7 +492,7 @@ const Reviews = () => {
                 </Form.Group>
 
                 <Form.Group>
-                  <Form.Label>Observações (opcional)</Form.Label>
+                  <Form.Label>{t('reviews.notes')}</Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={2}
@@ -500,7 +501,7 @@ const Reviews = () => {
                       ...prev,
                       notes: e.target.value
                     }))}
-                    placeholder="Motivo da revisão ou lembretes..."
+                    placeholder={t('reviews.notesPlaceholder')}
                   />
                 </Form.Group>
               </Form>
@@ -509,10 +510,10 @@ const Reviews = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowScheduleModal(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" onClick={handleScheduleReview}>
-            Agendar
+            {t('reviews.schedule')}
           </Button>
         </Modal.Footer>
       </Modal>

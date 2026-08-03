@@ -4,6 +4,7 @@ import { Card, Button, Badge, Modal, Form, Alert, Dropdown, Tabs, Tab, Row, Col 
 import { recordAPI, exportAPI } from '../../services/api';
 import api from '../../services/api';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import KBComments from '../../components/comments/KBComments';
 import FavoriteButton from '../../components/favorites/FavoriteButton';
@@ -28,9 +29,10 @@ const getErrorMessage = (error) =>
   error.response?.data?.error ||
   error.response?.data?.message ||
   (error.response ? `Erro ${error.response.status}` : error.message) ||
-  'Erro desconhecido';
+  t('common.unknownError');
 
 export default function KBView() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -79,7 +81,7 @@ export default function KBView() {
       await recordAPI.submitForReview(id);
       fetchRecord();
     } catch (error) {
-      alert('Falha ao enviar para revisão: ' + getErrorMessage(error));
+      alert(t('kbView.submitError') + ': ' + getErrorMessage(error));
     } finally {
       setActionLoading(false);
     }
@@ -94,12 +96,12 @@ export default function KBView() {
       const errorMsg = getErrorMessage(error);
       if (error.response?.status === 403) {
         if (errorMsg.includes('own KB')) {
-          alert('Você não pode aprovar seu próprio KB.');
+          alert(t('kbView.cannotApproveOwn'));
         } else {
-          alert('Você não tem permissão para aprovar KBs. Apenas administradores podem aprovar.');
+          alert(t('kbView.noApprovePermission'));
         }
       } else {
-        alert('Falha ao aprovar: ' + errorMsg);
+        alert(t('kbView.approveError') + ': ' + errorMsg);
       }
     } finally {
       setActionLoading(false);
@@ -114,7 +116,7 @@ export default function KBView() {
       setRejectReason('');
       fetchRecord();
     } catch (error) {
-      alert('Falha ao rejeitar: ' + getErrorMessage(error));
+      alert(t('kbView.rejectError') + ': ' + getErrorMessage(error));
     } finally {
       setActionLoading(false);
     }
@@ -126,7 +128,7 @@ export default function KBView() {
       await recordAPI.publish(id);
       fetchRecord();
     } catch (error) {
-      alert('Falha ao publicar: ' + getErrorMessage(error));
+      alert(t('kbView.publishError') + ': ' + getErrorMessage(error));
     } finally {
       setActionLoading(false);
     }
@@ -137,7 +139,7 @@ export default function KBView() {
       await recordAPI.delete(id);
       navigate('/kb');
     } catch (error) {
-      alert('Falha ao excluir: ' + getErrorMessage(error));
+      alert(t('kbView.deleteError') + ': ' + getErrorMessage(error));
     }
   };
   
@@ -148,7 +150,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'text/markdown' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.md`);
     } catch (error) {
-      alert('Falha ao exportar: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ': ' + getErrorMessage(error));
     }
   };
   
@@ -166,7 +168,7 @@ export default function KBView() {
         printWindow.print();
       };
     } catch (error) {
-      alert('Falha ao exportar PDF: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ' PDF: ' + getErrorMessage(error));
     }
   };
 
@@ -176,7 +178,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'application/json' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.json`);
     } catch (error) {
-      alert('Falha ao exportar JSON: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ' JSON: ' + getErrorMessage(error));
     }
   };
 
@@ -186,7 +188,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'application/vnd.ms-word' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.doc`);
     } catch (error) {
-      alert('Falha ao exportar Word: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ' Word: ' + getErrorMessage(error));
     }
   };
 
@@ -196,7 +198,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'text/plain' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.txt`);
     } catch (error) {
-      alert('Falha ao exportar texto: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ' TXT: ' + getErrorMessage(error));
     }
   };
 
@@ -224,7 +226,7 @@ export default function KBView() {
   }
   
   if (!record) {
-    return <div className="alert alert-danger">KB não encontrado</div>;
+    return <div className="alert alert-danger">{t('kbView.notFound')}</div>;
   }
   
   return (
@@ -239,9 +241,9 @@ export default function KBView() {
       {record.status === 'rejected' && record.rejection_reason && (
         <Alert variant="danger" className="mb-3">
           <Alert.Heading className="h6">
-            <i className="bi bi-x-circle me-2"></i>KB Rejeitado
+            <i className="bi bi-x-circle me-2"></i>{t('kbView.rejected')}
           </Alert.Heading>
-          <p className="mb-0"><strong>Motivo:</strong> {record.rejection_reason}</p>
+          <p className="mb-0"><strong>{t('kbView.reason')}</strong> {record.rejection_reason}</p>
         </Alert>
       )}
       
@@ -274,7 +276,7 @@ export default function KBView() {
                   onClick={handleSubmitForReview}
                   disabled={actionLoading}
                 >
-                  <i className="bi bi-send me-1"></i>Enviar para Revisão
+                  <i className="bi bi-send me-1"></i>{t('kbView.submitForReview')}
                 </Button>
               )}
               
@@ -286,7 +288,7 @@ export default function KBView() {
                     onClick={handleApprove}
                     disabled={actionLoading}
                   >
-                    <i className="bi bi-check-circle me-1"></i>Aprovar
+                    <i className="bi bi-check-circle me-1"></i>{t('kbView.approve')}
                   </Button>
                   <Button 
                     variant="danger" 
@@ -294,14 +296,14 @@ export default function KBView() {
                     onClick={() => setShowRejectModal(true)}
                     disabled={actionLoading}
                   >
-                    <i className="bi bi-x-circle me-1"></i>Rejeitar
+                    <i className="bi bi-x-circle me-1"></i>{t('kbView.reject')}
                   </Button>
                 </>
               )}
               
               {record.status === 'in_review' && isCreator && (
                 <Badge bg="warning" text="dark" className="d-flex align-items-center">
-                  <i className="bi bi-hourglass-split me-1"></i>Aguardando Aprovação
+                  <i className="bi bi-hourglass-split me-1"></i>{t('kbView.awaitingApproval')}
                 </Badge>
               )}
               
@@ -312,14 +314,14 @@ export default function KBView() {
                   onClick={handlePublish}
                   disabled={actionLoading}
                 >
-                  <i className="bi bi-globe me-1"></i>Publicar
+                  <i className="bi bi-globe me-1"></i>{t('kbView.publish')}
                 </Button>
               )}
               
               {/* Edit button (only for draft/rejected) */}
               {canEdit && (
                 <Link to={`/kb/${id}/edit`} className="btn btn-outline-primary btn-sm">
-                  <i className="bi bi-pencil me-1"></i>Editar
+                  <i className="bi bi-pencil me-1"></i>{t('common.edit')}
                 </Link>
               )}
               
@@ -329,44 +331,44 @@ export default function KBView() {
                 size="sm" 
                 onClick={() => setShowDeleteModal(true)}
               >
-                <i className="bi bi-trash me-1"></i>Excluir
+                <i className="bi bi-trash me-1"></i>{t('common.delete')}
               </Button>
               
               {/* Version History */}
               <Link to={`/kb/${id}/history`} className="btn btn-outline-info btn-sm">
-                <i className="bi bi-clock-history me-1"></i>Histórico
+                <i className="bi bi-clock-history me-1"></i>{t('kbView.history')}
               </Link>
               
               {/* Permissions (admin only) */}
               {user && ['owner', 'admin'].includes(user.role) && (
                 <Link to={`/kb/${id}/permissions`} className="btn btn-outline-secondary btn-sm">
-                  <i className="bi bi-shield-lock me-1"></i>Permissões
+                  <i className="bi bi-shield-lock me-1"></i>{t('kbView.permissions')}
                 </Link>
               )}
               
               {/* Export dropdown */}
               <Dropdown>
                 <Dropdown.Toggle variant="outline-secondary" size="sm" id="export-dropdown">
-                  <i className="bi bi-download me-1"></i>Exportar
+                  <i className="bi bi-download me-1"></i>{t('kbView.export')}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Header>Documentos</Dropdown.Header>
+                  <Dropdown.Header>{t('kbView.documents')}</Dropdown.Header>
                   <Dropdown.Item onClick={handleExportMarkdown}>
                     <i className="bi bi-file-text me-2"></i>Markdown (.md)
                   </Dropdown.Item>
                   <Dropdown.Item onClick={handleExportPDF}>
-                    <i className="bi bi-file-pdf me-2"></i>PDF / Imprimir
+                    <i className="bi bi-file-pdf me-2"></i>{t('kbView.pdfPrint')}
                   </Dropdown.Item>
                   <Dropdown.Item onClick={handleExportWord}>
                     <i className="bi bi-file-word me-2"></i>Word (.doc)
                   </Dropdown.Item>
                   <Dropdown.Divider />
-                  <Dropdown.Header>Outros Formatos</Dropdown.Header>
+                  <Dropdown.Header>{t('kbView.otherFormats')}</Dropdown.Header>
                   <Dropdown.Item onClick={handleExportJSON}>
                     <i className="bi bi-filetype-json me-2"></i>JSON
                   </Dropdown.Item>
                   <Dropdown.Item onClick={handleExportText}>
-                    <i className="bi bi-file-earmark-text me-2"></i>Texto Simples (.txt)
+                    <i className="bi bi-file-earmark-text me-2"></i>{t('kbView.plainText')} (.txt)
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
@@ -426,10 +428,10 @@ export default function KBView() {
               variant="outline-secondary" 
               size="sm"
               onClick={() => setShowTOC(!showTOC)}
-              title={showTOC ? 'Ocultar índice' : 'Mostrar índice'}
+              title={showTOC ? t('kbView.hideToc') : t('kbView.showToc')}
             >
               <i className={`bi bi-${showTOC ? 'layout-sidebar-inset-reverse' : 'list-ul'} me-1`}></i>
-              {showTOC ? 'Ocultar Índice' : 'Mostrar Índice'}
+              {showTOC ? t('kbView.hideToc') : t('kbView.showToc')}
             </Button>
           </div>
           
@@ -512,7 +514,7 @@ export default function KBView() {
               title={
                 <span>
                   <i className="bi bi-chat-dots me-2"></i>
-                  Comentários
+                  {t('kbView.comments')}
                 </span>
               }
             >
@@ -525,7 +527,7 @@ export default function KBView() {
               title={
                 <span>
                   <i className="bi bi-link-45deg me-2"></i>
-                  Relações Manuais
+                  {t('kbView.manualRelations')}
                 </span>
               }
             >
@@ -538,7 +540,7 @@ export default function KBView() {
               title={
                 <span>
                   <i className="bi bi-diagram-3 me-2"></i>
-                  KBs Relacionados
+                  {t('kbView.relatedKbs')}
                 </span>
               }
             >
@@ -553,17 +555,17 @@ export default function KBView() {
       {/* Delete Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Excluir KB</Modal.Title>
+          <Modal.Title>{t('kbView.deleteTitle')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Tem certeza de que deseja excluir este KB? Esta ação não pode ser desfeita.
+          {t('kbView.deleteConfirm')}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button variant="danger" onClick={handleDelete}>
-            Excluir
+            {t('common.delete')}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -571,23 +573,23 @@ export default function KBView() {
       {/* Reject Modal */}
       <Modal show={showRejectModal} onHide={() => setShowRejectModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Rejeitar KB</Modal.Title>
+          <Modal.Title>{t('kbView.rejectTitle')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
-            <Form.Label>Motivo da rejeição</Form.Label>
+            <Form.Label>{t('kbView.rejectReason')}</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Descreva o motivo da rejeição..."
+              placeholder={t('kbView.rejectReasonPlaceholder')}
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowRejectModal(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button 
             variant="danger" 

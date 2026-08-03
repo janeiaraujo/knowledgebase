@@ -11,47 +11,50 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Badge, Button, Modal, Form, Tabs, Tab, Spinner, Alert, ListGroup, ProgressBar, Accordion, OverlayTrigger, Tooltip, Table } from 'react-bootstrap';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { FaFileAlt, FaClock, FaUser, FaPlus, FaCheck, FaTimes, FaRobot, FaSave, FaDownload, FaBook, FaLightbulb, FaHistory, FaQuestionCircle, FaTrash, FaEdit, FaArrowLeft, FaPlay, FaProjectDiagram, FaExclamationTriangle, FaChevronDown, FaChevronUp, FaShare, FaEye } from 'react-icons/fa';
 import { formatDistanceToNow, format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ptBR, enUS } from 'date-fns/locale';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
 
 // Severity configurations
 const severityConfig = {
-    critical: { label: 'Crítico', color: 'danger' },
-    high: { label: 'Alto', color: 'warning' },
-    medium: { label: 'Médio', color: 'info' },
-    low: { label: 'Baixo', color: 'secondary' }
+    critical: { color: 'danger' },
+    high: { color: 'warning' },
+    medium: { color: 'info' },
+    low: { color: 'secondary' }
 };
 
 // Timeline entry types
 const timelineTypes = [
-    { value: 'detection', label: 'Detecção', color: 'danger' },
-    { value: 'investigation', label: 'Investigação', color: 'info' },
-    { value: 'mitigation', label: 'Mitigação', color: 'warning' },
-    { value: 'resolution', label: 'Resolução', color: 'success' },
-    { value: 'event', label: 'Evento', color: 'secondary' }
+    { value: 'detection', color: 'danger' },
+    { value: 'investigation', color: 'info' },
+    { value: 'mitigation', color: 'warning' },
+    { value: 'resolution', color: 'success' },
+    { value: 'event', color: 'secondary' }
 ];
 
 // Action item priorities
 const priorityConfig = {
-    critical: { label: 'Crítica', color: 'danger' },
-    high: { label: 'Alta', color: 'warning' },
-    medium: { label: 'Média', color: 'info' },
-    low: { label: 'Baixa', color: 'secondary' }
+    critical: { color: 'danger' },
+    high: { color: 'warning' },
+    medium: { color: 'info' },
+    low: { color: 'secondary' }
 };
 
 // Action item categories
 const categoryConfig = {
-    preventive: { label: 'Preventiva', color: 'success', description: 'Evitar recorrência' },
-    detective: { label: 'Detectiva', color: 'info', description: 'Melhorar detecção' },
-    corrective: { label: 'Corretiva', color: 'warning', description: 'Corrigir problema' }
+    preventive: { color: 'success' },
+    detective: { color: 'info' },
+    corrective: { color: 'warning' }
 };
 
 export default function PostMortemEditor() {
+    const { t, i18n } = useTranslation();
+    const dateLocale = i18n.language === 'en' ? enUS : ptBR;
     const { id } = useParams();
     const navigate = useNavigate();
     
@@ -101,7 +104,7 @@ export default function PostMortemEditor() {
             setPostmortem(response.data.postMortem);
         } catch (error) {
             console.error('Error loading post-mortem:', error);
-            toast.error('Erro ao carregar post-mortem');
+            toast.error(t('postmortem.loadError'));
             navigate('/postmortem');
         } finally {
             setLoading(false);
@@ -131,9 +134,9 @@ export default function PostMortemEditor() {
         try {
             await api.put(`/postmortem/${id}`, postmortem);
             setHasChanges(false);
-            if (!silent) toast.success('Salvo com sucesso!');
+            if (!silent) toast.success(t('postmortem.saved'));
         } catch (error) {
-            toast.error('Erro ao salvar');
+            toast.error(t('postmortem.saveError'));
         } finally {
             setSaving(false);
         }
@@ -169,48 +172,48 @@ export default function PostMortemEditor() {
     // Add timeline entry
     const addTimelineEntry = async () => {
         if (!timelineForm.timestamp || !timelineForm.description) {
-            toast.warning('Preencha data/hora e descrição');
+            toast.warning(t('postmortem.fillTimestampDesc'));
             return;
         }
 
         try {
             await api.post(`/postmortem/${id}/timeline`, timelineForm);
-            toast.success('Entrada adicionada!');
+            toast.success(t('postmortem.entryAdded'));
             setShowTimelineModal(false);
             setTimelineForm({ timestamp: '', description: '', type: 'event', actor: '' });
             loadPostmortem();
         } catch (error) {
-            toast.error('Erro ao adicionar entrada');
+            toast.error(t('postmortem.addEntryError'));
         }
     };
 
     // Remove timeline entry
     const removeTimelineEntry = async (entryId) => {
-        if (!window.confirm('Remover esta entrada?')) return;
+        if (!window.confirm(t('postmortem.confirmRemoveEntry'))) return;
         
         try {
             await api.delete(`/postmortem/${id}/timeline/${entryId}`);
             loadPostmortem();
         } catch (error) {
-            toast.error('Erro ao remover');
+            toast.error(t('postmortem.removeError'));
         }
     };
 
     // Add action item
     const addActionItem = async () => {
         if (!actionForm.title) {
-            toast.warning('Informe o título da ação');
+            toast.warning(t('postmortem.fillActionTitle'));
             return;
         }
 
         try {
             await api.post(`/postmortem/${id}/action-items`, actionForm);
-            toast.success('Ação adicionada!');
+            toast.success(t('postmortem.actionAdded'));
             setShowActionModal(false);
             setActionForm({ title: '', description: '', priority: 'medium', category: 'preventive', due_date: '' });
             loadPostmortem();
         } catch (error) {
-            toast.error('Erro ao adicionar ação');
+            toast.error(t('postmortem.addActionError'));
         }
     };
 
@@ -220,14 +223,14 @@ export default function PostMortemEditor() {
             await api.put(`/postmortem/${id}/action-items/${itemId}`, { status });
             loadPostmortem();
         } catch (error) {
-            toast.error('Erro ao atualizar');
+            toast.error(t('postmortem.updateError'));
         }
     };
 
     // Run 5 Whys analysis
     const runFiveWhys = async () => {
         if (!rcaForm.initial_problem) {
-            toast.warning('Descreva o problema inicial');
+            toast.warning(t('postmortem.describeInitialProblem'));
             return;
         }
 
@@ -237,11 +240,11 @@ export default function PostMortemEditor() {
                 initial_problem: rcaForm.initial_problem
             });
             
-            toast.success('Análise 5 Porquês gerada!');
+            toast.success(t('postmortem.fiveWhysGenerated'));
             setShowRCAModal(false);
             loadPostmortem();
         } catch (error) {
-            toast.error('Erro na análise');
+            toast.error(t('postmortem.analysisError'));
         } finally {
             setGenerating(false);
         }
@@ -250,7 +253,7 @@ export default function PostMortemEditor() {
     // Run Fishbone analysis
     const runFishbone = async () => {
         if (!rcaForm.initial_problem) {
-            toast.warning('Descreva o problema');
+            toast.warning(t('postmortem.describeProblem'));
             return;
         }
 
@@ -260,11 +263,11 @@ export default function PostMortemEditor() {
                 problem_statement: rcaForm.initial_problem
             });
             
-            toast.success('Diagrama de Ishikawa gerado!');
+            toast.success(t('postmortem.fishboneGenerated'));
             setShowRCAModal(false);
             loadPostmortem();
         } catch (error) {
-            toast.error('Erro na análise');
+            toast.error(t('postmortem.analysisError'));
         } finally {
             setGenerating(false);
         }
@@ -291,9 +294,9 @@ export default function PostMortemEditor() {
                 setShowGenerateModal(true);
             }
             
-            toast.success('Conteúdo gerado!');
+            toast.success(t('postmortem.contentGenerated'));
         } catch (error) {
-            toast.error('Erro ao gerar conteúdo');
+            toast.error(t('postmortem.generateError'));
         } finally {
             setGenerating(false);
         }
@@ -301,14 +304,14 @@ export default function PostMortemEditor() {
 
     // Publish post-mortem
     const publishPostmortem = async () => {
-        if (!window.confirm('Publicar este post-mortem?')) return;
+        if (!window.confirm(t('postmortem.confirmPublish'))) return;
 
         try {
             await api.post(`/postmortem/${id}/publish`);
-            toast.success('Publicado!');
+            toast.success(t('postmortem.published'));
             loadPostmortem();
         } catch (error) {
-            toast.error('Erro ao publicar');
+            toast.error(t('postmortem.publishError'));
         }
     };
 
@@ -327,20 +330,20 @@ export default function PostMortemEditor() {
             link.click();
             link.remove();
         } catch (error) {
-            toast.error('Erro ao exportar');
+            toast.error(t('postmortem.exportError'));
         }
     };
 
     // Create KB from post-mortem
     const createKB = async () => {
-        if (!window.confirm('Criar KB a partir deste post-mortem?')) return;
+        if (!window.confirm(t('postmortem.confirmCreateKb'))) return;
 
         try {
             const response = await api.post(`/postmortem/${id}/create-kb`);
-            toast.success('KB criado!');
+            toast.success(t('postmortem.kbCreated'));
             navigate(`/kb/${response.data.kb_id}/edit`);
         } catch (error) {
-            toast.error('Erro ao criar KB');
+            toast.error(t('postmortem.createKbError'));
         }
     };
 
@@ -355,7 +358,7 @@ export default function PostMortemEditor() {
     if (!postmortem) {
         return (
             <Container className="py-5">
-                <Alert variant="danger">Post-mortem não encontrado</Alert>
+                <Alert variant="danger">{t('postmortem.notFound')}</Alert>
             </Container>
         );
     }
@@ -368,41 +371,41 @@ export default function PostMortemEditor() {
                     <div className="d-flex justify-content-between align-items-start">
                         <div>
                             <Button variant="link" className="p-0 mb-2" onClick={() => navigate('/postmortem')}>
-                                <FaArrowLeft className="me-1" /> Voltar
+                                <FaArrowLeft className="me-1" /> {t('common.back')}
                             </Button>
                             <h2 className="mb-1">
                                 <Badge bg={severityConfig[postmortem.severity]?.color} className="me-2">
-                                    {severityConfig[postmortem.severity]?.label}
+                                    {t(`postmortem.severities.${postmortem.severity}`)}
                                 </Badge>
                                 {postmortem.title}
                             </h2>
                             <div className="text-muted">
                                 <FaClock className="me-1" />
-                                {format(new Date(postmortem.incident_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                                {format(new Date(postmortem.incident_date), t('postmortem.longDateFormat'), { locale: dateLocale })}
                                 {' • '}
                                 <Badge bg={postmortem.status === 'published' ? 'success' : 'secondary'}>
-                                    {postmortem.status === 'draft' ? 'Rascunho' : postmortem.status === 'published' ? 'Publicado' : postmortem.status}
+                                    {['draft', 'published'].includes(postmortem.status) ? t(`kb.status.${postmortem.status}`) : postmortem.status}
                                 </Badge>
                             </div>
                         </div>
                         <div className="d-flex gap-2">
                             {hasChanges && (
-                                <Badge bg="warning" className="align-self-center">Alterações não salvas</Badge>
+                                <Badge bg="warning" className="align-self-center">{t('gpsEditor.unsavedChanges')}</Badge>
                             )}
                             <Button variant="outline-secondary" onClick={exportMarkdown}>
-                                <FaDownload className="me-1" /> Exportar
+                                <FaDownload className="me-1" /> {t('kbView.export')}
                             </Button>
                             <Button variant="outline-primary" onClick={createKB}>
-                                <FaBook className="me-1" /> Criar KB
+                                <FaBook className="me-1" /> {t('postmortem.createKb')}
                             </Button>
                             {postmortem.status === 'draft' && (
                                 <Button variant="success" onClick={publishPostmortem}>
-                                    <FaShare className="me-1" /> Publicar
+                                    <FaShare className="me-1" /> {t('kbView.publish')}
                                 </Button>
                             )}
                             <Button variant="primary" onClick={() => savePostmortem(false)} disabled={saving}>
                                 {saving ? <Spinner animation="border" size="sm" /> : <FaSave className="me-1" />}
-                                Salvar
+                                {t('gpsEditor.save')}
                             </Button>
                         </div>
                     </div>
@@ -411,27 +414,27 @@ export default function PostMortemEditor() {
 
             {/* Main Content Tabs */}
             <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-4">
-                <Tab eventKey="overview" title="Visão Geral">
+                <Tab eventKey="overview" title={t('userActivity.tabOverview')}>
                     <Row>
                         <Col lg={8}>
                             {/* Executive Summary */}
                             <Card className="mb-4">
                                 <Card.Header className="d-flex justify-content-between align-items-center">
-                                    <span>Resumo Executivo</span>
+                                    <span>{t('postmortem.executiveSummary')}</span>
                                     <Button 
                                         size="sm" 
                                         variant="outline-primary"
                                         onClick={() => generateWithAI('summary')}
                                         disabled={generating}
                                     >
-                                        <FaRobot className="me-1" /> Gerar com IA
+                                        <FaRobot className="me-1" /> {t('postmortem.generateWithAi')}
                                     </Button>
                                 </Card.Header>
                                 <Card.Body>
                                     <Form.Control
                                         as="textarea"
                                         rows={6}
-                                        placeholder="Descreva o incidente, impacto e resolução..."
+                                        placeholder={t('postmortem.summaryPlaceholder')}
                                         value={postmortem.executive_summary || ''}
                                         onChange={e => updateField('executive_summary', e.target.value)}
                                     />
@@ -450,7 +453,7 @@ export default function PostMortemEditor() {
                                                     <Form.Control
                                                         as="textarea"
                                                         rows={4}
-                                                        placeholder={`Conteúdo para ${section.title}...`}
+                                                        placeholder={t('postmortem.sectionPlaceholder', { section: section.title })}
                                                         value={section.content || ''}
                                                         onChange={e => updateSection(key, e.target.value)}
                                                     />
@@ -464,10 +467,10 @@ export default function PostMortemEditor() {
                         <Col lg={4}>
                             {/* Impact */}
                             <Card className="mb-4">
-                                <Card.Header>Impacto</Card.Header>
+                                <Card.Header>{t('postmortem.impact')}</Card.Header>
                                 <Card.Body>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Duração (minutos)</Form.Label>
+                                        <Form.Label>{t('postmortem.durationMinutes')}</Form.Label>
                                         <Form.Control
                                             type="number"
                                             value={postmortem.impact?.duration_minutes || ''}
@@ -475,7 +478,7 @@ export default function PostMortemEditor() {
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Usuários Afetados</Form.Label>
+                                        <Form.Label>{t('postmortem.usersAffected')}</Form.Label>
                                         <Form.Control
                                             type="number"
                                             value={postmortem.impact?.users_affected || ''}
@@ -485,13 +488,13 @@ export default function PostMortemEditor() {
                                     <Form.Group className="mb-3">
                                         <Form.Check
                                             type="switch"
-                                            label="SLA Violado"
+                                            label={t('postmortem.slaBreached')}
                                             checked={postmortem.impact?.sla_breached || false}
                                             onChange={e => updateNestedField('impact', 'sla_breached', e.target.checked)}
                                         />
                                     </Form.Group>
                                     <Form.Group>
-                                        <Form.Label>Descrição do Impacto</Form.Label>
+                                        <Form.Label>{t('postmortem.impactDescription')}</Form.Label>
                                         <Form.Control
                                             as="textarea"
                                             rows={3}
@@ -504,11 +507,11 @@ export default function PostMortemEditor() {
 
                             {/* Affected Services */}
                             <Card className="mb-4">
-                                <Card.Header>Serviços Afetados</Card.Header>
+                                <Card.Header>{t('postmortem.affectedServices')}</Card.Header>
                                 <Card.Body>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Serviços separados por vírgula"
+                                        placeholder={t('postmortem.servicesPlaceholder')}
                                         value={postmortem.affected_services?.join(', ') || ''}
                                         onChange={e => updateField('affected_services', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
                                     />
@@ -517,11 +520,11 @@ export default function PostMortemEditor() {
 
                             {/* Participants */}
                             <Card>
-                                <Card.Header>Participantes</Card.Header>
+                                <Card.Header>{t('postmortem.participants')}</Card.Header>
                                 <Card.Body>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Nomes separados por vírgula"
+                                        placeholder={t('postmortem.namesPlaceholder')}
                                         value={postmortem.participants?.join(', ') || ''}
                                         onChange={e => updateField('participants', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
                                     />
@@ -531,30 +534,30 @@ export default function PostMortemEditor() {
                     </Row>
                 </Tab>
 
-                <Tab eventKey="timeline" title={`Timeline (${postmortem.timeline?.length || 0})`}>
+                <Tab eventKey="timeline" title={t('postmortem.tabTimeline', { count: postmortem.timeline?.length || 0 })}>
                     <Card>
                         <Card.Header className="d-flex justify-content-between align-items-center">
-                            <span>Linha do Tempo do Incidente</span>
+                            <span>{t('postmortem.incidentTimeline')}</span>
                             <Button variant="primary" size="sm" onClick={() => setShowTimelineModal(true)}>
-                                <FaPlus className="me-1" /> Adicionar Entrada
+                                <FaPlus className="me-1" /> {t('postmortem.addEntry')}
                             </Button>
                         </Card.Header>
                         <Card.Body>
                             {postmortem.timeline?.length > 0 ? (
                                 <div className="timeline">
                                     {postmortem.timeline.map((entry, index) => {
-                                        const typeConfig = timelineTypes.find(t => t.value === entry.type) || timelineTypes[4];
+                                        const typeConfig = timelineTypes.find(tt => tt.value === entry.type) || timelineTypes[4];
                                         return (
                                             <div key={entry._id} className="timeline-item d-flex mb-3">
                                                 <div className="timeline-marker me-3">
                                                     <Badge bg={typeConfig.color} className="p-2">
-                                                        {typeConfig.label}
+                                                        {t(`postmortem.timelineTypes.${typeConfig.value}`)}
                                                     </Badge>
                                                 </div>
                                                 <div className="timeline-content flex-grow-1">
                                                     <div className="d-flex justify-content-between">
                                                         <strong>
-                                                            {format(new Date(entry.timestamp), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                                                            {format(new Date(entry.timestamp), "dd/MM/yyyy HH:mm", { locale: dateLocale })}
                                                         </strong>
                                                         <Button 
                                                             variant="link" 
@@ -578,19 +581,19 @@ export default function PostMortemEditor() {
                                 </div>
                             ) : (
                                 <Alert variant="info">
-                                    Nenhuma entrada na timeline. Adicione eventos para documentar o incidente.
+                                    {t('postmortem.emptyTimeline')}
                                 </Alert>
                             )}
                         </Card.Body>
                     </Card>
                 </Tab>
 
-                <Tab eventKey="rca" title="Análise de Causa Raiz">
+                <Tab eventKey="rca" title={t('postmortem.tabRca')}>
                     <Row>
                         <Col lg={8}>
                             <Card className="mb-4">
                                 <Card.Header className="d-flex justify-content-between align-items-center">
-                                    <span>Análise de Causa Raiz (RCA)</span>
+                                    <span>{t('postmortem.rcaTitle')}</span>
                                     <div className="d-flex gap-2">
                                         <Button 
                                             variant="outline-primary" 
@@ -600,7 +603,7 @@ export default function PostMortemEditor() {
                                                 setShowRCAModal(true);
                                             }}
                                         >
-                                            <FaQuestionCircle className="me-1" /> 5 Porquês
+                                            <FaQuestionCircle className="me-1" /> {t('postmortem.fiveWhys')}
                                         </Button>
                                         <Button 
                                             variant="outline-info" 
@@ -610,7 +613,7 @@ export default function PostMortemEditor() {
                                                 setShowRCAModal(true);
                                             }}
                                         >
-                                            <FaProjectDiagram className="me-1" /> Ishikawa
+                                            <FaProjectDiagram className="me-1" /> {t('postmortem.ishikawa')}
                                         </Button>
                                     </div>
                                 </Card.Header>
@@ -618,7 +621,7 @@ export default function PostMortemEditor() {
                                     {postmortem.rca?.method ? (
                                         <>
                                             <Badge bg="primary" className="mb-3">
-                                                Método: {postmortem.rca.method === 'five_whys' ? '5 Porquês' : 'Diagrama de Ishikawa'}
+                                                {t('postmortem.method')}: {postmortem.rca.method === 'five_whys' ? t('postmortem.fiveWhys') : t('postmortem.fishboneDiagram')}
                                             </Badge>
 
                                             {postmortem.rca.method === 'five_whys' && postmortem.rca.analysis?.whys && (
@@ -626,7 +629,7 @@ export default function PostMortemEditor() {
                                                     {postmortem.rca.analysis.whys.map((why, index) => (
                                                         <Card key={index} className="mb-2">
                                                             <Card.Body className="py-2">
-                                                                <strong>{index + 1}º Por quê?</strong>
+                                                                <strong>{t('postmortem.nthWhy', { n: index + 1 })}</strong>
                                                                 <p className="mb-1">{why.why}</p>
                                                                 <p className="text-muted mb-0">→ {why.answer}</p>
                                                             </Card.Body>
@@ -656,7 +659,7 @@ export default function PostMortemEditor() {
 
                                             {postmortem.rca.root_causes?.length > 0 && (
                                                 <Alert variant="danger" className="mt-3">
-                                                    <strong>Causas Raiz Identificadas:</strong>
+                                                    <strong>{t('postmortem.rootCauses')}</strong>
                                                     <ul className="mb-0 mt-2">
                                                         {postmortem.rca.root_causes.map((cause, i) => (
                                                             <li key={i}>{cause}</li>
@@ -668,7 +671,7 @@ export default function PostMortemEditor() {
                                     ) : (
                                         <Alert variant="info">
                                             <FaLightbulb className="me-2" />
-                                            Selecione um método de análise: <strong>5 Porquês</strong> ou <strong>Ishikawa (Fishbone)</strong>
+                                            <Trans i18nKey="postmortem.pickMethod" components={{ b: <strong /> }} />
                                         </Alert>
                                     )}
                                 </Card.Body>
@@ -677,12 +680,12 @@ export default function PostMortemEditor() {
 
                         <Col lg={4}>
                             <Card>
-                                <Card.Header>Lições Aprendidas</Card.Header>
+                                <Card.Header>{t('postmortem.lessonsLearned')}</Card.Header>
                                 <Card.Body>
                                     <Form.Control
                                         as="textarea"
                                         rows={8}
-                                        placeholder="Uma lição por linha..."
+                                        placeholder={t('postmortem.lessonsPlaceholder')}
                                         value={postmortem.lessons_learned?.join('\n') || ''}
                                         onChange={e => updateField('lessons_learned', e.target.value.split('\n').filter(Boolean))}
                                     />
@@ -692,10 +695,10 @@ export default function PostMortemEditor() {
                     </Row>
                 </Tab>
 
-                <Tab eventKey="actions" title={`Ações (${postmortem.action_items?.length || 0})`}>
+                <Tab eventKey="actions" title={t('postmortem.tabActions', { count: postmortem.action_items?.length || 0 })}>
                     <Card>
                         <Card.Header className="d-flex justify-content-between align-items-center">
-                            <span>Itens de Ação</span>
+                            <span>{t('postmortem.actionItems')}</span>
                             <div className="d-flex gap-2">
                                 <Button 
                                     variant="outline-primary" 
@@ -703,10 +706,10 @@ export default function PostMortemEditor() {
                                     onClick={() => generateWithAI('actions')}
                                     disabled={generating}
                                 >
-                                    <FaRobot className="me-1" /> Sugerir Ações (IA)
+                                    <FaRobot className="me-1" /> {t('postmortem.suggestActions')}
                                 </Button>
                                 <Button variant="primary" size="sm" onClick={() => setShowActionModal(true)}>
-                                    <FaPlus className="me-1" /> Nova Ação
+                                    <FaPlus className="me-1" /> {t('postmortem.newAction')}
                                 </Button>
                             </div>
                         </Card.Header>
@@ -715,12 +718,12 @@ export default function PostMortemEditor() {
                                 <Table responsive hover>
                                     <thead>
                                         <tr>
-                                            <th>Prioridade</th>
-                                            <th>Ação</th>
-                                            <th>Categoria</th>
-                                            <th>Status</th>
-                                            <th>Prazo</th>
-                                            <th>Ações</th>
+                                            <th>{t('postmortem.priority')}</th>
+                                            <th>{t('postmortem.action')}</th>
+                                            <th>{t('search.category')}</th>
+                                            <th>{t('common.status')}</th>
+                                            <th>{t('postmortem.dueDate')}</th>
+                                            <th>{t('reviews.actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -728,7 +731,7 @@ export default function PostMortemEditor() {
                                             <tr key={item._id}>
                                                 <td>
                                                     <Badge bg={priorityConfig[item.priority]?.color}>
-                                                        {priorityConfig[item.priority]?.label}
+                                                        {t(`postmortem.priorities.${item.priority}`)}
                                                     </Badge>
                                                 </td>
                                                 <td>
@@ -739,7 +742,7 @@ export default function PostMortemEditor() {
                                                 </td>
                                                 <td>
                                                     <Badge bg={categoryConfig[item.category]?.color}>
-                                                        {categoryConfig[item.category]?.label}
+                                                        {t(`postmortem.actionCategories.${item.category}`)}
                                                     </Badge>
                                                 </td>
                                                 <td>
@@ -749,14 +752,14 @@ export default function PostMortemEditor() {
                                                         onChange={e => updateActionStatus(item._id, e.target.value)}
                                                         style={{ width: '120px' }}
                                                     >
-                                                        <option value="open">Aberto</option>
-                                                        <option value="in_progress">Em Progresso</option>
-                                                        <option value="completed">Concluído</option>
-                                                        <option value="cancelled">Cancelado</option>
+                                                        <option value="open">{t('postmortem.statuses.open')}</option>
+                                                        <option value="in_progress">{t('postmortem.statuses.in_progress')}</option>
+                                                        <option value="completed">{t('postmortem.statuses.completed')}</option>
+                                                        <option value="cancelled">{t('postmortem.statuses.cancelled')}</option>
                                                     </Form.Select>
                                                 </td>
                                                 <td>
-                                                    {item.due_date ? format(new Date(item.due_date), 'dd/MM/yyyy') : '-'}
+                                                    {item.due_date ? format(new Date(item.due_date), t('postmortem.shortDateFormat')) : '-'}
                                                 </td>
                                                 <td>
                                                     <Button 
@@ -774,7 +777,7 @@ export default function PostMortemEditor() {
                                 </Table>
                             ) : (
                                 <Alert variant="info">
-                                    Nenhum item de ação. Adicione ações para prevenir recorrências.
+                                    {t('postmortem.emptyActions')}
                                 </Alert>
                             )}
                         </Card.Body>
@@ -785,12 +788,12 @@ export default function PostMortemEditor() {
             {/* Timeline Modal */}
             <Modal show={showTimelineModal} onHide={() => setShowTimelineModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title><FaClock className="me-2" /> Adicionar Entrada na Timeline</Modal.Title>
+                    <Modal.Title><FaClock className="me-2" /> {t('postmortem.addTimelineEntry')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Data/Hora *</Form.Label>
+                            <Form.Label>{t('postmortem.dateTime')} *</Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={timelineForm.timestamp}
@@ -798,18 +801,18 @@ export default function PostMortemEditor() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tipo</Form.Label>
+                            <Form.Label>{t('gpsEditor.type')}</Form.Label>
                             <Form.Select
                                 value={timelineForm.type}
                                 onChange={e => setTimelineForm(prev => ({ ...prev, type: e.target.value }))}
                             >
                                 {timelineTypes.map(type => (
-                                    <option key={type.value} value={type.value}>{type.label}</option>
+                                    <option key={type.value} value={type.value}>{t(`postmortem.timelineTypes.${type.value}`)}</option>
                                 ))}
                             </Form.Select>
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Descrição *</Form.Label>
+                            <Form.Label>{t('common.description')} *</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -818,10 +821,10 @@ export default function PostMortemEditor() {
                             />
                         </Form.Group>
                         <Form.Group>
-                            <Form.Label>Responsável</Form.Label>
+                            <Form.Label>{t('postmortem.actor')}</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Nome do responsável"
+                                placeholder={t('postmortem.actorPlaceholder')}
                                 value={timelineForm.actor}
                                 onChange={e => setTimelineForm(prev => ({ ...prev, actor: e.target.value }))}
                             />
@@ -829,29 +832,29 @@ export default function PostMortemEditor() {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowTimelineModal(false)}>Cancelar</Button>
-                    <Button variant="primary" onClick={addTimelineEntry}>Adicionar</Button>
+                    <Button variant="secondary" onClick={() => setShowTimelineModal(false)}>{t('common.cancel')}</Button>
+                    <Button variant="primary" onClick={addTimelineEntry}>{t('common.add')}</Button>
                 </Modal.Footer>
             </Modal>
 
             {/* Action Modal */}
             <Modal show={showActionModal} onHide={() => setShowActionModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title><FaPlus className="me-2" /> Nova Ação</Modal.Title>
+                    <Modal.Title><FaPlus className="me-2" /> {t('postmortem.newAction')}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Título *</Form.Label>
+                            <Form.Label>{t('common.title')} *</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Descrição da ação"
+                                placeholder={t('postmortem.actionTitlePlaceholder')}
                                 value={actionForm.title}
                                 onChange={e => setActionForm(prev => ({ ...prev, title: e.target.value }))}
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Detalhes</Form.Label>
+                            <Form.Label>{t('postmortem.details')}</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={2}
@@ -862,33 +865,33 @@ export default function PostMortemEditor() {
                         <Row>
                             <Col>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Prioridade</Form.Label>
+                                    <Form.Label>{t('postmortem.priority')}</Form.Label>
                                     <Form.Select
                                         value={actionForm.priority}
                                         onChange={e => setActionForm(prev => ({ ...prev, priority: e.target.value }))}
                                     >
-                                        {Object.entries(priorityConfig).map(([value, config]) => (
-                                            <option key={value} value={value}>{config.label}</option>
+                                        {Object.keys(priorityConfig).map(value => (
+                                            <option key={value} value={value}>{t(`postmortem.priorities.${value}`)}</option>
                                         ))}
                                     </Form.Select>
                                 </Form.Group>
                             </Col>
                             <Col>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Categoria</Form.Label>
+                                    <Form.Label>{t('search.category')}</Form.Label>
                                     <Form.Select
                                         value={actionForm.category}
                                         onChange={e => setActionForm(prev => ({ ...prev, category: e.target.value }))}
                                     >
-                                        {Object.entries(categoryConfig).map(([value, config]) => (
-                                            <option key={value} value={value}>{config.label}</option>
+                                        {Object.keys(categoryConfig).map(value => (
+                                            <option key={value} value={value}>{t(`postmortem.actionCategories.${value}`)}</option>
                                         ))}
                                     </Form.Select>
                                 </Form.Group>
                             </Col>
                         </Row>
                         <Form.Group>
-                            <Form.Label>Prazo</Form.Label>
+                            <Form.Label>{t('postmortem.dueDate')}</Form.Label>
                             <Form.Control
                                 type="date"
                                 value={actionForm.due_date}
@@ -898,8 +901,8 @@ export default function PostMortemEditor() {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowActionModal(false)}>Cancelar</Button>
-                    <Button variant="primary" onClick={addActionItem}>Adicionar</Button>
+                    <Button variant="secondary" onClick={() => setShowActionModal(false)}>{t('common.cancel')}</Button>
+                    <Button variant="primary" onClick={addActionItem}>{t('common.add')}</Button>
                 </Modal.Footer>
             </Modal>
 
@@ -908,9 +911,9 @@ export default function PostMortemEditor() {
                 <Modal.Header closeButton>
                     <Modal.Title>
                         {rcaForm.method === 'five_whys' ? (
-                            <><FaQuestionCircle className="me-2" /> Análise 5 Porquês</>
+                            <><FaQuestionCircle className="me-2" /> {t('postmortem.fiveWhysAnalysis')}</>
                         ) : (
-                            <><FaProjectDiagram className="me-2" /> Diagrama de Ishikawa</>
+                            <><FaProjectDiagram className="me-2" /> {t('postmortem.fishboneDiagram')}</>
                         )}
                     </Modal.Title>
                 </Modal.Header>
@@ -918,41 +921,39 @@ export default function PostMortemEditor() {
                     <Alert variant="info">
                         {rcaForm.method === 'five_whys' ? (
                             <>
-                                <strong>5 Porquês:</strong> Técnica iterativa para identificar a causa raiz perguntando "Por quê?" 
-                                repetidamente até chegar à origem do problema.
+                                <Trans i18nKey="postmortem.fiveWhysHelp" components={{ b: <strong /> }} />
                             </>
                         ) : (
                             <>
-                                <strong>Diagrama de Ishikawa:</strong> Também conhecido como "espinha de peixe", categoriza as possíveis 
-                                causas em Pessoas, Processo, Tecnologia, Ambiente, Medição e Materiais.
+                                <Trans i18nKey="postmortem.fishboneHelp" components={{ b: <strong /> }} />
                             </>
                         )}
                     </Alert>
                     <Form.Group>
-                        <Form.Label>Descreva o problema *</Form.Label>
+                        <Form.Label>{t('postmortem.describeProblemLabel')} *</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={4}
-                            placeholder="Ex: O sistema de pagamentos ficou indisponível por 30 minutos..."
+                            placeholder={t('postmortem.problemPlaceholder')}
                             value={rcaForm.initial_problem}
                             onChange={e => setRcaForm(prev => ({ ...prev, initial_problem: e.target.value }))}
                         />
                         <Form.Text className="text-muted">
-                            A IA irá analisar o problema e gerar a análise automaticamente.
+                            {t('postmortem.aiWillAnalyze')}
                         </Form.Text>
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowRCAModal(false)}>Cancelar</Button>
+                    <Button variant="secondary" onClick={() => setShowRCAModal(false)}>{t('common.cancel')}</Button>
                     <Button 
                         variant="primary" 
                         onClick={rcaForm.method === 'five_whys' ? runFiveWhys : runFishbone}
                         disabled={generating}
                     >
                         {generating ? (
-                            <><Spinner animation="border" size="sm" className="me-1" /> Analisando...</>
+                            <><Spinner animation="border" size="sm" className="me-1" /> {t('postmortem.analyzing')}</>
                         ) : (
-                            <><FaRobot className="me-1" /> Gerar Análise</>
+                            <><FaRobot className="me-1" /> {t('postmortem.generateAnalysis')}</>
                         )}
                     </Button>
                 </Modal.Footer>
@@ -962,23 +963,23 @@ export default function PostMortemEditor() {
             <Modal show={showGenerateModal} onHide={() => setShowGenerateModal(false)} size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        <FaRobot className="me-2" /> Conteúdo Gerado pela IA
+                        <FaRobot className="me-2" /> {t('postmortem.aiGeneratedContent')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {generatedContent?.type === 'actions' && (
                         <>
-                            <p>A IA sugeriu as seguintes ações baseadas na análise:</p>
+                            <p>{t('postmortem.aiSuggestedActions')}</p>
                             <ListGroup>
                                 {generatedContent.data?.map((action, index) => (
                                     <ListGroup.Item key={index}>
                                         <div className="d-flex justify-content-between align-items-start">
                                             <div>
                                                 <Badge bg={priorityConfig[action.priority]?.color} className="me-2">
-                                                    {priorityConfig[action.priority]?.label}
+                                                    {t(`postmortem.priorities.${action.priority}`)}
                                                 </Badge>
                                                 <Badge bg={categoryConfig[action.category]?.color} className="me-2">
-                                                    {categoryConfig[action.category]?.label}
+                                                    {t(`postmortem.actionCategories.${action.category}`)}
                                                 </Badge>
                                                 <strong>{action.title}</strong>
                                                 {action.description && <p className="mb-0 mt-1 small">{action.description}</p>}
@@ -989,10 +990,10 @@ export default function PostMortemEditor() {
                                                 onClick={async () => {
                                                     try {
                                                         await api.post(`/postmortem/${id}/action-items`, action);
-                                                        toast.success('Ação adicionada!');
+                                                        toast.success(t('postmortem.actionAdded'));
                                                         loadPostmortem();
                                                     } catch (error) {
-                                                        toast.error('Erro ao adicionar');
+                                                        toast.error(t('postmortem.addError'));
                                                     }
                                                 }}
                                             >
@@ -1009,7 +1010,7 @@ export default function PostMortemEditor() {
                         <>
                             {generatedContent.data?.executive_summary && (
                                 <Card className="mb-3">
-                                    <Card.Header>Resumo Executivo</Card.Header>
+                                    <Card.Header>{t('postmortem.executiveSummary')}</Card.Header>
                                     <Card.Body>
                                         {generatedContent.data.executive_summary}
                                     </Card.Body>
@@ -1018,7 +1019,7 @@ export default function PostMortemEditor() {
 
                             {generatedContent.data?.lessons_learned && (
                                 <Card className="mb-3">
-                                    <Card.Header>Lições Aprendidas</Card.Header>
+                                    <Card.Header>{t('postmortem.lessonsLearned')}</Card.Header>
                                     <Card.Body>
                                         {generatedContent.data.lessons_learned.map((group, i) => (
                                             <div key={i} className="mb-2">
@@ -1034,7 +1035,7 @@ export default function PostMortemEditor() {
 
                             {generatedContent.data?.recommendations && (
                                 <Card>
-                                    <Card.Header>Recomendações</Card.Header>
+                                    <Card.Header>{t('postmortem.recommendations')}</Card.Header>
                                     <Card.Body>
                                         <ul className="mb-0">
                                             {generatedContent.data.recommendations.map((rec, i) => (
@@ -1048,7 +1049,7 @@ export default function PostMortemEditor() {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowGenerateModal(false)}>Fechar</Button>
+                    <Button variant="secondary" onClick={() => setShowGenerateModal(false)}>{t('postmortem.close')}</Button>
                 </Modal.Footer>
             </Modal>
 

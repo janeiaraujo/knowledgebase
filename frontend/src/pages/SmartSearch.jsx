@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Container, Row, Col, Form, Button, Card, Badge, Alert, Spinner, Modal, ListGroup, Tab, Tabs, OverlayTrigger, Tooltip, ProgressBar } from 'react-bootstrap';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { FaSearch, FaRobot, FaMagic, FaExclamationTriangle, FaPlus, FaLightbulb, FaBook, FaClock, FaUser, FaArrowRight, FaTimes, FaFilter, FaHistory, FaThumbsUp, FaThumbsDown } from 'react-icons/fa';
@@ -20,17 +21,19 @@ import api from '../services/api';
 import { debounce } from 'lodash';
 import { toast } from 'react-toastify';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ptBR, enUS } from 'date-fns/locale';
 
 // Severity/Urgency options
 const urgencyOptions = [
-    { value: 'low', label: 'Baixa', color: 'secondary', description: 'Quando tiver tempo' },
-    { value: 'normal', label: 'Normal', color: 'primary', description: 'Prioridade padrão' },
-    { value: 'high', label: 'Alta', color: 'warning', description: 'Preciso em breve' },
-    { value: 'critical', label: 'Crítica', color: 'danger', description: 'Bloqueando produção' }
+    { value: 'low', color: 'secondary' },
+    { value: 'normal', color: 'primary' },
+    { value: 'high', color: 'warning' },
+    { value: 'critical', color: 'danger' }
 ];
 
 export default function SmartSearch() {
+    const { t, i18n } = useTranslation();
+    const dateLocale = i18n.language === 'en' ? enUS : ptBR;
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     
@@ -84,7 +87,7 @@ export default function SmartSearch() {
     const performSearch = async (searchQuery, mode = searchMode) => {
         if (!searchQuery.trim() || searchQuery.trim().length < 3) {
             if (searchQuery.trim().length > 0 && searchQuery.trim().length < 3) {
-                toast.warning('Digite pelo menos 3 caracteres para buscar');
+                toast.warning(t('smartSearch.minChars'));
             }
             setResults(null);
             return;
@@ -105,7 +108,7 @@ export default function SmartSearch() {
             setSearchParams({ q: searchQuery, mode });
         } catch (error) {
             console.error('Search error:', error);
-            toast.error('Erro ao realizar busca');
+            toast.error(t('smartSearch.searchError'));
         } finally {
             setLoading(false);
         }
@@ -173,7 +176,7 @@ export default function SmartSearch() {
                 
                 // Delete the preview request (we just wanted to see the enhancement)
                 // Actually, let's keep it since user might want it
-                toast.success('Solicitação criada com sucesso!');
+                toast.success(t('smartSearch.requestCreated'));
                 setShowRequestModal(false);
                 setResults(prev => prev ? {
                     ...prev,
@@ -182,7 +185,7 @@ export default function SmartSearch() {
             }
         } catch (error) {
             console.error('Enhancement preview error:', error);
-            toast.error('Erro ao processar solicitação');
+            toast.error(t('smartSearch.requestProcessError'));
         } finally {
             setSubmittingRequest(false);
         }
@@ -191,12 +194,12 @@ export default function SmartSearch() {
     // Submit KB request
     const submitKBRequest = async () => {
         if (!requestForm.title.trim() || !requestForm.description.trim()) {
-            toast.warning('Preencha título e descrição');
+            toast.warning(t('smartSearch.fillTitleDesc'));
             return;
         }
 
         if (requestForm.description.trim().length < 20) {
-            toast.warning('A descrição deve ter pelo menos 20 caracteres');
+            toast.warning(t('smartSearch.descTooShort'));
             return;
         }
 
@@ -213,7 +216,7 @@ export default function SmartSearch() {
                 }
             });
 
-            toast.success('Solicitação de KB criada com sucesso!');
+            toast.success(t('smartSearch.kbRequestCreated'));
             setShowRequestModal(false);
             setResults(prev => prev ? {
                 ...prev,
@@ -221,7 +224,7 @@ export default function SmartSearch() {
             } : prev);
         } catch (error) {
             console.error('KB request error:', error);
-            toast.error('Erro ao criar solicitação');
+            toast.error(t('smartSearch.requestCreateError'));
         } finally {
             setSubmittingRequest(false);
         }
@@ -238,7 +241,7 @@ export default function SmartSearch() {
             });
             
             setFeedbackGiven(prev => ({ ...prev, [resultId]: helpful }));
-            toast.success('Obrigado pelo feedback!');
+            toast.success(t('smartSearch.thanksFeedback'));
         } catch (error) {
             // Silently fail - feedback is optional
         }
@@ -256,9 +259,9 @@ export default function SmartSearch() {
                         <div className="flex-grow-1">
                             <div className="d-flex align-items-center gap-2 mb-2">
                                 <Badge bg={result.match_type === 'exact' ? 'success' : result.match_type === 'semantic' ? 'info' : 'warning'}>
-                                    {result.match_type === 'exact' ? 'Exato' : result.match_type === 'semantic' ? 'Semântico' : 'Problema'}
+                                    {t(`smartSearch.matchType.${['exact', 'semantic'].includes(result.match_type) ? result.match_type : 'problem'}`)}
                                 </Badge>
-                                <Badge bg="secondary">{scorePercent}% relevante</Badge>
+                                <Badge bg="secondary">{t('search.relevantPct', { pct: scorePercent })}</Badge>
                                 {result.status && (
                                     <Badge bg={result.status === 'published' ? 'success' : 'secondary'}>
                                         {result.status}
@@ -294,14 +297,14 @@ export default function SmartSearch() {
                             
                             <small className="text-muted">
                                 <FaClock className="me-1" />
-                                Atualizado {formatDistanceToNow(new Date(result.updated_at), { addSuffix: true, locale: ptBR })}
+                                {t('smartSearch.updated')} {formatDistanceToNow(new Date(result.updated_at), { addSuffix: true, locale: dateLocale })}
                             </small>
                         </div>
                         
                         <div className="ms-3 d-flex flex-column gap-1">
                             {!feedbackGiven[result._id] ? (
                                 <>
-                                    <OverlayTrigger overlay={<Tooltip>Resultado útil</Tooltip>}>
+                                    <OverlayTrigger overlay={<Tooltip>{t('smartSearch.helpful')}</Tooltip>}>
                                         <Button 
                                             size="sm" 
                                             variant="outline-success"
@@ -310,7 +313,7 @@ export default function SmartSearch() {
                                             <FaThumbsUp />
                                         </Button>
                                     </OverlayTrigger>
-                                    <OverlayTrigger overlay={<Tooltip>Resultado não ajudou</Tooltip>}>
+                                    <OverlayTrigger overlay={<Tooltip>{t('smartSearch.notHelpful')}</Tooltip>}>
                                         <Button 
                                             size="sm" 
                                             variant="outline-danger"
@@ -322,7 +325,7 @@ export default function SmartSearch() {
                                 </>
                             ) : (
                                 <small className="text-success">
-                                    ✓ Feedback enviado
+                                    ✓ {t('smartSearch.feedbackSent')}
                                 </small>
                             )}
                         </div>
@@ -340,10 +343,10 @@ export default function SmartSearch() {
                     <div className="text-center mb-4">
                         <h2>
                             <FaRobot className="me-2 text-primary" />
-                            Busca Inteligente
+                            {t('smartSearch.title')}
                         </h2>
                         <p className="text-muted">
-                            Descreva seu problema ou busque por termos específicos
+                            {t('smartSearch.subtitle')}
                         </p>
                     </div>
 
@@ -355,7 +358,7 @@ export default function SmartSearch() {
                                     <Form.Control
                                         type="text"
                                         size="lg"
-                                        placeholder="Descreva o problema ou busque por palavras-chave..."
+                                        placeholder={t('smartSearch.placeholder')}
                                         value={query}
                                         onChange={handleQueryChange}
                                         autoFocus
@@ -379,55 +382,55 @@ export default function SmartSearch() {
                                         size="sm"
                                         onClick={() => setSearchMode('smart')}
                                     >
-                                        <FaMagic className="me-1" /> Inteligente
+                                        <FaMagic className="me-1" /> {t('smartSearch.modeSmart')}
                                     </Button>
                                     <Button 
                                         variant={searchMode === 'text' ? 'primary' : 'outline-primary'}
                                         size="sm"
                                         onClick={() => setSearchMode('text')}
                                     >
-                                        <FaSearch className="me-1" /> Texto Exato
+                                        <FaSearch className="me-1" /> {t('smartSearch.modeText')}
                                     </Button>
                                     <Button 
                                         variant={searchMode === 'semantic' ? 'primary' : 'outline-primary'}
                                         size="sm"
                                         onClick={() => setSearchMode('semantic')}
                                     >
-                                        <FaRobot className="me-1" /> Semântico (IA)
+                                        <FaRobot className="me-1" /> {t('smartSearch.modeSemantic')}
                                     </Button>
                                     <Button 
                                         variant={searchMode === 'problem' ? 'primary' : 'outline-primary'}
                                         size="sm"
                                         onClick={() => setSearchMode('problem')}
                                     >
-                                        <FaExclamationTriangle className="me-1" /> Problema
+                                        <FaExclamationTriangle className="me-1" /> {t('smartSearch.modeProblem')}
                                     </Button>
                                 </div>
 
                                 {/* Mode description */}
                                 <small className="text-muted">
                                     {searchMode === 'smart' && (
-                                        <><FaLightbulb className="me-1" /> Combina busca por texto, semântica e análise de problemas</>
+                                        <><FaLightbulb className="me-1" /> {t('smartSearch.helpSmart')}</>
                                     )}
                                     {searchMode === 'text' && (
-                                        <><FaSearch className="me-1" /> Busca exata por palavras-chave</>
+                                        <><FaSearch className="me-1" /> {t('smartSearch.helpText')}</>
                                     )}
                                     {searchMode === 'semantic' && (
-                                        <><FaRobot className="me-1" /> Encontra KBs com significado similar usando IA</>
+                                        <><FaRobot className="me-1" /> {t('smartSearch.helpSemantic')}</>
                                     )}
                                     {searchMode === 'problem' && (
-                                        <><FaExclamationTriangle className="me-1" /> Otimizado para encontrar soluções de problemas técnicos</>
+                                        <><FaExclamationTriangle className="me-1" /> {t('smartSearch.helpProblem')}</>
                                     )}
                                 </small>
 
                                 {/* Filters */}
                                 {showFilters && (
                                     <div className="border rounded p-3 mt-3 bg-light">
-                                        <h6>Filtros Avançados</h6>
+                                        <h6>{t('smartSearch.advancedFilters')}</h6>
                                         <Row>
                                             <Col md={4}>
                                                 <Form.Group className="mb-2">
-                                                    <Form.Label className="small">Relevância mínima</Form.Label>
+                                                    <Form.Label className="small">{t('smartSearch.minRelevance')}</Form.Label>
                                                     <Form.Range 
                                                         min={0} 
                                                         max={100} 
@@ -442,7 +445,7 @@ export default function SmartSearch() {
                                             </Col>
                                             <Col md={4}>
                                                 <Form.Group className="mb-2">
-                                                    <Form.Label className="small">Máximo de resultados</Form.Label>
+                                                    <Form.Label className="small">{t('smartSearch.maxResults')}</Form.Label>
                                                     <Form.Select 
                                                         size="sm"
                                                         value={filters.max_results}
@@ -461,7 +464,7 @@ export default function SmartSearch() {
                                                 <Form.Group className="mb-2">
                                                     <Form.Check 
                                                         type="switch"
-                                                        label="Incluir relacionados"
+                                                        label={t('smartSearch.includeRelated')}
                                                         checked={filters.include_related}
                                                         onChange={e => setFilters(prev => ({
                                                             ...prev,
@@ -482,7 +485,7 @@ export default function SmartSearch() {
                         <Card className="mb-4">
                             <Card.Header>
                                 <FaHistory className="me-2" />
-                                Buscas Recentes
+                                {t('smartSearch.recentSearches')}
                             </Card.Header>
                             <ListGroup variant="flush">
                                 {searchHistory.map((item, index) => (
@@ -494,7 +497,7 @@ export default function SmartSearch() {
                                     >
                                         <span>{item.query}</span>
                                         <small className="text-muted">
-                                            {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: ptBR })}
+                                            {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: dateLocale })}
                                         </small>
                                     </ListGroup.Item>
                                 ))}
@@ -506,7 +509,7 @@ export default function SmartSearch() {
                     {loading && (
                         <div className="text-center py-5">
                             <Spinner animation="border" variant="primary" />
-                            <p className="mt-2 text-muted">Buscando...</p>
+                            <p className="mt-2 text-muted">{t('search.searching')}</p>
                         </div>
                     )}
 
@@ -517,19 +520,25 @@ export default function SmartSearch() {
                             <Alert variant="info" className="mb-4">
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <strong>{results.total || results.results?.length || 0}</strong> resultados encontrados
+                                        <Trans
+                                            i18nKey="search.resultsFound"
+                                            count={results.total || results.results?.length || 0}
+                                            components={{ b: <strong /> }}
+                                        />
                                         {results.search_breakdown && (
                                             <span className="ms-2">
-                                                ({results.search_breakdown.exact || 0} exatos, 
-                                                {' '}{results.search_breakdown.semantic || 0} semânticos, 
-                                                {' '}{results.search_breakdown.problem || 0} por problema)
+                                                {t('smartSearch.breakdown', {
+                                                    exact: results.search_breakdown.exact || 0,
+                                                    semantic: results.search_breakdown.semantic || 0,
+                                                    problem: results.search_breakdown.problem || 0
+                                                })}
                                             </span>
                                         )}
                                     </div>
                                     {results.query_type === 'problem' && (
                                         <Badge bg="warning">
                                             <FaExclamationTriangle className="me-1" />
-                                            Detectado como problema
+                                            {t('smartSearch.detectedProblem')}
                                         </Badge>
                                     )}
                                 </div>
@@ -545,9 +554,9 @@ export default function SmartSearch() {
                                 <Card className="text-center py-5">
                                     <Card.Body>
                                         <FaBook size={48} className="text-muted mb-3" />
-                                        <h4>Nenhum KB encontrado</h4>
+                                        <h4>{t('smartSearch.noKbFound')}</h4>
                                         <p className="text-muted mb-4">
-                                            Não encontramos uma base de conhecimento que resolva seu problema.
+                                            {t('smartSearch.noKbHelp')}
                                         </p>
                                         
                                         {!results.kb_request_submitted ? (
@@ -557,17 +566,17 @@ export default function SmartSearch() {
                                                 onClick={openRequestModal}
                                             >
                                                 <FaPlus className="me-2" />
-                                                Solicitar Criação de KB
+                                                {t('smartSearch.requestKb')}
                                             </Button>
                                         ) : (
                                             <Alert variant="success">
                                                 <FaLightbulb className="me-2" />
-                                                Sua solicitação foi enviada! Nossa equipe irá analisar e criar o KB.
+                                                {t('smartSearch.requestSent')}
                                             </Alert>
                                         )}
                                         
                                         <p className="text-muted mt-3 small">
-                                            Um analista sênior irá revisar sua solicitação e criar um KB para ajudar você e outros usuários.
+                                            {t('smartSearch.requestReviewNote')}
                                         </p>
                                     </Card.Body>
                                 </Card>
@@ -578,7 +587,7 @@ export default function SmartSearch() {
                                 <Card className="mt-4">
                                     <Card.Header>
                                         <FaLightbulb className="me-2" />
-                                        Sugestões de Busca
+                                        {t('smartSearch.searchSuggestions')}
                                     </Card.Header>
                                     <Card.Body>
                                         <div className="d-flex flex-wrap gap-2">
@@ -605,13 +614,13 @@ export default function SmartSearch() {
                                 <Card className="mt-4 bg-light">
                                     <Card.Body className="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong>Não encontrou o que procurava?</strong>
+                                            <strong>{t('smartSearch.notFoundQuestion')}</strong>
                                             <p className="mb-0 text-muted small">
-                                                Solicite a criação de um KB e nossa equipe irá ajudá-lo.
+                                                {t('smartSearch.notFoundHelp')}
                                             </p>
                                         </div>
                                         <Button variant="outline-primary" onClick={openRequestModal}>
-                                            Solicitar KB <FaArrowRight className="ms-1" />
+                                            {t('smartSearch.requestKbShort')} <FaArrowRight className="ms-1" />
                                         </Button>
                                     </Card.Body>
                                 </Card>
@@ -626,45 +635,44 @@ export default function SmartSearch() {
                 <Modal.Header closeButton>
                     <Modal.Title>
                         <FaPlus className="me-2" />
-                        Solicitar Criação de KB
+                        {t('smartSearch.requestKb')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Alert variant="info" className="mb-4">
                         <FaLightbulb className="me-2" />
-                        Descreva o problema ou assunto que você gostaria que fosse documentado. 
-                        Nossa IA irá melhorar sua descrição e um analista sênior revisará a solicitação.
+                        {t('smartSearch.modalIntro')}
                     </Alert>
 
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Título *</Form.Label>
+                            <Form.Label>{t('common.title')} *</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ex: Como resolver erro de conexão no banco de dados"
+                                placeholder={t('smartSearch.titlePlaceholder')}
                                 value={requestForm.title}
                                 onChange={e => setRequestForm(prev => ({ ...prev, title: e.target.value }))}
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Descrição do Problema *</Form.Label>
+                            <Form.Label>{t('smartSearch.problemDescription')} *</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={5}
-                                placeholder="Descreva detalhadamente o problema, incluindo mensagens de erro, contexto e o que você já tentou..."
+                                placeholder={t('smartSearch.problemPlaceholder')}
                                 value={requestForm.description}
                                 onChange={e => setRequestForm(prev => ({ ...prev, description: e.target.value }))}
                             />
                             <Form.Text className="text-muted">
-                                Quanto mais detalhes, melhor será o KB criado.
+                                {t('smartSearch.moreDetailsHelp')}
                             </Form.Text>
                         </Form.Group>
 
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Urgência</Form.Label>
+                                    <Form.Label>{t('smartSearch.urgency')}</Form.Label>
                                     <div>
                                         {urgencyOptions.map(option => (
                                             <Form.Check
@@ -674,8 +682,8 @@ export default function SmartSearch() {
                                                 id={`urgency-${option.value}`}
                                                 label={
                                                     <span>
-                                                        <Badge bg={option.color} className="me-2">{option.label}</Badge>
-                                                        <small className="text-muted">{option.description}</small>
+                                                        <Badge bg={option.color} className="me-2">{t(`smartSearch.urgencyLevels.${option.value}.label`)}</Badge>
+                                                        <small className="text-muted">{t(`smartSearch.urgencyLevels.${option.value}.description`)}</small>
                                                     </span>
                                                 }
                                                 checked={requestForm.urgency === option.value}
@@ -687,10 +695,10 @@ export default function SmartSearch() {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Categoria (opcional)</Form.Label>
+                                    <Form.Label>{t('smartSearch.categoryOptional')}</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Ex: Banco de Dados, Infraestrutura..."
+                                        placeholder={t('smartSearch.categoryPlaceholder')}
                                         value={requestForm.category}
                                         onChange={e => setRequestForm(prev => ({ ...prev, category: e.target.value }))}
                                     />
@@ -703,7 +711,7 @@ export default function SmartSearch() {
                                         label={
                                             <span>
                                                 <FaRobot className="me-1" />
-                                                Usar IA para melhorar descrição
+                                                {t('smartSearch.useAi')}
                                             </span>
                                         }
                                         checked={requestForm.use_ai_enhancement}
@@ -718,10 +726,10 @@ export default function SmartSearch() {
                             <Alert variant="success" className="mt-3">
                                 <Alert.Heading>
                                     <FaMagic className="me-2" />
-                                    Prévia Aprimorada pela IA
+                                    {t('smartSearch.aiPreview')}
                                 </Alert.Heading>
                                 {enhancedPreview.suggested_title && (
-                                    <p><strong>Título sugerido:</strong> {enhancedPreview.suggested_title}</p>
+                                    <p><strong>{t('smartSearch.suggestedTitle')}</strong> {enhancedPreview.suggested_title}</p>
                                 )}
                                 <p className="mb-0">{enhancedPreview.enhanced_description}</p>
                             </Alert>
@@ -730,7 +738,7 @@ export default function SmartSearch() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowRequestModal(false)}>
-                        Cancelar
+                        {t('common.cancel')}
                     </Button>
                     <Button 
                         variant="primary" 
@@ -740,12 +748,12 @@ export default function SmartSearch() {
                         {submittingRequest ? (
                             <>
                                 <Spinner animation="border" size="sm" className="me-2" />
-                                Processando...
+                                {t('smartSearch.processing')}
                             </>
                         ) : (
                             <>
                                 <FaPlus className="me-2" />
-                                Enviar Solicitação
+                                {t('smartSearch.submitRequest')}
                             </>
                         )}
                     </Button>
