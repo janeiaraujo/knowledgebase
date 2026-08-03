@@ -47,6 +47,8 @@ fix: corrigir paginacao na listagem de incidentes
 docs: documentar variaveis de ambiente opcionais
 ```
 
+Se o PR merece uma nova versão (`feat`/`fix` relevantes), bump `backend/package.json` **e** `frontend/package.json` juntos, no mesmo PR — veja [Versionamento](README.md#versionamento) no README. A tag e a release são criadas automaticamente ao mergear.
+
 ## Padrões de código
 
 - **JavaScript ES Modules** (`import`/`export`) — o projeto usa `"type": "module"`.
