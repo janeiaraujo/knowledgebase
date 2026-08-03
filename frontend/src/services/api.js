@@ -208,7 +208,8 @@ export const aiAPI = {
     suggestProperties: (data) => api.post('/ai/suggest-properties', data),
     semanticSearch: (data) => api.post('/ai/semantic-search', data),
     indexAll: () => api.post('/ai/index-all'),
-    getIndexStatus: () => api.get('/ai/index-status')
+    getIndexStatus: () => api.get('/ai/index-status'),
+    describeImage: (fileId, context) => api.post('/ai/describe-image', { fileId, context })
 };
 
 // Databases API

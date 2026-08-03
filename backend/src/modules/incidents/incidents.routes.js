@@ -22,13 +22,21 @@ export default async function incidentRoutes(fastify, options) {
         preHandler: [authMiddleware, tenantMiddleware, requirePermission('kb:create')]
     }, async (request, reply) => {
         const db = fastify.db();
-        const { problem, solution, severity, affected_services, tags, category_id } = request.body;
+        const { problem, solution, severity, affected_services, tags, category_id, logs, images } = request.body;
 
         if (!problem || !solution) {
-            return reply.status(400).send({ 
-                error: 'Problema e solução são obrigatórios' 
+            return reply.status(400).send({
+                error: 'Problema e solução são obrigatórios'
             });
         }
+
+        // logs: texto colado (stack trace, mensagens de erro, trechos de log).
+        // images: [{ url, filename, description }] - ja enviadas via /api/files/upload,
+        // com description opcionalmente preenchida pela IA (POST /api/ai/describe-image).
+        const cleanLogs = typeof logs === 'string' ? logs.trim() : '';
+        const cleanImages = Array.isArray(images)
+            ? images.filter(img => img && typeof img.url === 'string').slice(0, 10)
+            : [];
 
         try {
             // Check if OpenAI is configured
@@ -40,6 +48,15 @@ export default async function incidentRoutes(fastify, options) {
             if (openaiKey) {
                 // Use AI to generate KB article
                 const openai = await getOpenAI();
+
+                const logsBlock = cleanLogs
+                    ? `\n**Logs/Mensagens de Erro Capturadas:**\n\`\`\`\n${cleanLogs.substring(0, 4000)}\n\`\`\`\n`
+                    : '';
+                const imagesBlock = cleanImages.length
+                    ? `\n**Evidências Visuais (${cleanImages.length} captura(s) de tela):**\n${cleanImages
+                        .map((img, i) => `${i + 1}. ${img.description || img.filename || 'Screenshot sem descrição'}`)
+                        .join('\n')}\n`
+                    : '';
 
                 const prompt = `Você é um especialista em documentação técnica. Com base no relato de incidente abaixo, gere um artigo de Knowledge Base profissional e bem estruturado em Markdown.
 
@@ -53,7 +70,7 @@ ${solution}
 
 ${severity ? `**Severidade:** ${severity}` : ''}
 ${affected_services ? `**Serviços Afetados:** ${affected_services}` : ''}
-
+${logsBlock}${imagesBlock}
 ## Instruções
 
 Gere um artigo KB completo com:
@@ -63,6 +80,10 @@ Gere um artigo KB completo com:
 4. **Causa Raiz** - Análise da causa do problema
 5. **Solução** - Passos detalhados da solução
 6. **Prevenção** - Como evitar que ocorra novamente
+
+${cleanLogs ? 'Cite trechos relevantes dos logs (mensagens de erro, códigos de status, stack traces) nas seções de Sintomas e Causa Raiz, entre crases ou em bloco de código.' : ''}
+${cleanImages.length ? 'Referencie o que as evidências visuais mostram, quando relevante para os Sintomas ou a Causa Raiz.' : ''}
+NÃO inclua uma seção de evidências/anexos no conteúdo - ela será adicionada automaticamente depois.
 
 Use formatação Markdown apropriada com headers, listas, código quando necessário.
 
@@ -120,6 +141,7 @@ ${problem.substring(0, 200)}
 ## Problema Reportado
 ${problem}
 
+${cleanLogs ? `## Logs/Mensagens de Erro\n\`\`\`\n${cleanLogs.substring(0, 4000)}\n\`\`\`\n` : ''}
 ## Solução Aplicada
 ${solution}
 
@@ -135,6 +157,27 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
 ---
 *Artigo gerado automaticamente via Quick Capture*
 `;
+            }
+
+            // Anexa a secao de evidencias com as URLs reais (nao confiar na IA para
+            // reproduzir URLs literalmente). Feito fora dos dois ramos acima para
+            // valer tanto para o artigo gerado por IA quanto para o template basico.
+            if (cleanImages.length || (cleanLogs && openaiKey)) {
+                let evidenceSection = '\n\n## Evidências\n';
+
+                if (cleanImages.length) {
+                    evidenceSection += cleanImages
+                        .map(img => `\n![${(img.description || img.filename || 'Screenshot').replace(/[[\]]/g, '')}](${img.url})\n${img.description ? `*${img.description}*\n` : ''}`)
+                        .join('');
+                }
+
+                // No caminho com IA, os logs ja citados no prompt podem nao aparecer
+                // literalmente no texto gerado - garante o bloco bruto disponivel.
+                if (cleanLogs && openaiKey) {
+                    evidenceSection += `\n**Log completo capturado:**\n\`\`\`\n${cleanLogs.substring(0, 8000)}\n\`\`\`\n`;
+                }
+
+                generatedContent += evidenceSection;
             }
 
             // Create draft KB record
@@ -155,7 +198,9 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
                     source: 'quick_capture',
                     original_problem: problem,
                     original_solution: solution,
-                    affected_services: affected_services || ''
+                    affected_services: affected_services || '',
+                    logs: cleanLogs || undefined,
+                    images: cleanImages.length ? cleanImages : undefined
                 },
                 tags: tags ? tags.map(t => new ObjectId(t)) : [],
                 views: 0,
@@ -176,7 +221,9 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
                 details: {
                     ai_generated: !!openaiKey,
                     problem_length: problem.length,
-                    solution_length: solution.length
+                    solution_length: solution.length,
+                    has_logs: Boolean(cleanLogs),
+                    image_count: cleanImages.length
                 },
                 timestamp: new Date()
             });

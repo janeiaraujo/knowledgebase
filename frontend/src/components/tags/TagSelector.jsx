@@ -1,12 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Badge, Form, Dropdown } from 'react-bootstrap';
+import { Badge, Form, Dropdown, Button, InputGroup } from 'react-bootstrap';
 import { tagAPI, categoryAPI } from '../../services/api';
+
+// Paleta usada para colorir tags/categorias criadas rapidamente pelo
+// seletor (mesma paleta do gerenciador em Configuracoes > Tags).
+const QUICK_CREATE_COLORS = [
+  '#dc3545', '#fd7e14', '#ffc107', '#28a745', '#20c997',
+  '#17a2b8', '#007bff', '#6610f2', '#e83e8c', '#6c757d'
+];
 
 // Tag Selector Component
 export function TagSelector({ selectedTags = [], onChange }) {
   const [tags, setTags] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef(null);
   
@@ -49,11 +57,31 @@ export function TagSelector({ selectedTags = [], onChange }) {
     onChange(selectedTags.filter(id => id !== tagId));
   };
   
-  const filteredTags = tags.filter(tag => 
+  const filteredTags = tags.filter(tag =>
     tag.name.toLowerCase().includes(search.toLowerCase())
   );
-  
+
   const selectedTagObjects = tags.filter(tag => selectedTags.includes(tag._id));
+
+  const trimmedSearch = search.trim();
+  const hasExactMatch = tags.some(tag => tag.name.toLowerCase() === trimmedSearch.toLowerCase());
+  const canCreateTag = trimmedSearch.length > 0 && !hasExactMatch && !loading;
+
+  const handleCreateTag = async () => {
+    if (!trimmedSearch || creating) return;
+    setCreating(true);
+    try {
+      const color = QUICK_CREATE_COLORS[tags.length % QUICK_CREATE_COLORS.length];
+      const { data } = await tagAPI.create({ name: trimmedSearch, color });
+      setTags(prev => [...prev, data.tag]);
+      onChange([...selectedTags, data.tag._id]);
+      setSearch('');
+    } catch (error) {
+      console.error('Failed to create tag:', error);
+    } finally {
+      setCreating(false);
+    }
+  };
   
   return (
     <div ref={wrapperRef} className="tag-selector">
@@ -125,6 +153,20 @@ export function TagSelector({ selectedTags = [], onChange }) {
                 {search ? 'Nenhuma tag encontrada' : 'Nenhuma tag disponível'}
               </div>
             )}
+            {canCreateTag && (
+              <div
+                className="p-2 border-top text-primary d-flex align-items-center gap-2"
+                style={{ cursor: creating ? 'default' : 'pointer' }}
+                onClick={handleCreateTag}
+              >
+                {creating ? (
+                  <span className="spinner-border spinner-border-sm" />
+                ) : (
+                  <i className="bi bi-plus-circle"></i>
+                )}
+                <span>Criar tag "{trimmedSearch}"</span>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -136,10 +178,30 @@ export function TagSelector({ selectedTags = [], onChange }) {
 export function CategorySelector({ selectedCategory, onChange }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [showCreate, setShowCreate] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [creating, setCreating] = useState(false);
+
   useEffect(() => {
     loadCategories();
   }, []);
+
+  const handleCreateCategory = async () => {
+    const name = newCategoryName.trim();
+    if (!name || creating) return;
+    setCreating(true);
+    try {
+      const { data } = await categoryAPI.create({ name });
+      setCategories(prev => [...prev, data.category]);
+      onChange(data.category._id);
+      setNewCategoryName('');
+      setShowCreate(false);
+    } catch (error) {
+      console.error('Failed to create category:', error);
+    } finally {
+      setCreating(false);
+    }
+  };
   
   const loadCategories = async () => {
     try {
@@ -195,19 +257,47 @@ export function CategorySelector({ selectedCategory, onChange }) {
   
   return (
     <div className="category-selector">
-      <Form.Select
-        value={selectedCategory || ''}
-        onChange={(e) => onChange(e.target.value || null)}
-        disabled={loading}
-      >
-        <option value="">Selecione uma categoria...</option>
-        {categoryOptions.map(cat => (
-          <option key={cat._id} value={cat._id}>
-            {cat.displayName}
-          </option>
-        ))}
-      </Form.Select>
-      
+      <div className="d-flex gap-2">
+        <Form.Select
+          value={selectedCategory || ''}
+          onChange={(e) => onChange(e.target.value || null)}
+          disabled={loading}
+        >
+          <option value="">Selecione uma categoria...</option>
+          {categoryOptions.map(cat => (
+            <option key={cat._id} value={cat._id}>
+              {cat.displayName}
+            </option>
+          ))}
+        </Form.Select>
+        <Button
+          variant="outline-secondary"
+          size="sm"
+          onClick={() => setShowCreate(prev => !prev)}
+          title="Criar nova categoria"
+        >
+          <i className="bi bi-plus-lg"></i>
+        </Button>
+      </div>
+
+      {showCreate && (
+        <InputGroup size="sm" className="mt-2">
+          <Form.Control
+            placeholder="Nome da nova categoria"
+            value={newCategoryName}
+            autoFocus
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreateCategory(); } }}
+          />
+          <Button variant="primary" disabled={creating || !newCategoryName.trim()} onClick={handleCreateCategory}>
+            {creating ? <span className="spinner-border spinner-border-sm" /> : 'Criar'}
+          </Button>
+          <Button variant="outline-secondary" onClick={() => { setShowCreate(false); setNewCategoryName(''); }}>
+            <i className="bi bi-x"></i>
+          </Button>
+        </InputGroup>
+      )}
+
       {selectedCategoryObj && (
         <div className="mt-2">
           <small className="text-muted">
