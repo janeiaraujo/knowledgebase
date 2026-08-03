@@ -25,6 +25,50 @@ jobs:
             exit 1
           fi
 
+  # Avisa, sem bloquear, quando um PR muda codigo de produto e nao bumpa a
+  # versao. Nao e erro: PR de doc, teste ou CI nao precisa de release. Mas ja
+  # aconteceu tres vezes de varios PRs entrarem seguidos sem ninguem bumpar, e
+  # o release ficar para tras - inclusive com correcao de seguranca dentro.
+  aviso-de-release:
+    name: Aviso de release pendente
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: A versao acompanha as mudancas de produto?
+        run: |
+          BASE="origin/${{ github.base_ref }}"
+          git fetch --quiet origin "${{ github.base_ref }}"
+
+          VERSAO_PR=$(node -p "require('./backend/package.json').version")
+          VERSAO_BASE=$(git show "$BASE:backend/package.json" | node -p "JSON.parse(require('fs').readFileSync(0)).version")
+
+          MUDOU_PRODUTO=$(git diff --name-only "$BASE"...HEAD \
+            | grep -E '^(backend/src/|frontend/src/)' | head -1 || true)
+
+          if [ -z "$MUDOU_PRODUTO" ]; then
+            echo "PR nao mexe em codigo de produto - nada a avisar."
+            exit 0
+          fi
+
+          if [ "$VERSAO_PR" != "$VERSAO_BASE" ]; then
+            echo "Versao bumpada: $VERSAO_BASE -> $VERSAO_PR."
+            exit 0
+          fi
+
+          echo "::warning title=Release vai ficar para tras::Este PR muda codigo de produto e mantem a versao em $VERSAO_PR. Sem bump em backend/package.json E frontend/package.json, o workflow de release nao dispara e a mudanca fica sem tag. Se for intencional (agrupar com outros PRs), tudo bem - so lembre de bumpar antes de encerrar o ciclo."
+          {
+            echo "### Release vai ficar para tras"
+            echo ""
+            echo "Este PR mexe em \`backend/src/\` ou \`frontend/src/\` e mantem a versao em **$VERSAO_PR**."
+            echo ""
+            echo "Sem bump nos dois \`package.json\`, o workflow de release nao dispara ao mergear."
+            echo "Se a intencao e agrupar varios PRs numa release so, ignore - mas nao esqueca do bump no ultimo."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   backend:
     name: Backend (install + smoke test)
     runs-on: ubuntu-latest

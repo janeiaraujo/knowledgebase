@@ -1,0 +1,110 @@
+name: Release pendente
+
+# O aviso no PR (ci.yml) cobre o caso de um PR isolado. Este workflow cobre o
+# caso que de fato aconteceu tres vezes: varios PRs entrando seguidos, cada um
+# sem bump, e a release ficando para tras sem ninguem notar - uma vez com
+# correcao de seguranca dentro.
+#
+# Ele nao bumpa nada sozinho: quem decide se e patch, minor ou major e quem
+# escreve o PR. Aqui so mantem um lembrete visivel enquanto houver mudanca de
+# produto na main sem tag, e o fecha assim que a release sair.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verificar:
+    name: A main esta a frente da ultima tag?
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Comparar main com a ultima tag
+        id: drift
+        run: |
+          TAG=$(git tag -l 'v*' --sort=-v:refname | head -1)
+          if [ -z "$TAG" ]; then
+            echo "Nenhuma tag ainda - nada a comparar."
+            echo "pendente=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # So conta o que muda o que roda em producao: PR de doc, teste ou
+          # CI nao precisa virar release, e contar isso encheria de lembrete
+          # falso. Os lockfiles entram porque e por eles que uma correcao de
+          # seguranca transitiva chega - foi o caso do fast-uri, que nao toca
+          # em src nenhum e mesmo assim precisa ser publicado.
+          ALVOS="backend/src frontend/src backend/package-lock.json frontend/package-lock.json"
+          COMMITS=$(git log --oneline "$TAG..HEAD" -- $ALVOS | wc -l | tr -d ' ')
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "commits=$COMMITS" >> "$GITHUB_OUTPUT"
+
+          if [ "$COMMITS" -eq 0 ]; then
+            echo "A main esta em dia com a $TAG."
+            echo "pendente=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$COMMITS commit(s) de produto desde a $TAG."
+            echo "pendente=true" >> "$GITHUB_OUTPUT"
+            git log --pretty='- %s' "$TAG..HEAD" -- $ALVOS > lista.txt
+          fi
+
+      - name: Abrir ou atualizar o lembrete
+        if: steps.drift.outputs.pendente == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.drift.outputs.tag }}
+          COMMITS: ${{ steps.drift.outputs.commits }}
+        run: |
+          TITULO="Release pendente: a main esta a frente da $TAG"
+
+          {
+            echo "A \`main\` tem **$COMMITS commit(s)** desde a **$TAG** que mudam o que roda em"
+            echo "producao (\`src/\` ou os lockfiles), e a versao nos \`package.json\` nao mudou."
+            echo "Enquanto isso, o workflow de release nao dispara e essas mudancas ficam sem tag."
+            echo ""
+            echo "### O que entrou desde a $TAG"
+            echo ""
+            cat lista.txt
+            echo ""
+            echo "### Para fechar"
+            echo ""
+            echo "1. \`npm version <x.y.z> --no-git-tag-version\` em \`backend/\` **e** \`frontend/\`"
+            echo "2. Adicione a secao da versao no \`CHANGELOG.md\` - e dela que sai o corpo da release"
+            echo "3. Abra o PR; ao mergear, a tag e a release saem sozinhas"
+            echo ""
+            echo "Esta issue se fecha automaticamente quando a release sair."
+          } > corpo.md
+
+          EXISTENTE=$(gh issue list --state open --search "$TITULO in:title" \
+            --json number,title --jq ".[] | select(.title==\"$TITULO\") | .number" | head -1)
+
+          if [ -n "$EXISTENTE" ]; then
+            gh issue edit "$EXISTENTE" --body-file corpo.md
+            echo "Lembrete #$EXISTENTE atualizado."
+          else
+            gh issue create --title "$TITULO" --body-file corpo.md --label "documentation" \
+              || gh issue create --title "$TITULO" --body-file corpo.md
+          fi
+
+      - name: Fechar o lembrete quando a release alcancar
+        if: steps.drift.outputs.pendente == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # O titulo carrega a tag antiga, entao procura por prefixo.
+          gh issue list --state open --search "Release pendente: a main esta a frente in:title" \
+            --json number,title --jq '.[] | select(.title | startswith("Release pendente: a main esta a frente")) | .number' \
+          | while read -r numero; do
+              [ -n "$numero" ] || continue
+              gh issue comment "$numero" --body "Release publicada - a main voltou a ficar em dia. Fechando."
+              gh issue close "$numero"
+            done
