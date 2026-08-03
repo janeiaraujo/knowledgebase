@@ -1,4 +1,5 @@
 import axios from 'axios';
+import i18n from '../i18n';
 
 const API_URL =
     import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -17,6 +18,12 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // O backend traduz as mensagens de erro pelo idioma do pedido. Sem
+        // isto ele cairia no Accept-Language do navegador, que nao acompanha
+        // a troca de idioma feita dentro da plataforma.
+        config.headers['Accept-Language'] = i18n.language || 'pt';
+
         return config;
     },
     (error) => Promise.reject(error)
