@@ -241,7 +241,11 @@ export const userAPI = {
     getMe: () => api.get('/users/me'),
     updateMe: (data) => api.patch('/users/me', data),
     changePassword: (currentPassword, newPassword) =>
-        api.post('/users/me/password', { currentPassword, newPassword })
+        api.post('/users/me/password', { currentPassword, newPassword }),
+    uploadAvatar: (formData) => api.post('/users/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    deleteAvatar: () => api.delete('/users/me/avatar')
 };
 
 // Billing API
