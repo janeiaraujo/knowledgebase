@@ -97,7 +97,25 @@
     "verifyingMagicLink": "Verifying your magic link...",
     "pleaseWait": "Please wait",
     "verificationFailed": "Verification Failed",
-    "backToLogin": "Back to Login"
+    "backToLogin": "Back to Login",
+    "forgot": {
+      "link": "Forgot your password?",
+      "title": "Reset password",
+      "subtitle": "We'll send you a link to create a new password.",
+      "submit": "Send reset link",
+      "sent": "If an account exists with that email, we've sent a reset link.",
+      "sentHelp": "Check your spam folder too. The link expires in 60 minutes and can only be used once.",
+      "failed": "Couldn't process the request. Please try again.",
+      "smtpNotConfigured": "Email service isn't configured on this install. Ask your administrator to reset your password."
+    },
+    "reset": {
+      "title": "New password",
+      "subtitle": "Choose a password to get back into your account.",
+      "submit": "Reset password",
+      "success": "Password reset successfully. You can now sign in with your new password.",
+      "invalidLink": "Invalid link",
+      "invalidLinkHelp": "This reset link isn't valid. Request a new one."
+    }
   },
   "profile": {
     "title": "My Profile",

@@ -97,7 +97,25 @@
     "verifyingMagicLink": "Verificando seu magic link...",
     "pleaseWait": "Aguarde um momento",
     "verificationFailed": "Falha na verificação",
-    "backToLogin": "Voltar ao login"
+    "backToLogin": "Voltar ao login",
+    "forgot": {
+      "link": "Esqueci minha senha",
+      "title": "Recuperar senha",
+      "subtitle": "Enviaremos um link para você criar uma nova senha.",
+      "submit": "Enviar link de recuperação",
+      "sent": "Se existir uma conta com esse e-mail, enviamos um link de redefinição.",
+      "sentHelp": "Confira também a caixa de spam. O link expira em 60 minutos e só pode ser usado uma vez.",
+      "failed": "Não foi possível processar o pedido. Tente novamente.",
+      "smtpNotConfigured": "O serviço de e-mail não está configurado nesta instalação. Peça ao administrador para redefinir sua senha."
+    },
+    "reset": {
+      "title": "Nova senha",
+      "subtitle": "Escolha uma senha para voltar a acessar sua conta.",
+      "submit": "Redefinir senha",
+      "success": "Senha redefinida com sucesso. Você já pode entrar com a nova senha.",
+      "invalidLink": "Link inválido",
+      "invalidLinkHelp": "Este link de recuperação não é válido. Solicite um novo."
+    }
   },
   "profile": {
     "title": "Meu Perfil",

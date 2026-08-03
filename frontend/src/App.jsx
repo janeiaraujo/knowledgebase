@@ -9,6 +9,8 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import MagicLink from './pages/auth/MagicLink';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import KBList from './pages/kb/KBList';
 import KBView from './pages/kb/KBView';
@@ -100,6 +102,16 @@ function AppRoutes() {
       <Route path="/auth/magic" element={
         <PublicRoute>
           <MagicLink />
+        </PublicRoute>
+      } />
+      <Route path="/forgot-password" element={
+        <PublicRoute>
+          <ForgotPassword />
+        </PublicRoute>
+      } />
+      <Route path="/reset-password" element={
+        <PublicRoute>
+          <ResetPassword />
         </PublicRoute>
       } />
       

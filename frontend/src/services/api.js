@@ -133,6 +133,8 @@ export const authAPI = {
     login: (data) => api.post('/auth/login', data),
     requestMagicLink: (data) => api.post('/auth/magic-link', data),
     verifyMagicLink: (data) => api.post('/auth/magic-verify', data),
+    forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+    resetPassword: (token, password) => api.post('/auth/reset-password', { token, password }),
     getMe: () => api.get('/auth/me')
 };
 
