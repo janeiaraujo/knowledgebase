@@ -151,7 +151,7 @@ export default async function gamificationRoutes(fastify) {
     const db = fastify.mongo.db;
 
     // Clean up any existing duplicates FIRST (keep the one with most points)
-    await cleanupDuplicateProfiles(db);
+    await cleanupDuplicateProfiles(db, fastify.log);
 
     // Then create unique index to prevent future duplicates
     try {
@@ -490,7 +490,7 @@ export default async function gamificationRoutes(fastify) {
 }
 
 // Helper function to clean up duplicate profiles
-async function cleanupDuplicateProfiles(db) {
+async function cleanupDuplicateProfiles(db, log) {
     try {
         // Find users with duplicate profiles
         const duplicates = await db.collection('user_gamification').aggregate([
@@ -513,7 +513,7 @@ async function cleanupDuplicateProfiles(db) {
                 await db.collection('user_gamification').deleteMany({
                     _id: { $in: toDelete }
                 });
-                fastify.log.info(`Removidos ${toDelete.length} perfil(is) duplicado(s) do usuario ${dup._id.user_id}`);
+                log.info(`Removidos ${toDelete.length} perfil(is) duplicado(s) do usuario ${dup._id.user_id}`);
             }
         }
     } catch (error) {
