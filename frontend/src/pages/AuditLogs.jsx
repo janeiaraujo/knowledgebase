@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Table, Form, Button, Badge, Row, Col, InputGroup, Pagination, Modal } from 'react-bootstrap';
+import { Card, Table, Form, Button, Badge, Row, Col, Pagination, Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -154,10 +154,6 @@ export default function AuditLogs() {
     setShowDetailModal(true);
   };
   
-  const getUserName = (userId) => {
-    const u = users.find(user => user._id === userId);
-    return u ? (u.name || u.email) : 'Usuário desconhecido';
-  };
   
   const formatDate = (dateString) => {
     const date = new Date(dateString);

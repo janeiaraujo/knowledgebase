@@ -7,8 +7,6 @@ import { Link } from 'react-router-dom';
 // Icon components using Bootstrap Icons
 const IconChartLine = () => <i className="bi bi-graph-up"></i>;
 const IconBook = () => <i className="bi bi-journal-text"></i>;
-const IconUsers = () => <i className="bi bi-people"></i>;
-const IconComments = () => <i className="bi bi-chat-dots"></i>;
 const IconEye = () => <i className="bi bi-eye"></i>;
 const IconStar = () => <i className="bi bi-star-fill"></i>;
 const IconCalendar = () => <i className="bi bi-calendar"></i>;
@@ -16,7 +14,6 @@ const IconTrophy = () => <i className="bi bi-trophy"></i>;
 const IconHistory = () => <i className="bi bi-clock-history"></i>;
 const IconTag = () => <i className="bi bi-tag"></i>;
 const IconFolder = () => <i className="bi bi-folder"></i>;
-const IconBrain = () => <i className="bi bi-cpu"></i>;
 
 export default function Analytics() {
   const { t } = useTranslation();
@@ -25,7 +22,7 @@ export default function Analytics() {
   const [period, setPeriod] = useState('30d');
   
   const [overview, setOverview] = useState(null);
-  const [trends, setTrends] = useState([]);
+  const [, setTrends] = useState([]);
   const [statusDist, setStatusDist] = useState([]);
   const [categoryDist, setCategoryDist] = useState([]);
   const [tagDist, setTagDist] = useState([]);
@@ -74,17 +71,6 @@ export default function Analytics() {
     }
   };
   
-  const getStatusColor = (status) => {
-    const colors = {
-      draft: '#ffc107',
-      captured: '#6c757d',
-      in_review: '#17a2b8',
-      approved: '#28a745',
-      published: '#007bff',
-      deprecated: '#dc3545'
-    };
-    return colors[status] || '#6c757d';
-  };
   
   const getActionLabel = (action) => {
     const labels = {

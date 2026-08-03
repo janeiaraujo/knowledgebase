@@ -3,7 +3,6 @@ import { toObjectId } from '../../utils/mongodb.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission } from '../../middlewares/rbac.middleware.js';
 import { ObjectId } from 'mongodb';
-import Joi from 'joi';
 
 // Helper to get OpenAI instance
 const getOpenAI = async () => {

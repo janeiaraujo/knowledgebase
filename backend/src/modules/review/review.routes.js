@@ -223,16 +223,18 @@ export default async function reviewRoutes(fastify, options) {
             case 'upcoming':
                 filter.next_review_date = { $gte: now };
                 break;
-            case 'this_week':
+            case 'this_week': {
                 const weekFromNow = new Date(now);
                 weekFromNow.setDate(weekFromNow.getDate() + 7);
                 filter.next_review_date = { $lte: weekFromNow };
                 break;
-            case 'this_month':
+            }
+            case 'this_month': {
                 const monthFromNow = new Date(now);
                 monthFromNow.setDate(monthFromNow.getDate() + 30);
                 filter.next_review_date = { $lte: monthFromNow };
                 break;
+            }
         }
 
         if (owner_id) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Card, Form, Button, Badge, Alert, Row, Col, Tabs, Tab, Table, Modal } from 'react-bootstrap';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,7 +8,6 @@ import { useAuth } from '../../contexts/AuthContext';
 export default function KBPermissions() {
   const { t } = useTranslation();
   const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
   
   const [record, setRecord] = useState(null);
@@ -133,15 +132,7 @@ export default function KBPermissions() {
     return u ? (u.name || u.email) : 'Usuário desconhecido';
   };
   
-  const getDepartmentName = (depId) => {
-    const d = departments.find(dep => dep._id === depId);
-    return d ? d.name : 'Departamento desconhecido';
-  };
   
-  const getGroupName = (groupId) => {
-    const g = groups.find(group => group._id === groupId);
-    return g ? g.name : 'Grupo desconhecido';
-  };
   
   if (loading) {
     return (

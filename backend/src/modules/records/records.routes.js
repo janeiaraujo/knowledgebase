@@ -1,11 +1,10 @@
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
-import { requirePermission, canApproveKB } from '../../middlewares/rbac.middleware.js';
+import { requirePermission } from '../../middlewares/rbac.middleware.js';
 import { toObjectId } from '../../utils/mongodb.js';
-import { filterKBsByAccess, checkKBAccess, checkKBEditAccess, checkKBApproveAccess } from '../../middlewares/kbAccess.middleware.js';
-import auditMiddleware, { logKBView } from '../../middlewares/audit.middleware.js';
+import { filterKBsByAccess } from '../../middlewares/kbAccess.middleware.js';
+import auditMiddleware from '../../middlewares/audit.middleware.js';
 import { notifyApprovers, notifyCreator } from '../notifications/notifications.routes.js';
-import Joi from 'joi';
 
 export default async function recordRoutes(fastify, options) {
 

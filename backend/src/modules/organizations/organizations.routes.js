@@ -1,8 +1,6 @@
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
-import { toObjectId } from '../../utils/mongodb.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requireAdmin } from '../../middlewares/rbac.middleware.js';
-import Joi from 'joi';
 
 // Idiomas suportados pela interface (mesma lista do frontend/src/i18n).
 const SUPPORTED_LANGUAGES = ['pt', 'en'];

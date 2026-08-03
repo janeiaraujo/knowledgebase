@@ -10,6 +10,8 @@
         "migrate": "node src/seeds/migrate.js",
         "seed": "node src/seeds/index.js",
         "test": "node --test \"tests/*.test.js\"",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
         "smoke-test": "node scripts/smoke-test.js",
         "test:unit": "node --test \"tests/*.test.js\"",
         "test:integration": "node --test \"tests/integration/*.test.js\""
@@ -41,5 +43,9 @@
         "openai": "^4.20.1",
         "pino": "^8.16.2",
         "pino-pretty": "^10.3.1"
+    },
+    "devDependencies": {
+        "eslint": "^9.39.5",
+        "globals": "^17.9.0"
     }
 }

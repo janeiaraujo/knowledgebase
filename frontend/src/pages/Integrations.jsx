@@ -10,8 +10,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Form, Modal, Badge, Alert, Spinner, Tab, Tabs, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { FaSlack, FaMicrosoft, FaJira, FaEnvelope, FaBell, FaPlug, FaCheck, FaTimes, FaCog, FaExternalLinkAlt, FaTrash, FaToggleOn, FaToggleOff, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
+import { Container, Row, Col, Card, Button, Form, Modal, Badge, Alert, Spinner, Tab, Tabs, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FaSlack, FaMicrosoft, FaJira, FaEnvelope, FaBell, FaPlug, FaCheck, FaCog, FaExternalLinkAlt, FaTrash, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
@@ -127,17 +127,6 @@ export default function Integrations() {
         }
     };
 
-    const toggleIntegration = async (integration) => {
-        try {
-            await api.put(`/integrations/${integration.type}`, {
-                enabled: !integration.config?.enabled
-            });
-            toast.success(integration.config?.enabled ? t('integrations.disabled') : t('integrations.enabled'));
-            loadData();
-        } catch (error) {
-            toast.error(t('integrations.toggleError'));
-        }
-    };
 
     const sendTestNotification = async (type) => {
         try {

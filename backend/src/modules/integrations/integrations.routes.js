@@ -7,20 +7,11 @@
  * - Custom webhook notifications
  */
 
-import { ObjectId } from 'mongodb';
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 
 export default async function integrationsRoutes(fastify, options) {
     const db = () => fastify.db();
-
-    const toObjectId = (id) => {
-        try {
-            return new ObjectId(id);
-        } catch {
-            return null;
-        }
-    };
 
     // ==================== INTEGRATION CONFIGURATIONS ====================
 
@@ -312,7 +303,7 @@ export default async function integrationsRoutes(fastify, options) {
     fastify.post('/notifications/test', {
         preHandler: [authMiddleware, tenantMiddleware]
     }, async (request, reply) => {
-        const { type, channel } = request.body;
+        const { type, channel: _channel } = request.body;
 
         const integration = await db().collection('integrations')
             .findOne({ tenant_id: request.tenantId, type, enabled: true });

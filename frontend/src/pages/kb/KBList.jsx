@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect, useRef } from 'react';
-import { Row, Col, Card, Form, Button, Badge, Dropdown, ButtonGroup } from 'react-bootstrap';
+import { Row, Col, Card, Form, Button, Badge, ButtonGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { recordAPI, tagAPI, categoryAPI } from '../../services/api';
 import BatchExportModal from '../../components/export/BatchExportModal';

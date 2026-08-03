@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Badge, ProgressBar, Button, Dropdown, Alert } from 'react-bootstrap';
+import { Row, Col, Card, Badge, ProgressBar, Dropdown, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { recordAPI, incidentAPI, billingAPI } from '../services/api';
+import { recordAPI } from '../services/api';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import i18n from '../i18n';

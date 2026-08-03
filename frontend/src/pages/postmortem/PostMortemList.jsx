@@ -17,10 +17,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Container, Row, Col, Card, Table, Badge, Button, Modal, Form, Tabs, Tab, Spinner, Alert, ListGroup, ProgressBar, Accordion, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
-import { FaFileAlt, FaClock, FaUser, FaPlus, FaCheck, FaTimes, FaRobot, FaChartBar, FaFilter, FaExclamationTriangle, FaEye, FaEdit, FaTrash, FaDownload, FaBook, FaLightbulb, FaHistory, FaQuestionCircle, FaChevronRight, FaPlay, FaPause, FaFlag, FaUserCheck } from 'react-icons/fa';
-import { formatDistanceToNow, format } from 'date-fns';
+import { Container, Row, Col, Card, Table, Badge, Button, Modal, Form, Spinner, Alert } from 'react-bootstrap';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { FaFileAlt, FaPlus, FaTimes, FaFilter, FaEye, FaTrash, FaLightbulb } from 'react-icons/fa';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
@@ -42,13 +42,6 @@ const statusConfig = {
 };
 
 // Timeline entry types
-const timelineTypes = {
-    detection: { label: 'Detecção', color: 'danger', icon: FaExclamationTriangle },
-    investigation: { label: 'Investigação', color: 'info', icon: FaEye },
-    mitigation: { label: 'Mitigação', color: 'warning', icon: FaPlay },
-    resolution: { label: 'Resolução', color: 'success', icon: FaCheck },
-    event: { label: 'Evento', color: 'secondary', icon: FaClock }
-};
 
 export default function PostMortemList() {
   const { t } = useTranslation();

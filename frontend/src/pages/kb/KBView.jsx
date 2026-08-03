@@ -25,7 +25,9 @@ const isProbablyHtml = (value) => {
 // nenhum, ex.: CORS, timeout, servidor fora do ar) nao tem esse campo. Sem
 // esses fallbacks, tudo isso virava um "Erro desconhecido" que escondia a
 // causa real - inclusive de quem for depurar o problema depois.
-const getErrorMessage = (error) =>
+// Recebe `t` por parametro: esta funcao vive no modulo, fora de qualquer
+// componente, entao nao existe hook de traducao no escopo dela.
+const getErrorMessage = (error, t) =>
   error.response?.data?.error ||
   error.response?.data?.message ||
   (error.response ? `Erro ${error.response.status}` : error.message) ||
@@ -81,7 +83,7 @@ export default function KBView() {
       await recordAPI.submitForReview(id);
       fetchRecord();
     } catch (error) {
-      alert(t('kbView.submitError') + ': ' + getErrorMessage(error));
+      alert(t('kbView.submitError') + ': ' + getErrorMessage(error, t));
     } finally {
       setActionLoading(false);
     }
@@ -93,7 +95,7 @@ export default function KBView() {
       await recordAPI.approve(id);
       fetchRecord();
     } catch (error) {
-      const errorMsg = getErrorMessage(error);
+      const errorMsg = getErrorMessage(error, t);
       if (error.response?.status === 403) {
         if (errorMsg.includes('own KB')) {
           alert(t('kbView.cannotApproveOwn'));
@@ -116,7 +118,7 @@ export default function KBView() {
       setRejectReason('');
       fetchRecord();
     } catch (error) {
-      alert(t('kbView.rejectError') + ': ' + getErrorMessage(error));
+      alert(t('kbView.rejectError') + ': ' + getErrorMessage(error, t));
     } finally {
       setActionLoading(false);
     }
@@ -128,7 +130,7 @@ export default function KBView() {
       await recordAPI.publish(id);
       fetchRecord();
     } catch (error) {
-      alert(t('kbView.publishError') + ': ' + getErrorMessage(error));
+      alert(t('kbView.publishError') + ': ' + getErrorMessage(error, t));
     } finally {
       setActionLoading(false);
     }
@@ -139,7 +141,7 @@ export default function KBView() {
       await recordAPI.delete(id);
       navigate('/kb');
     } catch (error) {
-      alert(t('kbView.deleteError') + ': ' + getErrorMessage(error));
+      alert(t('kbView.deleteError') + ': ' + getErrorMessage(error, t));
     }
   };
   
@@ -150,7 +152,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'text/markdown' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.md`);
     } catch (error) {
-      alert(t('kbView.exportError') + ': ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ': ' + getErrorMessage(error, t));
     }
   };
   
@@ -168,7 +170,7 @@ export default function KBView() {
         printWindow.print();
       };
     } catch (error) {
-      alert(t('kbView.exportError') + ' PDF: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ' PDF: ' + getErrorMessage(error, t));
     }
   };
 
@@ -178,7 +180,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'application/json' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.json`);
     } catch (error) {
-      alert(t('kbView.exportError') + ' JSON: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ' JSON: ' + getErrorMessage(error, t));
     }
   };
 
@@ -188,7 +190,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'application/vnd.ms-word' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.doc`);
     } catch (error) {
-      alert(t('kbView.exportError') + ' Word: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ' Word: ' + getErrorMessage(error, t));
     }
   };
 
@@ -198,7 +200,7 @@ export default function KBView() {
       const blob = new Blob([response.data], { type: 'text/plain' });
       downloadBlob(blob, `${record.title.replace(/[^a-zA-Z0-9]/g, '-')}.txt`);
     } catch (error) {
-      alert(t('kbView.exportError') + ' TXT: ' + getErrorMessage(error));
+      alert(t('kbView.exportError') + ' TXT: ' + getErrorMessage(error, t));
     }
   };
 

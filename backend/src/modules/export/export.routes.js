@@ -709,15 +709,15 @@ function convertMarkdownToHTML(markdown) {
   html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  html = html.replace(/\_\_(.*?)\_\_/g, '<strong>$1</strong>');
-  html = html.replace(/\_(.*?)\_/g, '<em>$1</em>');
+  html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+  html = html.replace(/_(.*?)_/g, '<em>$1</em>');
   
   // Code blocks
   html = html.replace(/```[\w]*\n([\s\S]*?)```/g, '<pre>$1</pre>');
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
   
   // Blockquotes
-  html = html.replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>');
+  html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
   
   // Horizontal rule
   html = html.replace(/^---$/gim, '<hr>');
@@ -731,7 +731,7 @@ function convertMarkdownToHTML(markdown) {
   
   // Unordered lists
   html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
-  html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
+  html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
   
   // Ordered lists (simplified)
   html = html.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
@@ -829,8 +829,8 @@ ${subDivider}
   plainContent = plainContent.replace(/\*\*\*(.*?)\*\*\*/g, '$1');
   plainContent = plainContent.replace(/\*\*(.*?)\*\*/g, '$1');
   plainContent = plainContent.replace(/\*(.*?)\*/g, '$1');
-  plainContent = plainContent.replace(/\_\_(.*?)\_\_/g, '$1');
-  plainContent = plainContent.replace(/\_(.*?)\_/g, '$1');
+  plainContent = plainContent.replace(/__(.*?)__/g, '$1');
+  plainContent = plainContent.replace(/_(.*?)_/g, '$1');
   
   // Remove code markers
   plainContent = plainContent.replace(/```[\w]*\n?/g, '');
@@ -843,7 +843,7 @@ ${subDivider}
   plainContent = plainContent.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '[Imagem: $1]');
   
   // Convert blockquotes
-  plainContent = plainContent.replace(/^\> /gm, '  | ');
+  plainContent = plainContent.replace(/^> /gm, '  | ');
   
   // Convert horizontal rules
   plainContent = plainContent.replace(/^---$/gm, subDivider);

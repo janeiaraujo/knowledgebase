@@ -10,8 +10,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Container, Row, Col, Card, Table, Badge, Button, Modal, Form, Tabs, Tab, Spinner, Alert, ProgressBar, OverlayTrigger, Tooltip, ListGroup } from 'react-bootstrap';
-import { FaBook, FaUser, FaClock, FaPlus, FaCheck, FaTimes, FaRobot, FaChartBar, FaFilter, FaExclamationTriangle, FaEye, FaArrowRight, FaHistory, FaLightbulb } from 'react-icons/fa';
+import { Container, Row, Col, Card, Table, Badge, Button, Modal, Form, Spinner, Alert, OverlayTrigger, Tooltip, ListGroup } from 'react-bootstrap';
+import { FaBook, FaUser, FaPlus, FaCheck, FaTimes, FaRobot, FaFilter, FaEye, FaLightbulb } from 'react-icons/fa';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';

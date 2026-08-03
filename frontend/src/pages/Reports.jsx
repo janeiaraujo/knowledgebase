@@ -8,10 +8,10 @@
  * - Report history
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Container, Row, Col, Card, Button, Form, Modal, Badge, Table, Tabs, Tab, Spinner, Alert, ListGroup, ProgressBar } from 'react-bootstrap';
-import { FaFilePdf, FaFileExcel, FaFileCsv, FaDownload, FaCalendarAlt, FaClock, FaPlay, FaHistory, FaPlus, FaTrash, FaEdit, FaEnvelope } from 'react-icons/fa';
+import { Container, Row, Col, Card, Button, Form, Modal, Badge, Table, Tabs, Tab, Spinner, Alert } from 'react-bootstrap';
+import { FaFilePdf, FaFileExcel, FaFileCsv, FaDownload, FaCalendarAlt, FaPlay, FaTrash, FaEnvelope } from 'react-icons/fa';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR, enUS } from 'date-fns/locale';
 import api from '../services/api';

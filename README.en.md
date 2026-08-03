@@ -283,6 +283,8 @@ Follows [SemVer](https://semver.org/). The version lives in two places that must
 
 Tagging and [releases](https://github.com/janeiaraujo/knowledgebase/releases) are automatic: merging a PR that bumps the version triggers `.github/workflows/release.yml`, which creates the `vX.Y.Z` tag and publishes a release using the matching section of [CHANGELOG.md](CHANGELOG.md) as the body — nothing to do by hand. If the CHANGELOG has no section for that version yet, the workflow warns and falls back to notes generated from the commits. The "version" badge at the top reads `backend/package.json` live; the "release" badge reads the latest published tag.
 
+Two guards keep releases from falling behind: CI **warns** (without blocking) when a PR changes product code without bumping the version, and the `release-drift.yml` workflow keeps an issue open while `main` is ahead of the latest tag — closing it automatically once the release ships.
+
 To ship a new version: bump both `package.json` files in the same PR, following the type of change (`patch` for a fix, `minor` for a backward-compatible feature, `major` for a breaking change), and merge — the rest is automatic.
 
 ### `main` branch protection

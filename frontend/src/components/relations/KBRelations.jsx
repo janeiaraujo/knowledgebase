@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Button, Badge, Modal, Form, ListGroup, Spinner, Alert } from 'react-bootstrap';
+import { Button, Badge, Modal, Form, ListGroup, Spinner, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { relationAPI } from '../../services/api';
 

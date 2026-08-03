@@ -37,8 +37,11 @@ turndown.addRule('images', {
 // Toolbar component
 function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
   const { t } = useTranslation();
-  if (!editor) return null;
 
+  // O guard fica depois do useCallback de proposito: `editor` chega null no
+  // primeiro render e preenchido no seguinte, entao sair antes do hook mudaria
+  // a ordem dos hooks entre um render e outro - que e justamente o que o React
+  // proibe.
   const addLink = useCallback(() => {
     const previousUrl = editor.getAttributes('link').href;
     const url = window.prompt('URL do link:', previousUrl);
@@ -52,6 +55,10 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
     
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
+
+  // Guard reposicionado: `editor` chega null no primeiro render, e sair antes
+  // do useCallback acima mudaria a ordem dos hooks entre um render e outro.
+  if (!editor) return null;
 
   return (
     <div className="tiptap-toolbar">

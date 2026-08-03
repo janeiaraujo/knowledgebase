@@ -2,7 +2,6 @@ import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { toObjectId } from '../../utils/mongodb.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission } from '../../middlewares/rbac.middleware.js';
-import Joi from 'joi';
 
 export default async function databaseRoutes(fastify, options) {
   
@@ -59,7 +58,12 @@ export default async function databaseRoutes(fastify, options) {
   }, async (request, reply) => {
     const db = fastify.db();
     const { databaseId } = request.params;
-    
+
+    const objectId = toObjectId(databaseId);
+    if (!objectId) {
+      return reply.status(400).send({ error: 'Invalid database ID' });
+    }
+
     const database = await db.collection('databases').findOne({
       _id: objectId,
       tenant_id: request.tenantId
@@ -79,7 +83,12 @@ export default async function databaseRoutes(fastify, options) {
     const db = fastify.db();
     const { databaseId } = request.params;
     const updates = request.body;
-    
+
+    const objectId = toObjectId(databaseId);
+    if (!objectId) {
+      return reply.status(400).send({ error: 'Invalid database ID' });
+    }
+
     await db.collection('databases').updateOne(
       { _id: objectId, tenant_id: request.tenantId },
       { $set: { ...updates, updated_at: new Date() } }

@@ -260,6 +260,7 @@ export const MESSAGES = {
     'Invalid audit log ID': ['ID de registro de auditoria inválido', 'Invalid audit log ID'],
     'Artigo não encontrado': ['Artigo não encontrado', 'Article not found'],
     'Database not found': ['Base não encontrada', 'Database not found'],
+    'Invalid database ID': ['ID de base inválido', 'Invalid database ID'],
     'ID de view inválido': ['ID de view inválido', 'Invalid view ID'],
     'Desafio criado': ['Desafio criado', 'Challenge created'],
     'Tour concluído': ['Tour concluído', 'Tour completed'],

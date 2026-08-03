@@ -9,8 +9,6 @@ import { saveAs } from 'file-saver';
 const IconDownload = () => <i className="bi bi-download"></i>;
 const IconFileAlt = () => <i className="bi bi-file-earmark-text"></i>;
 const IconFile = () => <i className="bi bi-file-earmark"></i>;
-const IconCheck = () => <i className="bi bi-check-lg"></i>;
-const IconTimes = () => <i className="bi bi-x-lg"></i>;
 
 export default function BatchExportModal({ show, onHide, selectedRecords }) {
   const { t } = useTranslation();

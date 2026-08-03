@@ -1325,7 +1325,7 @@ function generateMarkdownExport(postMortem) {
         const sortedSections = Object.entries(postMortem.sections)
             .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
         
-        for (const [key, section] of sortedSections) {
+        for (const [, section] of sortedSections) {
             if (section.content) {
                 md += `## ${section.title}\n\n${section.content}\n\n`;
             }

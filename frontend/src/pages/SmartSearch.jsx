@@ -14,9 +14,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Container, Row, Col, Form, Button, Card, Badge, Alert, Spinner, Modal, ListGroup, Tab, Tabs, OverlayTrigger, Tooltip, ProgressBar } from 'react-bootstrap';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { FaSearch, FaRobot, FaMagic, FaExclamationTriangle, FaPlus, FaLightbulb, FaBook, FaClock, FaUser, FaArrowRight, FaTimes, FaFilter, FaHistory, FaThumbsUp, FaThumbsDown } from 'react-icons/fa';
+import { Container, Row, Col, Form, Button, Card, Badge, Alert, Spinner, Modal, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Link, useSearchParams } from 'react-router-dom';
+import { FaSearch, FaRobot, FaMagic, FaExclamationTriangle, FaPlus, FaLightbulb, FaBook, FaClock, FaArrowRight, FaFilter, FaHistory, FaThumbsUp, FaThumbsDown } from 'react-icons/fa';
 import api from '../services/api';
 import { debounce } from 'lodash';
 import { toast } from 'react-toastify';
@@ -34,7 +34,6 @@ const urgencyOptions = [
 export default function SmartSearch() {
     const { t, i18n } = useTranslation();
     const dateLocale = i18n.language === 'en' ? enUS : ptBR;
-    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     
     // Search state
@@ -157,39 +156,6 @@ export default function SmartSearch() {
     };
 
     // Preview AI enhancement
-    const previewEnhancement = async () => {
-        if (!requestForm.description.trim()) return;
-
-        setSubmittingRequest(true);
-        try {
-            // First create with AI enhancement to see preview
-            const response = await api.post('/smart-search/kb-requests', {
-                ...requestForm,
-                related_search_query: query
-            });
-
-            if (response.data.kb_request) {
-                setEnhancedPreview({
-                    enhanced_description: response.data.kb_request.enhanced_description,
-                    suggested_title: response.data.kb_request.suggested_title
-                });
-                
-                // Delete the preview request (we just wanted to see the enhancement)
-                // Actually, let's keep it since user might want it
-                toast.success(t('smartSearch.requestCreated'));
-                setShowRequestModal(false);
-                setResults(prev => prev ? {
-                    ...prev,
-                    kb_request_submitted: true
-                } : prev);
-            }
-        } catch (error) {
-            console.error('Enhancement preview error:', error);
-            toast.error(t('smartSearch.requestProcessError'));
-        } finally {
-            setSubmittingRequest(false);
-        }
-    };
 
     // Submit KB request
     const submitKBRequest = async () => {
