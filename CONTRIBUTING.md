@@ -26,7 +26,7 @@ cd frontend && cp .env.example .env && npm install && npm run dev
    git checkout -b feat/minha-funcionalidade
    ```
 2. Faça suas alterações.
-3. Verifique que a aplicação sobe sem erros e que o fluxo afetado funciona de ponta a ponta. No backend, rode `npm test` (smoke test) antes de abrir o PR — o mesmo check roda no CI.
+3. Verifique que a aplicação sobe sem erros e que o fluxo afetado funciona de ponta a ponta. No backend, rode `npm test` (testes de unidade) e, com o banco no ar, `npm run smoke-test` — os dois rodam no CI.
 4. Abra o pull request descrevendo **o que** mudou e **por quê**.
 
 ### Nomes de branch
@@ -69,6 +69,12 @@ await db.collection('records').find({ tenant_id: request.tenantId, status: 'publ
 // Errado — vaza dados entre organizações
 await db.collection('records').find({ status: 'published' });
 ```
+
+### Testes
+
+`npm test` roda os testes de unidade (`backend/tests/`), que não precisam de banco: matriz de permissões, bloqueio de login, recuperação de senha, armazenamento de arquivos e a varredura de isolamento multi-tenant.
+
+Essa varredura merece atenção: ela falha se um PR introduzir consulta a coleção de tenant **sem** `tenant_id` no filtro. Os casos que já existiam estão congelados numa lista (`KNOWN_GAPS`) — corrija-os aos poucos, removendo da lista, em vez de adicionar novos.
 
 ### Índices
 
