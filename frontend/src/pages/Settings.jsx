@@ -1,20 +1,59 @@
-import React, { useState } from 'react';
-import { Card, Nav, Row, Col, Form, Button, Alert } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Card, Nav, Row, Col, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 import { useTheme } from '../contexts/ThemeContext';
+import { organizationAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import TagsSettings from './settings/TagsSettings';
 import CategoriesSettings from './settings/CategoriesSettings';
 
 export default function Settings() {
   const { theme, setThemeMode, isDark } = useTheme();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('appearance');
-  const [generalSettings, setGeneralSettings] = useState({
-    siteName: 'Knowledge Base',
-    defaultLanguage: 'pt-BR',
-    allowPublicAccess: false,
-    enableComments: true,
-    enableRatings: true,
-    requireApproval: true
-  });
+
+  const canEditOrg = ['owner', 'admin'].includes(user?.role);
+
+  const [org, setOrg] = useState({ name: '', default_language: 'pt' });
+  const [loadingOrg, setLoadingOrg] = useState(true);
+  const [savingOrg, setSavingOrg] = useState(false);
+  const [orgError, setOrgError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    organizationAPI.get()
+      .then(({ data }) => {
+        if (!active) return;
+        setOrg({
+          name: data.organization?.name || '',
+          default_language: data.organization?.settings?.default_language || 'pt'
+        });
+      })
+      .catch(() => active && setOrgError('Falha ao carregar as configurações da organização.'))
+      .finally(() => active && setLoadingOrg(false));
+    return () => { active = false; };
+  }, []);
+
+  const handleSaveOrg = async (e) => {
+    e.preventDefault();
+    setSavingOrg(true);
+    setOrgError('');
+    try {
+      const { data } = await organizationAPI.update({
+        name: org.name,
+        settings: { default_language: org.default_language }
+      });
+      setOrg({
+        name: data.organization?.name || org.name,
+        default_language: data.organization?.settings?.default_language || org.default_language
+      });
+      toast.success('Configurações salvas');
+    } catch (err) {
+      setOrgError(err.response?.data?.error || 'Não foi possível salvar. Tente novamente.');
+    } finally {
+      setSavingOrg(false);
+    }
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -98,79 +137,65 @@ export default function Settings() {
               </h5>
             </Card.Header>
             <Card.Body>
-              <Form>
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Nome do Site</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={generalSettings.siteName}
-                        onChange={(e) => setGeneralSettings({...generalSettings, siteName: e.target.value})}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Idioma Padrão</Form.Label>
-                      <Form.Select
-                        value={generalSettings.defaultLanguage}
-                        onChange={(e) => setGeneralSettings({...generalSettings, defaultLanguage: e.target.value})}
-                      >
-                        <option value="pt-BR">Português (Brasil)</option>
-                        <option value="en-US">English (US)</option>
-                        <option value="es">Español</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                </Row>
+              {loadingOrg ? (
+                <div className="text-center py-4"><Spinner animation="border" variant="primary" /></div>
+              ) : (
+                <Form onSubmit={handleSaveOrg}>
+                  {orgError && <Alert variant="danger">{orgError}</Alert>}
+                  {!canEditOrg && (
+                    <Alert variant="secondary">
+                      <i className="bi bi-info-circle me-2"></i>
+                      Apenas owners e admins podem alterar estas configurações.
+                    </Alert>
+                  )}
 
-                <hr className="my-4" />
-                <h6 className="mb-3">Permissões</h6>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Nome da Organização</Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={org.name}
+                          disabled={!canEditOrg}
+                          onChange={(e) => setOrg({ ...org, name: e.target.value })}
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Idioma padrão</Form.Label>
+                        <Form.Select
+                          value={org.default_language}
+                          disabled={!canEditOrg}
+                          onChange={(e) => setOrg({ ...org, default_language: e.target.value })}
+                        >
+                          <option value="pt">Português</option>
+                          <option value="en">English</option>
+                        </Form.Select>
+                        <Form.Text className="text-muted">
+                          Aplicado a novos usuários da organização. Cada pessoa pode trocar
+                          o próprio idioma em <a href="/profile">Meu Perfil</a>.
+                        </Form.Text>
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
-                <Form.Check
-                  type="switch"
-                  id="allowPublicAccess"
-                  label="Permitir acesso público (sem login)"
-                  checked={generalSettings.allowPublicAccess}
-                  onChange={(e) => setGeneralSettings({...generalSettings, allowPublicAccess: e.target.checked})}
-                  className="mb-2"
-                />
-                <Form.Check
-                  type="switch"
-                  id="enableComments"
-                  label="Habilitar comentários em KBs"
-                  checked={generalSettings.enableComments}
-                  onChange={(e) => setGeneralSettings({...generalSettings, enableComments: e.target.checked})}
-                  className="mb-2"
-                />
-                <Form.Check
-                  type="switch"
-                  id="enableRatings"
-                  label="Habilitar avaliações de KBs"
-                  checked={generalSettings.enableRatings}
-                  onChange={(e) => setGeneralSettings({...generalSettings, enableRatings: e.target.checked})}
-                  className="mb-2"
-                />
-                <Form.Check
-                  type="switch"
-                  id="requireApproval"
-                  label="Exigir aprovação para publicação"
-                  checked={generalSettings.requireApproval}
-                  onChange={(e) => setGeneralSettings({...generalSettings, requireApproval: e.target.checked})}
-                  className="mb-2"
-                />
-
-                <div className="mt-4">
-                  <Button variant="primary">
-                    <i className="bi bi-check-lg me-1"></i>
-                    Salvar Configurações
-                  </Button>
-                </div>
-              </Form>
+                  {canEditOrg && (
+                    <div className="mt-3">
+                      <Button variant="primary" type="submit" disabled={savingOrg || !org.name.trim()}>
+                        {savingOrg ? <Spinner size="sm" animation="border" /> : (
+                          <><i className="bi bi-check-lg me-1"></i>Salvar Configurações</>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </Form>
+              )}
             </Card.Body>
           </Card>
         );
+
       case 'team':
         return (
           <Card className="border-0 shadow-sm">
