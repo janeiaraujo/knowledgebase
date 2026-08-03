@@ -1,8 +1,11 @@
 # Incident Intelligence Platform
 
+🌐 [English version](README.en.md) · Português (padrão)
+
 **Base de conhecimento operacional orientada a incidentes.** Um "Notion para operações": registre incidentes durante a emergência, transforme-os em KBs revisadas e encontre soluções rapidamente na próxima ocorrência.
 
 <!-- Badges dinâmicos: os valores são lidos do repositório em tempo real. -->
+[![CI](https://img.shields.io/github/actions/workflow/status/janeiaraujo/knowledgebase/ci.yml?branch=main&style=flat-square&color=0aa344&label=build)](https://github.com/janeiaraujo/knowledgebase/actions/workflows/ci.yml)
 [![Versão](https://img.shields.io/github/package-json/v/janeiaraujo/knowledgebase?filename=backend%2Fpackage.json&style=flat-square&color=0aa344&label=vers%C3%A3o)](backend/package.json)
 [![Última release](https://img.shields.io/github/v/release/janeiaraujo/knowledgebase?style=flat-square&color=0aa344&label=release)](https://github.com/janeiaraujo/knowledgebase/releases)
 [![Licença](https://img.shields.io/github/license/janeiaraujo/knowledgebase?style=flat-square&color=0aa344)](LICENSE)
@@ -166,8 +169,11 @@ O sistema sobe e funciona **sem nenhuma** delas. Cada uma habilita um recurso es
 | `npm run dev` | Inicia com hot reload (`node --watch`) |
 | `npm run migrate` | Cria/atualiza os índices do MongoDB (idempotente) |
 | `npm run seed` | Popula dados de demonstração |
+| `node scripts/seed-sample-data.js` | Popula KBs, incidentes e eventos de exemplo extras (idempotente por tipo de dado) |
+| `npm test` | Smoke test: sobe a API real e valida boot, `/health`, login e uma rota protegida |
 
 > ⚠️ O `seed` é **aditivo**: executá-lo novamente duplica os dados de exemplo. Rode-o apenas em bancos vazios.
+> Já `scripts/seed-sample-data.js` verifica antes de inserir (pula KBs/incidentes se já existirem para o tenant), então pode rodar quantas vezes quiser.
 
 ### Frontend (`cd frontend`)
 

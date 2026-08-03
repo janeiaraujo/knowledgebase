@@ -1,42 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { incidentAPI, tagAPI, categoryAPI } from '../../services/api';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { incidentAPI } from '../../services/api';
+import { TagSelector, CategorySelector } from '../../components/tags/TagSelector';
+import VoiceRecorderButton from '../../components/VoiceRecorderButton';
+import ImageAttachments from '../../components/ImageAttachments';
 
 const QuickCapture = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [loading, setLoading] = useState(false);
-    const [categories, setCategories] = useState([]);
-    const [tags, setTags] = useState([]);
     const [recentCaptures, setRecentCaptures] = useState([]);
     const [loadingRecent, setLoadingRecent] = useState(true);
-    
+    const [attachmentsKey, setAttachmentsKey] = useState(0);
+    const [images, setImages] = useState([]);
+    const [linkedIncidentTitle, setLinkedIncidentTitle] = useState(null);
+
     const [formData, setFormData] = useState({
         problem: '',
         solution: '',
+        logs: '',
         severity: 'medium',
         affected_services: '',
         category_id: '',
-        tags: []
+        tags: [],
+        incident_id: null
     });
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        loadInitialData();
+        loadRecentCaptures();
     }, []);
 
-    const loadInitialData = async () => {
+    // Chegando a partir de "Criar KB a partir deste incidente" (ver
+    // IncidentView) - pre-preenche o problema/severidade/serviços.
+    useEffect(() => {
+        const prefill = location.state?.prefill;
+        if (!prefill) return;
+
+        setFormData(prev => ({
+            ...prev,
+            problem: prefill.problem || prev.problem,
+            severity: prefill.severity || prev.severity,
+            affected_services: prefill.affected_services || prev.affected_services,
+            incident_id: prefill.incident_id || null
+        }));
+        setLinkedIncidentTitle(prefill.incident_id ? 'Este KB será vinculado ao incidente de origem.' : null);
+
+        navigate(location.pathname, { replace: true, state: {} });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.state]);
+
+    const loadRecentCaptures = async () => {
         try {
-            const [catRes, tagRes, capturesRes] = await Promise.all([
-                categoryAPI.list({ limit: 100 }),
-                tagAPI.list({ limit: 100 }),
-                incidentAPI.listQuickCaptures({ limit: 5 })
-            ]);
-            setCategories(catRes.data.categories || []);
-            setTags(tagRes.data.tags || []);
+            const capturesRes = await incidentAPI.listQuickCaptures({ limit: 5 });
             setRecentCaptures(capturesRes.data.records || []);
         } catch (err) {
-            console.error('Error loading data:', err);
+            console.error('Error loading recent captures:', err);
         } finally {
             setLoadingRecent(false);
         }
@@ -49,19 +69,27 @@ const QuickCapture = () => {
         setResult(null);
 
         try {
-            const res = await incidentAPI.quickCapture(formData);
+            const res = await incidentAPI.quickCapture({
+                ...formData,
+                images: images.map(({ url, filename, description }) => ({ url, filename, description }))
+            });
             setResult(res.data);
-            
+
             // Reset form
             setFormData({
                 problem: '',
                 solution: '',
+                logs: '',
                 severity: 'medium',
                 affected_services: '',
                 category_id: '',
-                tags: []
+                tags: [],
+                incident_id: null
             });
-            
+            setLinkedIncidentTitle(null);
+            setImages([]);
+            setAttachmentsKey(prev => prev + 1); // forca remount do ImageAttachments (limpa estado interno)
+
             // Reload recent captures
             const capturesRes = await incidentAPI.listQuickCaptures({ limit: 5 });
             setRecentCaptures(capturesRes.data.records || []);
@@ -72,12 +100,10 @@ const QuickCapture = () => {
         }
     };
 
-    const handleTagToggle = (tagId) => {
+    const appendTranscript = (field) => (text) => {
         setFormData(prev => ({
             ...prev,
-            tags: prev.tags.includes(tagId)
-                ? prev.tags.filter(t => t !== tagId)
-                : [...prev.tags, tagId]
+            [field]: prev[field] ? `${prev[field]} ${text}`.trim() : text.trim()
         }));
     };
 
@@ -100,13 +126,19 @@ const QuickCapture = () => {
                                 <div>
                                     <h5 className="mb-0">Captura Rápida</h5>
                                     <small className="opacity-75">
-                                        Descreva o problema e a solução - a IA gera o artigo KB
+                                        Texto, voz, logs e imagens - a IA aproveita tudo para gerar o artigo KB
                                     </small>
                                 </div>
                             </div>
                         </div>
                         
                         <div className="card-body">
+                            {linkedIncidentTitle && (
+                                <div className="alert alert-info d-flex align-items-center mb-4">
+                                    <i className="bi bi-link-45deg me-2"></i>
+                                    <div className="flex-grow-1 small">{linkedIncidentTitle}</div>
+                                </div>
+                            )}
                             {/* Success Result */}
                             {result && (
                                 <div className="alert alert-success d-flex align-items-start mb-4">
@@ -157,14 +189,20 @@ const QuickCapture = () => {
                             <form onSubmit={handleSubmit}>
                                 {/* Problem */}
                                 <div className="mb-4">
-                                    <label className="form-label fw-semibold">
-                                        <i className="bi bi-bug text-danger me-2"></i>
-                                        Qual era o problema?
-                                    </label>
+                                    <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <label className="form-label fw-semibold mb-0">
+                                            <i className="bi bi-bug text-danger me-2"></i>
+                                            Qual era o problema?
+                                        </label>
+                                        <VoiceRecorderButton
+                                            label="Ditar problema"
+                                            onTranscript={appendTranscript('problem')}
+                                        />
+                                    </div>
                                     <textarea
-                                        className="form-control"
+                                        className="form-control mt-2"
                                         rows="4"
-                                        placeholder="Descreva o problema encontrado. Ex: Usuário não conseguia acessar o sistema, recebia erro 403..."
+                                        placeholder="Descreva o problema encontrado, cole logs/mensagens de erro, ou use o microfone. Ex: Usuário não conseguia acessar o sistema, recebia erro 403..."
                                         value={formData.problem}
                                         onChange={(e) => setFormData(prev => ({ ...prev, problem: e.target.value }))}
                                         required
@@ -176,20 +214,61 @@ const QuickCapture = () => {
 
                                 {/* Solution */}
                                 <div className="mb-4">
-                                    <label className="form-label fw-semibold">
-                                        <i className="bi bi-check-circle text-success me-2"></i>
-                                        Qual foi a solução?
-                                    </label>
+                                    <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <label className="form-label fw-semibold mb-0">
+                                            <i className="bi bi-check-circle text-success me-2"></i>
+                                            Qual foi a solução?
+                                        </label>
+                                        <VoiceRecorderButton
+                                            label="Ditar solução"
+                                            onTranscript={appendTranscript('solution')}
+                                        />
+                                    </div>
                                     <textarea
-                                        className="form-control"
+                                        className="form-control mt-2"
                                         rows="4"
-                                        placeholder="Descreva os passos da solução. Ex: 1. Verificar permissões do usuário no AD. 2. Adicionar ao grupo X..."
+                                        placeholder="Descreva os passos da solução, ou use o microfone. Ex: 1. Verificar permissões do usuário no AD. 2. Adicionar ao grupo X..."
                                         value={formData.solution}
                                         onChange={(e) => setFormData(prev => ({ ...prev, solution: e.target.value }))}
                                         required
                                     />
                                     <div className="form-text">
                                         Detalhe os passos realizados para resolver o problema.
+                                    </div>
+                                </div>
+
+                                {/* Logs */}
+                                <div className="mb-4">
+                                    <label className="form-label fw-semibold">
+                                        <i className="bi bi-terminal text-secondary me-2"></i>
+                                        Logs / mensagens de erro
+                                    </label>
+                                    <textarea
+                                        className="form-control font-monospace"
+                                        style={{ fontSize: '0.85rem' }}
+                                        rows="5"
+                                        placeholder="Cole aqui trechos de log, stack trace ou a saída de erro (Ctrl+V)..."
+                                        value={formData.logs}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, logs: e.target.value }))}
+                                    />
+                                    <div className="form-text">
+                                        Opcional. Trechos relevantes do log ajudam a IA a identificar sintomas e causa raiz com mais precisão.
+                                    </div>
+                                </div>
+
+                                {/* Images */}
+                                <div className="mb-4">
+                                    <label className="form-label fw-semibold">
+                                        <i className="bi bi-camera text-primary me-2"></i>
+                                        Capturas de tela do erro
+                                    </label>
+                                    <ImageAttachments
+                                        key={attachmentsKey}
+                                        context={formData.problem}
+                                        onChange={setImages}
+                                    />
+                                    <div className="form-text">
+                                        Opcional. Cada imagem é descrita automaticamente pela IA (quando configurada) e entra como evidência no KB gerado.
                                     </div>
                                 </div>
 
@@ -223,19 +302,10 @@ const QuickCapture = () => {
                                             <i className="bi bi-folder me-2"></i>
                                             Categoria
                                         </label>
-                                        <select
-                                            className="form-select"
-                                            value={formData.category_id}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                                        >
-                                            <option value="">Selecione uma categoria...</option>
-                                            {categories.map(cat => (
-                                                <option key={cat._id} value={cat._id}>
-                                                    {cat.icon && <span>{cat.icon} </span>}
-                                                    {cat.name}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <CategorySelector
+                                            selectedCategory={formData.category_id}
+                                            onChange={(category_id) => setFormData(prev => ({ ...prev, category_id: category_id || '' }))}
+                                        />
                                     </div>
                                 </div>
 
@@ -255,32 +325,16 @@ const QuickCapture = () => {
                                 </div>
 
                                 {/* Tags */}
-                                {tags.length > 0 && (
-                                    <div className="mb-4">
-                                        <label className="form-label fw-semibold">
-                                            <i className="bi bi-tags me-2"></i>
-                                            Tags
-                                        </label>
-                                        <div className="d-flex flex-wrap gap-2">
-                                            {tags.map(tag => (
-                                                <button
-                                                    key={tag._id}
-                                                    type="button"
-                                                    className={`btn btn-sm ${formData.tags.includes(tag._id) 
-                                                        ? 'btn-primary' 
-                                                        : 'btn-outline-secondary'}`}
-                                                    onClick={() => handleTagToggle(tag._id)}
-                                                    style={formData.tags.includes(tag._id) && tag.color ? {
-                                                        backgroundColor: tag.color,
-                                                        borderColor: tag.color
-                                                    } : {}}
-                                                >
-                                                    {tag.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                <div className="mb-4">
+                                    <label className="form-label fw-semibold">
+                                        <i className="bi bi-tags me-2"></i>
+                                        Tags
+                                    </label>
+                                    <TagSelector
+                                        selectedTags={formData.tags}
+                                        onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                                    />
+                                </div>
 
                                 {/* Submit */}
                                 <div className="d-grid gap-2">
@@ -323,9 +377,9 @@ const QuickCapture = () => {
                                     <span className="badge bg-primary rounded-circle p-2">1</span>
                                 </div>
                                 <div className="ms-3">
-                                    <strong>Descreva o problema</strong>
+                                    <strong>Problema e solução</strong>
                                     <p className="mb-0 text-muted small">
-                                        O que aconteceu? Qual erro apareceu?
+                                        Digite, dite por voz (<i className="bi bi-mic"></i>), ou cole logs e prints do erro.
                                     </p>
                                 </div>
                             </div>
@@ -334,9 +388,9 @@ const QuickCapture = () => {
                                     <span className="badge bg-primary rounded-circle p-2">2</span>
                                 </div>
                                 <div className="ms-3">
-                                    <strong>Descreva a solução</strong>
+                                    <strong>Evidências</strong>
                                     <p className="mb-0 text-muted small">
-                                        O que você fez para resolver?
+                                        Cada captura de tela ganha uma descrição automática da IA.
                                     </p>
                                 </div>
                             </div>
@@ -347,7 +401,7 @@ const QuickCapture = () => {
                                 <div className="ms-3">
                                     <strong>IA gera o artigo</strong>
                                     <p className="mb-0 text-muted small">
-                                        Um KB completo em modo rascunho para revisão.
+                                        Um KB completo em modo rascunho para revisão, com logs e imagens já anexados.
                                     </p>
                                 </div>
                             </div>

@@ -1,8 +1,11 @@
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission } from '../../middlewares/rbac.middleware.js';
+import { toObjectId } from '../../utils/mongodb.js';
 import Joi from 'joi';
 import { getOpenAI, requireAI } from '../../utils/ai.js';
+
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8MB, mesmo teto pratico do upload de arquivos
 
 export default async function aiRoutes(fastify, options) {
 
@@ -435,6 +438,94 @@ export default async function aiRoutes(fastify, options) {
     } catch (error) {
       fastify.log.error('Property suggestion error:', error);
       return reply.status(500).send({ error: 'Failed to suggest properties' });
+    }
+  });
+
+  // Describe an uploaded image (screenshot de erro, etc.) usando visao da IA.
+  // Usado pela Captura Rapida para gerar uma legenda automatica de evidencias
+  // visuais, que depois entra no prompt de geracao do KB.
+  fastify.post('/describe-image', {
+    preHandler: [authMiddleware, tenantMiddleware, requirePermission('ai:use')]
+  }, async (request, reply) => {
+    const db = fastify.db();
+    const { fileId, context } = request.body || {};
+
+    if (!fileId) {
+      return reply.status(400).send({ error: 'fileId é obrigatório' });
+    }
+
+    const objectId = toObjectId(fileId);
+    if (!objectId) {
+      return reply.status(400).send({ error: 'fileId inválido' });
+    }
+
+    const canUse = await checkAICredits(db, request.tenantId);
+    if (!canUse) {
+      return reply.status(429).send({ error: 'AI credits exhausted' });
+    }
+
+    try {
+      const file = await db.collection('files').findOne({
+        _id: objectId,
+        tenant_id: request.tenantId
+      });
+
+      if (!file) {
+        return reply.status(404).send({ error: 'Arquivo não encontrado' });
+      }
+
+      if (!file.mimetype || !file.mimetype.startsWith('image/')) {
+        return reply.status(400).send({ error: 'Arquivo não é uma imagem' });
+      }
+
+      // Busca os bytes pela propria URL publica do arquivo (self-fetch quando o
+      // storage e local, request direta quando e R2) - evita duplicar a logica
+      // de leitura em disco/S3 que ja existe em files.routes.js.
+      const fileRes = await fetch(file.url);
+      if (!fileRes.ok) {
+        throw new Error(`Falha ao baixar imagem (status ${fileRes.status})`);
+      }
+
+      const arrayBuffer = await fileRes.arrayBuffer();
+      if (arrayBuffer.byteLength > MAX_IMAGE_BYTES) {
+        return reply.status(413).send({ error: 'Imagem muito grande para análise (máx. 8MB)' });
+      }
+
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      const dataUrl = `data:${file.mimetype};base64,${base64}`;
+
+      const completion = await getOpenAI().chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'Você descreve screenshots de erros e problemas técnicos de forma objetiva, para alimentar um artigo de knowledge base de TI. Responda em português, em 1-3 frases, focando em: qual tela/sistema aparece, qual mensagem de erro ou sintoma é visível, e qualquer código/status relevante. Não invente informação que não esteja visível na imagem.'
+          },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: context ? `Contexto do incidente: ${context}` : 'Descreva esta captura de tela de um incidente técnico.' },
+              { type: 'image_url', image_url: { url: dataUrl } }
+            ]
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 250
+      });
+
+      const description = completion.choices[0].message.content.trim();
+
+      await trackAIUsage(db, request.tenantId, request.currentUser._id, {
+        action: 'describe_image',
+        tokens: completion.usage.total_tokens,
+        cost_credits: Math.ceil(completion.usage.total_tokens / 500)
+      });
+
+      return { success: true, description };
+
+    } catch (error) {
+      fastify.log.error('Image description error:', error);
+      return reply.status(500).send({ error: 'Falha ao descrever a imagem' });
     }
   });
 }

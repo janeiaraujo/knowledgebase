@@ -103,39 +103,10 @@ export default async function integrationsRoutes(fastify, options) {
                     'Comentários bidirecionais'
                 ],
                 setup_url: 'https://developer.atlassian.com'
-            },
-            {
-                type: 'pagerduty',
-                name: 'PagerDuty',
-                description: 'Integre com PagerDuty para gerenciamento de incidentes',
-                icon: 'bi-bell',
-                color: '#06AC38',
-                configured: !!configuredMap.pagerduty,
-                config: configuredMap.pagerduty || null,
-                features: [
-                    'Criar incidentes automaticamente',
-                    'Vincular KBs a alertas',
-                    'Runbooks automáticos',
-                    'Post-mortems integrados'
-                ],
-                setup_url: 'https://developer.pagerduty.com'
-            },
-            {
-                type: 'datadog',
-                name: 'Datadog',
-                description: 'Integre com Datadog para métricas e monitoramento',
-                icon: 'bi-graph-up',
-                color: '#632CA6',
-                configured: !!configuredMap.datadog,
-                config: configuredMap.datadog || null,
-                features: [
-                    'Métricas de uso',
-                    'Dashboard personalizado',
-                    'Alertas baseados em dados',
-                    'Correlação de incidentes'
-                ],
-                setup_url: 'https://docs.datadoghq.com'
             }
+            // PagerDuty e Datadog nao ficam aqui: sao fontes de alerta/monitoramento
+            // (entrada), nao canais de notificacao de saida - ver GET /events/tokens,
+            // que ja os lista como "source" para o endpoint POST /events/ingest.
         ];
 
         return {

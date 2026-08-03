@@ -17,7 +17,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Table, Badge, Button, Modal, Form, Tabs, Tab, Spinner, Alert, ListGroup, ProgressBar, Accordion, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FaFileAlt, FaClock, FaUser, FaPlus, FaCheck, FaTimes, FaRobot, FaChartBar, FaFilter, FaExclamationTriangle, FaEye, FaEdit, FaTrash, FaDownload, FaBook, FaLightbulb, FaHistory, FaQuestionCircle, FaChevronRight, FaPlay, FaPause, FaFlag, FaUserCheck } from 'react-icons/fa';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -51,7 +51,8 @@ const timelineTypes = {
 
 export default function PostMortemList() {
     const navigate = useNavigate();
-    
+    const location = useLocation();
+
     // State
     const [postmortems, setPostmortems] = useState([]);
     const [stats, setStats] = useState(null);
@@ -77,11 +78,32 @@ export default function PostMortemList() {
     // New post-mortem form
     const [newForm, setNewForm] = useState({
         title: '',
+        incident_id: null,
         incident_date: new Date().toISOString().split('T')[0],
         severity: 'medium',
         template: 'google_sre',
         affected_services: ''
     });
+
+    // Chegando a partir de "Criar Post-Mortem" num incidente resolvido
+    // (ver IncidentView) - pre-preenche e ja abre o modal de criacao.
+    useEffect(() => {
+        const prefill = location.state?.prefill;
+        if (!prefill) return;
+
+        setNewForm(prev => ({
+            ...prev,
+            title: prefill.title || prev.title,
+            severity: prefill.severity || prev.severity,
+            affected_services: prefill.affected_services || prev.affected_services,
+            incident_id: prefill.incident_id || null
+        }));
+        setShowCreateModal(true);
+
+        // Limpa o state de navegacao para nao reabrir o modal num refresh/voltar
+        navigate(location.pathname, { replace: true, state: {} });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.state]);
 
     // Load post-mortems
     const loadPostmortems = useCallback(async () => {

@@ -11,9 +11,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Modal, Badge, Alert, Spinner, Tab, Tabs, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { FaSlack, FaMicrosoft, FaJira, FaEnvelope, FaBell, FaPlug, FaCheck, FaTimes, FaCog, FaExternalLinkAlt, FaTrash, FaToggleOn, FaToggleOff } from 'react-icons/fa';
+import { FaSlack, FaMicrosoft, FaJira, FaEnvelope, FaBell, FaPlug, FaCheck, FaTimes, FaCog, FaExternalLinkAlt, FaTrash, FaToggleOn, FaToggleOff, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import api from '../services/api';
+import InboundEventSources from '../components/integrations/InboundEventSources';
 
 // Integration icons mapping
 const integrationIcons = {
@@ -390,12 +391,19 @@ export default function Integrations() {
                         <i className="bi bi-plug me-2"></i>
                         Integrações
                     </h2>
-                    <p className="text-muted">Conecte com suas ferramentas favoritas</p>
+                    <p className="text-muted">
+                        Entrada: ferramentas que enviam dados para dentro desta plataforma. Saída: para onde esta
+                        plataforma envia notificações.
+                    </p>
                 </Col>
             </Row>
 
-            <Tabs defaultActiveKey="integrations" className="mb-4">
-                <Tab eventKey="integrations" title={<span><FaPlug className="me-2" />Integrações</span>}>
+            <Tabs defaultActiveKey="inbound" className="mb-4">
+                <Tab eventKey="inbound" title={<span><FaSignInAlt className="me-2" />Entrada</span>}>
+                    <InboundEventSources />
+                </Tab>
+
+                <Tab eventKey="integrations" title={<span><FaSignOutAlt className="me-2" />Saída</span>}>
                     <Row xs={1} md={2} lg={3} className="g-4">
                         {integrations.map(integration => {
                             const IconComponent = integrationIcons[integration.type]?.icon || FaPlug;

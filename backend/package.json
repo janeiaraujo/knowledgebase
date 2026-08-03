@@ -1,6 +1,6 @@
 {
     "name": "incident-kb-backend",
-    "version": "1.0.0",
+    "version": "2.1.0",
     "description": "Backend API for Incident Intelligence Platform",
     "type": "module",
     "main": "src/server.js",
@@ -8,7 +8,9 @@
         "dev": "node --watch src/server.js",
         "start": "node src/server.js",
         "migrate": "node src/seeds/migrate.js",
-        "seed": "node src/seeds/index.js"
+        "seed": "node src/seeds/index.js",
+        "test": "node scripts/smoke-test.js",
+        "smoke-test": "node scripts/smoke-test.js"
     },
     "keywords": [
         "incident",
