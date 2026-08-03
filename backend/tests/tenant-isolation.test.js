@@ -49,38 +49,15 @@ const ALLOWED_EXCEPTIONS = [
 
 
 /**
- * Gaps ja existentes quando esta varredura foi criada.
+ * Gaps conhecidos, no padrao "catraca": o teste passa com os listados e
+ * falha em QUALQUER novo.
  *
- * Sao consultas por `_id` ou `created_by` sem tenant_id: nao vazam leitura
- * hoje (o id costuma vir de um documento ja filtrado), mas nao ha defesa em
- * profundidade - um id de outra organizacao chegando pela URL seria aceito.
- *
- * Congelados aqui de proposito, no padrao "catraca": o teste passa com os
- * conhecidos e falha em QUALQUER novo. Corrigir e remover da lista, um por
- * vez, com teste manual - por isso nao foram corrigidos em lote.
- * Acompanhamento: issue "Fechar gaps de tenant_id".
+ * A lista nasceu com 19 entradas e hoje esta vazia - todas foram
+ * corrigidas. Se um caso legitimo aparecer (id que comprovadamente ja vem
+ * de documento filtrado por tenant), prefira ALLOWED_EXCEPTIONS com o
+ * motivo, em vez de reabrir esta lista.
  */
-const KNOWN_GAPS = new Set([
-    'activity/activity.routes.js:64 records.updateOne',
-    'gamification/gamification.routes.js:586 records.countDocuments',
-    'gamification/gamification.routes.js:587 comments.countDocuments',
-    'gamification/gamification.routes.js:592 favorites.countDocuments',
-    'gamification/gamification.routes.js:594 records.find',
-    'gamification/gamification.routes.js:629 records.countDocuments',
-    'gamification/gamification.routes.js:635 comments.countDocuments',
-    'gamification/gamification.routes.js:647 postmortems.countDocuments',
-    'gamification/gamification.routes.js:653 gps_flows.countDocuments',
-    'gamification/gamification.routes.js:659 favorites.countDocuments',
-    'gamification/gamification.routes.js:661 records.find',
-    'gps/gps.routes.js:352 gps_flows.findOne',
-    'gps/gps.routes.js:435 gps_flows.findOne',
-    'gps/gps.routes.js:588 gps_flows.findOne',
-    'postmortem/postmortem.routes.js:613 postmortems.updateOne',
-    'review/review.routes.js:110 records.updateOne',
-    'review/review.routes.js:168 records.updateOne',
-    'smart-search/smart-search.routes.js:544 kb_requests.updateOne',
-    'webhooks/webhooks.routes.js:466 webhooks.updateOne'
-]);
+const KNOWN_GAPS = new Set([]);
 
 const gapKey = (p) => `${p.file}:${p.line} ${p.collection}.${p.method}`;
 

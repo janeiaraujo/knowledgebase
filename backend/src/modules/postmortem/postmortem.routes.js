@@ -611,7 +611,7 @@ export default async function postMortemRoutes(fastify, options) {
             }
 
             await db().collection('postmortems').updateOne(
-                { _id: objectId },
+                { _id: objectId, tenant_id: request.tenantId },
                 { $set: updateDoc }
             );
 

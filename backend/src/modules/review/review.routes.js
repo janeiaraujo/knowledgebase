@@ -107,7 +107,7 @@ export default async function reviewRoutes(fastify, options) {
         }
 
         // Update record with review info
-        await db.collection('records').updateOne({ _id: new ObjectId(recordId) }, {
+        await db.collection('records').updateOne({ _id: new ObjectId(recordId), tenant_id: request.tenantId }, {
             $set: {
                 next_review_date: reviewDate,
                 review_period_days: review_period_days || null,
@@ -165,7 +165,7 @@ export default async function reviewRoutes(fastify, options) {
         }
 
         // Update record
-        await db.collection('records').updateOne({ _id: new ObjectId(recordId) }, {
+        await db.collection('records').updateOne({ _id: new ObjectId(recordId), tenant_id: request.tenantId }, {
             $set: {
                 last_reviewed_at: new Date(),
                 last_reviewed_by: request.userId,

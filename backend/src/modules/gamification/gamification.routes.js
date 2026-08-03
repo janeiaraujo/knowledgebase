@@ -175,7 +175,7 @@ export default async function gamificationRoutes(fastify) {
         const [profile, badges, stats] = await Promise.all([
             getOrCreateProfile(db, userId),
             db.collection('user_badges').find({ user_id: new ObjectId(userId) }).toArray(),
-            calculateUserStats(db, userId)
+            calculateUserStats(db, userId, request.user.tenantId)
         ]);
 
         // Calculate level
@@ -579,20 +579,25 @@ function calculateLevel(points) {
     };
 }
 
-async function calculateUserStats(db, userId) {
+// `tenantId` nao e opcional de proposito: sem ele as contagens cruzam
+// organizacoes se o mesmo _id de usuario aparecer em outro tenant.
+async function calculateUserStats(db, userId, tenantId) {
     const userObjId = new ObjectId(userId);
+    const scope = { tenant_id: tenantId, created_by: userObjId };
 
     const [kbCount, commentsCount, reviewsCount, favoritesReceived] = await Promise.all([
-        db.collection('records').countDocuments({ created_by: userObjId }),
-        db.collection('comments').countDocuments({ created_by: userObjId }),
+        db.collection('records').countDocuments(scope),
+        db.collection('comments').countDocuments(scope),
         db.collection('audit_logs').countDocuments({
+            tenant_id: tenantId,
             user_id: userObjId,
             action: { $regex: /review/i }
         }),
         db.collection('favorites').countDocuments({
+            tenant_id: tenantId,
             record_id: {
                 $in: (await db.collection('records')
-                    .find({ created_by: userObjId })
+                    .find(scope)
                     .project({ _id: 1 })
                     .toArray()).map(r => r._id)
             }
@@ -627,13 +632,13 @@ async function checkAndAwardBadges(db, userId, tenantId) {
         switch (criteria.type) {
             case 'kb_count':
                 const kbCount = await db.collection('records')
-                    .countDocuments({ created_by: userObjId });
+                    .countDocuments({ tenant_id: tenantId, created_by: userObjId });
                 earned = kbCount >= criteria.value;
                 break;
 
             case 'comments_count':
                 const commentsCount = await db.collection('comments')
-                    .countDocuments({ created_by: userObjId });
+                    .countDocuments({ tenant_id: tenantId, created_by: userObjId });
                 earned = commentsCount >= criteria.value;
                 break;
 
@@ -645,21 +650,22 @@ async function checkAndAwardBadges(db, userId, tenantId) {
 
             case 'postmortem_count':
                 const pmCount = await db.collection('postmortems')
-                    .countDocuments({ created_by: userObjId });
+                    .countDocuments({ tenant_id: tenantId, created_by: userObjId });
                 earned = pmCount >= criteria.value;
                 break;
 
             case 'gps_flows_count':
                 const gpsCount = await db.collection('gps_flows')
-                    .countDocuments({ created_by: userObjId });
+                    .countDocuments({ tenant_id: tenantId, created_by: userObjId });
                 earned = gpsCount >= criteria.value;
                 break;
 
             case 'favorites_received':
                 const favCount = await db.collection('favorites').countDocuments({
+                    tenant_id: tenantId,
                     record_id: {
                         $in: (await db.collection('records')
-                            .find({ created_by: userObjId })
+                            .find({ tenant_id: tenantId, created_by: userObjId })
                             .project({ _id: 1 })
                             .toArray()).map(r => r._id)
                     }

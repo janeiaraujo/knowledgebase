@@ -464,7 +464,7 @@ export default async function webhooksRoutes(fastify, options) {
         }
 
         await db.collection('webhooks').updateOne(
-            { _id: webhook._id },
+            { _id: webhook._id, tenant_id: request.tenantId },
             { $inc: statsUpdate }
         );
     }
