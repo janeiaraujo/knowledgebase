@@ -76,6 +76,13 @@ jobs:
       - name: Run smoke test
         run: npm run smoke-test
 
+      # Depois do smoke: sobe a API contra o Mongo e prova o isolamento
+      # entre duas organizacoes de verdade. Usa base propria
+      # (incident_kb_itest) e a dropa no final, entao nao encosta nos
+      # dados que o seed criou.
+      - name: Testes de integracao (isolamento multi-tenant)
+        run: npm run test:integration
+
   frontend:
     name: Frontend (install + build)
     runs-on: ubuntu-latest
