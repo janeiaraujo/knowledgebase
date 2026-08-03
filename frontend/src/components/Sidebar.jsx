@@ -92,11 +92,8 @@ export default function Sidebar({ isOpen, onClose }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [avatarFailed, setAvatarFailed] = useState(false);
 
-  // Avatar: URL principal (R2 quando configurado) -> copia local -> inicial do
-  // nome. `avatarFailed` cobre o caso da imagem principal nao carregar.
-  const avatarSrc = avatarFailed
-    ? user?.avatar_fallback_url
-    : (user?.avatar_url || user?.avatar_fallback_url);
+  // Imagem quebrada cai para a inicial do nome
+  const avatarSrc = avatarFailed ? null : user?.avatar_url;
 
   // Uma troca de avatar precisa limpar o estado de falha da imagem anterior
   useEffect(() => {
@@ -239,14 +236,12 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* User Profile */}
         <div className="sidebar-footer">
           <Link to="/profile" className="sidebar-user" onClick={onClose}>
-            <div className="sidebar-user-avatar">
+            <div className={`sidebar-user-avatar ${avatarSrc ? 'has-image' : ''}`}>
               {avatarSrc ? (
                 <img
                   src={avatarSrc}
                   alt=""
-                  className="w-100 h-100 rounded-circle"
-                  style={{ objectFit: 'cover' }}
-                  // Se a URL do R2 falhar, usa a copia local antes de cair na inicial
+                  // Imagem quebrada volta para a inicial do nome
                   onError={() => setAvatarFailed(true)}
                 />
               ) : (

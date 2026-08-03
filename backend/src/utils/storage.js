@@ -1,15 +1,9 @@
 /**
- * Armazenamento de arquivos: Cloudflare R2 com copia local redundante.
+ * Armazenamento de arquivos: Cloudflare R2 como destino principal, disco
+ * local apenas como fallback quando o R2 nao esta configurado ou falha.
  *
  * A logica de R2 vivia duplicada dentro de files.routes.js; centralizada aqui
  * para que outros modulos (ex.: avatar do usuario) reusem em vez de copiar.
- *
- * Diferenca importante entre os dois modos:
- * - `storeFile`      : R2 **ou** disco local (fallback) - comportamento
- *                      historico do upload de arquivos de KB.
- * - `storeFileWithRedundancy`: grava SEMPRE no disco local e, se o R2 estiver
- *                      configurado, tambem envia pra la. Usado no avatar, onde
- *                      queremos a copia local como redundancia mesmo com o R2 ok.
  */
 
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
@@ -87,37 +81,34 @@ export const deleteFromR2 = async (key) => {
 };
 
 /**
- * Grava no disco local E no R2 (quando configurado).
+ * Grava o arquivo no R2 quando configurado; cai para o disco local apenas
+ * se o R2 nao estiver configurado ou se o envio falhar.
  *
- * A copia local e escrita primeiro e nunca e descartada: se o R2 cair ou a
- * conta for perdida, o arquivo continua servivel pelo proprio backend. Uma
- * falha no envio ao R2 nao derruba a operacao - degrada para "somente local".
+ * Nao mantem copia local quando o R2 responde: o disco local e fallback,
+ * nao replica. Isso evita ocupar disco do servidor com arquivos que ja
+ * estao no object storage.
  *
- * @returns {{ url: string, localUrl: string, r2Url: string|null, key: string, storage: string }}
+ * @returns {{ url: string, key: string, storage: 'r2'|'local' }}
  */
-export const storeFileWithRedundancy = async ({
+export const storeFile = async ({
     tenantId, fileName, buffer, contentType, metadata, logger
 }) => {
     const tenantIdStr = String(tenantId);
     const key = `${tenantIdStr}/${fileName}`;
 
-    const localUrl = saveLocalCopy(tenantIdStr, fileName, buffer);
-
-    let r2Url = null;
     if (hasR2Config()) {
         try {
-            r2Url = await uploadToR2(key, buffer, contentType, metadata);
+            const r2Url = await uploadToR2(key, buffer, contentType, metadata);
+            return { url: r2Url, key, storage: 'r2' };
         } catch (error) {
-            // Degrada para somente-local em vez de falhar o upload inteiro
-            logger?.warn?.({ err: error }, 'Falha ao enviar para o R2; mantendo apenas a cópia local');
+            // Fallback: nao perde o upload por indisponibilidade do R2
+            logger?.warn?.({ err: error }, 'Falha ao enviar para o R2; gravando no disco local');
         }
     }
 
     return {
-        url: r2Url || localUrl,
-        localUrl,
-        r2Url,
+        url: saveLocalCopy(tenantIdStr, fileName, buffer),
         key,
-        storage: r2Url ? 'r2+local' : 'local'
+        storage: 'local'
     };
 };
