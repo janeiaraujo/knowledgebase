@@ -7,6 +7,7 @@
 <!-- Dynamic badges: values are read live from the repository. -->
 [![CI](https://img.shields.io/github/actions/workflow/status/janeiaraujo/knowledgebase/ci.yml?branch=main&style=flat-square&color=0aa344&label=build)](https://github.com/janeiaraujo/knowledgebase/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/package-json/v/janeiaraujo/knowledgebase?filename=backend%2Fpackage.json&style=flat-square&color=0aa344&label=version)](backend/package.json)
+[![Latest release](https://img.shields.io/github/v/release/janeiaraujo/knowledgebase?style=flat-square&color=0aa344&label=release)](https://github.com/janeiaraujo/knowledgebase/releases)
 [![License](https://img.shields.io/github/license/janeiaraujo/knowledgebase?style=flat-square&color=0aa344)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/janeiaraujo/knowledgebase?style=flat-square&color=0aa344&label=stars)](https://github.com/janeiaraujo/knowledgebase/stargazers)
 [![Issues](https://img.shields.io/github/issues/janeiaraujo/knowledgebase?style=flat-square&color=0aa344)](https://github.com/janeiaraujo/knowledgebase/issues)
@@ -30,6 +31,7 @@
 - [Available scripts](#available-scripts)
 - [Project structure](#project-structure)
 - [Contributing](#contributing)
+- [Versioning](#versioning)
 - [Contributors](#contributors)
 - [Author](#author)
 - [License](#license)
@@ -224,6 +226,14 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workfl
 If this project helped you, consider leaving a ⭐ — it's what grows its reach.
 
 [![Stars over time](https://img.shields.io/github/stars/janeiaraujo/knowledgebase?style=social)](https://github.com/janeiaraujo/knowledgebase/stargazers)
+
+## Versioning
+
+Follows [SemVer](https://semver.org/). The version lives in two places that must always match: `backend/package.json` and `frontend/package.json` — CI fails the build if they diverge.
+
+Tagging and [releases](https://github.com/janeiaraujo/knowledgebase/releases) are automatic: merging a PR that bumps the version triggers `.github/workflows/release.yml`, which creates the `vX.Y.Z` tag and publishes a release with notes generated from the PRs merged since the last one — nothing to do by hand. The "version" badge at the top reads `backend/package.json` live; the "release" badge reads the latest published tag.
+
+To ship a new version: bump both `package.json` files in the same PR, following the type of change (`patch` for a fix, `minor` for a backward-compatible feature, `major` for a breaking change), and merge — the rest is automatic.
 
 ## Contributors
 
