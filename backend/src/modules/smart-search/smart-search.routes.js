@@ -542,7 +542,7 @@ export default async function smartSearchRoutes(fastify, options) {
 
         // Update the request
         await db().collection('kb_requests').updateOne(
-            { _id: objectId },
+            { _id: objectId, tenant_id: request.tenantId },
             {
                 $set: {
                     status: 'completed',

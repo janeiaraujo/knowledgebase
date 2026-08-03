@@ -350,7 +350,8 @@ async function gpsRoutes(fastify, options) {
 
         // Get flow for current step info
         const flow = await db.collection('gps_flows').findOne({
-            _id: session.flow_id
+            _id: session.flow_id,
+            tenant_id: request.tenantId
         });
 
         if (!flow) {
@@ -433,7 +434,8 @@ async function gpsRoutes(fastify, options) {
 
         // Get flow
         const flow = await db.collection('gps_flows').findOne({
-            _id: session.flow_id
+            _id: session.flow_id,
+            tenant_id: request.tenantId
         });
 
         if (!flow) {
@@ -585,7 +587,7 @@ async function gpsRoutes(fastify, options) {
         }
 
         // Get flow for context
-        const flow = await db.collection('gps_flows').findOne({ _id: session.flow_id });
+        const flow = await db.collection('gps_flows').findOne({ _id: session.flow_id, tenant_id: request.tenantId });
 
         // Build context from responses
         const responseSummary = session.responses.map(r => 

@@ -62,7 +62,7 @@ export default async function activityRoutes(fastify, options) {
 
         // Update KB view count
         await db.collection('records').updateOne(
-            { _id: kbObjectId },
+            { _id: kbObjectId, tenant_id: request.tenantId },
             { 
                 $inc: { view_count: 1 },
                 $set: { last_viewed_at: new Date() }
