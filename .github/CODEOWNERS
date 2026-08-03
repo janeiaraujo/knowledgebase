@@ -1,0 +1,10 @@
+# Revisor padrão de tudo. O GitHub solicita revisão automaticamente
+# em qualquer PR aberto no repositório.
+#
+# Ao adicionar mantenedores por área, prefira linhas específicas abaixo
+# desta — a última regra que casa com o arquivo é a que vale.
+*       @janeiaraujo
+
+# Exemplo de divisão por área, quando houver mais gente:
+# /backend/    @janeiaraujo @outra-pessoa
+# /frontend/   @janeiaraujo @outra-pessoa

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Dúvida de uso ou instalação
+    url: https://github.com/janeiaraujo/knowledgebase/discussions
+    about: Para perguntas abertas, use as Discussions em vez de abrir uma issue.
+  - name: 🔒 Vulnerabilidade de segurança
+    url: https://github.com/janeiaraujo/knowledgebase/security/advisories/new
+    about: Não abra issue pública para falhas de segurança. Reporte de forma privada por aqui.

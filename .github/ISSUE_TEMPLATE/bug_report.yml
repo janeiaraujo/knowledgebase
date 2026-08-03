@@ -1,0 +1,76 @@
+name: 🐛 Reportar bug
+description: Algo não funciona como esperado
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar! Quanto mais específico, mais rápido conseguimos corrigir.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: O que aconteceu?
+      description: Descreva o comportamento observado e o que você esperava no lugar.
+      placeholder: |
+        Ao clicar em "Excluir" num KB, aparece "Falha ao excluir: Erro desconhecido".
+        Esperava que o KB fosse excluído.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Como reproduzir
+      description: Passos para chegar ao problema.
+      placeholder: |
+        1. Entrar como owner
+        2. Abrir um KB publicado
+        3. Clicar em Excluir → Confirmar
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Onde acontece?
+      options:
+        - Frontend (interface)
+        - Backend (API)
+        - Não sei
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / mensagens de erro
+      description: >
+        Console do navegador (F12) e/ou saída do backend. Cole o texto — ele é
+        formatado automaticamente, não precisa de crases.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Versão
+      description: Aparece no rodapé do menu lateral (ex. v2.2.0) ou em `backend/package.json`.
+      placeholder: v2.2.0
+
+  - type: input
+    id: environment
+    attributes:
+      label: Ambiente
+      description: Node (`node -v`), sistema operacional e navegador.
+      placeholder: Node 22.13, Ubuntu 24.04, Chrome 131
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Antes de enviar
+      options:
+        - label: Procurei em issues abertas e não achei este problema
+          required: true
+        - label: Não incluí senhas, tokens ou dados reais de clientes no relato
+          required: true

@@ -4,8 +4,10 @@ Obrigado pelo interesse em contribuir! Este documento descreve o fluxo de trabal
 
 ## Antes de começar
 
-- Para **bugs** e **novas funcionalidades**, abra uma issue antes de escrever código. Isso evita trabalho duplicado e alinha a abordagem.
+- Para **bugs** e **novas funcionalidades**, abra uma issue antes de escrever código. Isso evita trabalho duplicado e alinha a abordagem. Há [templates](https://github.com/janeiaraujo/knowledgebase/issues/new/choose) para os dois casos.
 - Para correções pequenas (typos, ajustes de documentação), vá direto ao pull request.
+- **Primeira vez aqui?** As issues marcadas com [`good first issue`](https://github.com/janeiaraujo/knowledgebase/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) são pontos de entrada com escopo pequeno e contexto já escrito.
+- **Encontrou uma falha de segurança?** Não abra issue pública — [reporte de forma privada](https://github.com/janeiaraujo/knowledgebase/security/advisories/new).
 
 ## Ambiente de desenvolvimento
 
