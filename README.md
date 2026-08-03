@@ -167,9 +167,11 @@ O sistema sobe e funciona **sem nenhuma** delas. Cada uma habilita um recurso es
 | `npm run dev` | Inicia com hot reload (`node --watch`) |
 | `npm run migrate` | Cria/atualiza os índices do MongoDB (idempotente) |
 | `npm run seed` | Popula dados de demonstração |
+| `node scripts/seed-sample-data.js` | Popula KBs, incidentes e eventos de exemplo extras (idempotente por tipo de dado) |
 | `npm test` | Smoke test: sobe a API real e valida boot, `/health`, login e uma rota protegida |
 
 > ⚠️ O `seed` é **aditivo**: executá-lo novamente duplica os dados de exemplo. Rode-o apenas em bancos vazios.
+> Já `scripts/seed-sample-data.js` verifica antes de inserir (pula KBs/incidentes se já existirem para o tenant), então pode rodar quantas vezes quiser.
 
 ### Frontend (`cd frontend`)
 

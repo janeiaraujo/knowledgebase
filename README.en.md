@@ -167,9 +167,11 @@ The system boots and works **without any** of these. Each one enables a specific
 | `npm run dev` | Starts with hot reload (`node --watch`) |
 | `npm run migrate` | Creates/updates MongoDB indexes (idempotent) |
 | `npm run seed` | Populates demo data |
+| `node scripts/seed-sample-data.js` | Populates extra sample KBs, incidents and events (idempotent per data type) |
 | `npm test` | Smoke test: boots the real API and checks boot, `/health`, login and a protected route |
 
 > ⚠️ `seed` is **additive**: running it again duplicates the sample data. Only run it against an empty database.
+> `scripts/seed-sample-data.js` checks before inserting (skips KBs/incidents if the tenant already has them), so it's safe to run more than once.
 
 ### Frontend (`cd frontend`)
 
