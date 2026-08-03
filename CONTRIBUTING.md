@@ -24,7 +24,7 @@ cd frontend && cp .env.example .env && npm install && npm run dev
    git checkout -b feat/minha-funcionalidade
    ```
 2. Faça suas alterações.
-3. Verifique que a aplicação sobe sem erros e que o fluxo afetado funciona de ponta a ponta.
+3. Verifique que a aplicação sobe sem erros e que o fluxo afetado funciona de ponta a ponta. No backend, rode `npm test` (smoke test) antes de abrir o PR — o mesmo check roda no CI.
 4. Abra o pull request descrevendo **o que** mudou e **por quê**.
 
 ### Nomes de branch
