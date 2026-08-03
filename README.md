@@ -4,6 +4,7 @@
 
 <!-- Badges dinâmicos: os valores são lidos do repositório em tempo real. -->
 [![Versão](https://img.shields.io/github/package-json/v/janeiaraujo/knowledgebase?filename=backend%2Fpackage.json&style=flat-square&color=0aa344&label=vers%C3%A3o)](backend/package.json)
+[![Última release](https://img.shields.io/github/v/release/janeiaraujo/knowledgebase?style=flat-square&color=0aa344&label=release)](https://github.com/janeiaraujo/knowledgebase/releases)
 [![Licença](https://img.shields.io/github/license/janeiaraujo/knowledgebase?style=flat-square&color=0aa344)](LICENSE)
 [![Estrelas](https://img.shields.io/github/stars/janeiaraujo/knowledgebase?style=flat-square&color=0aa344&label=estrelas)](https://github.com/janeiaraujo/knowledgebase/stargazers)
 [![Issues](https://img.shields.io/github/issues/janeiaraujo/knowledgebase?style=flat-square&color=0aa344)](https://github.com/janeiaraujo/knowledgebase/issues)
@@ -27,6 +28,7 @@
 - [Scripts disponíveis](#scripts-disponíveis)
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Como contribuir](#como-contribuir)
+- [Versionamento](#versionamento)
 - [Contribuidores](#contribuidores)
 - [Autor](#autor)
 - [Licença](#licença)
@@ -218,6 +220,14 @@ Contribuições são bem-vindas. Veja o [CONTRIBUTING.md](CONTRIBUTING.md) para 
 Se este projeto te ajudou, considere deixar uma ⭐ — é o que aumenta o alcance dele.
 
 [![Estrelas ao longo do tempo](https://img.shields.io/github/stars/janeiaraujo/knowledgebase?style=social)](https://github.com/janeiaraujo/knowledgebase/stargazers)
+
+## Versionamento
+
+Segue [SemVer](https://semver.org/lang/pt-BR/). A versão vive em dois lugares que precisam estar sempre iguais: `backend/package.json` e `frontend/package.json` — o CI falha o build se eles divergirem.
+
+Tag e [release](https://github.com/janeiaraujo/knowledgebase/releases) são automáticas: ao mergear um PR que muda a versão, o workflow `.github/workflows/release.yml` cria a tag `vX.Y.Z` e publica a release com as notas geradas a partir dos PRs mergeados desde a última — não precisa criar nada manualmente. O badge de "versão" no topo deste README lê `backend/package.json` em tempo real; o de "release" lê a última tag publicada.
+
+Para lançar uma nova versão: bump os dois `package.json` no mesmo PR, seguindo o tipo de mudança (`patch` para correção, `minor` para funcionalidade nova compatível, `major` para quebra de compatibilidade), e mergeie — o resto é automático.
 
 ## Contribuidores
 
