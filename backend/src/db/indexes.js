@@ -68,9 +68,67 @@ export async function createIndexes(db) {
     await db.collection('record_relations').createIndex({ tenant_id: 1, source_id: 1, target_id: 1, relation_type: 1 });
 
     // Text search indexes
-    await db.collection('records').createIndex({
-        title: 'text',
-        content_md: 'text',
-        'properties.tags': 'text'
-    });
+    await ensureRecordsTextIndex(db);
+}
+
+// Nome fixo para conseguir localizar e recriar o indice quando as opcoes
+// mudarem (o Mongo gera "title_text_content_md_text_..." por padrao).
+const RECORDS_TEXT_INDEX = 'records_text_search';
+
+const RECORDS_TEXT_KEYS = {
+    title: 'text',
+    content_md: 'text',
+    'properties.tags': 'text'
+};
+
+const RECORDS_TEXT_OPTIONS = {
+    name: RECORDS_TEXT_INDEX,
+    // O conteudo deste projeto e majoritariamente em portugues. Sem definir
+    // isto, o Mongo assume 'english' e aplica stemming ingles sobre texto
+    // PT - na pratica, buscar "incidentes" nao encontra "incidente", e
+    // stopwords portuguesas ("de", "para", "com") entram no indice como se
+    // fossem termos relevantes.
+    default_language: 'portuguese',
+    // Permite que um documento declare o proprio idioma, para quando a base
+    // tiver KBs em ingles convivendo com os em portugues. Campo dedicado em
+    // vez do padrao ('language'), que colidiria com um campo de negocio de
+    // mesmo nome.
+    language_override: 'search_language'
+};
+
+/**
+ * Cria o indice de texto de `records` garantindo as opcoes corretas.
+ *
+ * O Mongo nao permite alterar `default_language` de um indice existente:
+ * `createIndex` com opcoes diferentes falha com IndexOptionsConflict. Como
+ * esta funcao roda a cada boot, instalacoes antigas (indice em ingles)
+ * quebrariam. Por isso derrubamos o indice antigo antes de recriar.
+ */
+async function ensureRecordsTextIndex(db) {
+    const records = db.collection('records');
+
+    // Em base nova a colecao ainda nao existe e listar indices lanca
+    // NamespaceNotFound - nesse caso simplesmente nao ha indice antigo.
+    let existing = [];
+    try {
+        existing = await records.indexes();
+    } catch (error) {
+        if (error.codeName !== 'NamespaceNotFound' && error.code !== 26) throw error;
+    }
+
+    const currentTextIndex = existing.find(index => index.textIndexVersion !== undefined);
+
+    const isUpToDate = currentTextIndex &&
+        currentTextIndex.name === RECORDS_TEXT_INDEX &&
+        currentTextIndex.default_language === RECORDS_TEXT_OPTIONS.default_language &&
+        currentTextIndex.language_override === RECORDS_TEXT_OPTIONS.language_override;
+
+    if (isUpToDate) return;
+
+    // Só pode existir um indice de texto por colecao, entao o antigo sai antes.
+    if (currentTextIndex) {
+        await records.dropIndex(currentTextIndex.name);
+    }
+
+    await records.createIndex(RECORDS_TEXT_KEYS, RECORDS_TEXT_OPTIONS);
 }
