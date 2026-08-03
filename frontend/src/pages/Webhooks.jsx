@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Table, Button, Badge, Form, Modal, Row, Col, Alert, Spinner, Tabs, Tab } from 'react-bootstrap';
+import { Card, Table, Button, Badge, Form, Modal, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 
 const WEBHOOK_EVENTS = [

@@ -12,10 +12,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Container, Row, Col, Card, Badge, Button, Modal, Form, Tabs, Tab, Spinner, Alert, ListGroup, ProgressBar, Accordion, OverlayTrigger, Tooltip, Table } from 'react-bootstrap';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { FaFileAlt, FaClock, FaUser, FaPlus, FaCheck, FaTimes, FaRobot, FaSave, FaDownload, FaBook, FaLightbulb, FaHistory, FaQuestionCircle, FaTrash, FaEdit, FaArrowLeft, FaPlay, FaProjectDiagram, FaExclamationTriangle, FaChevronDown, FaChevronUp, FaShare, FaEye } from 'react-icons/fa';
-import { formatDistanceToNow, format } from 'date-fns';
+import { Container, Row, Col, Card, Badge, Button, Modal, Form, Tabs, Tab, Spinner, Alert, ListGroup, Accordion, Table } from 'react-bootstrap';
+import { useNavigate, useParams } from 'react-router-dom';
+import { FaClock, FaUser, FaPlus, FaCheck, FaRobot, FaSave, FaDownload, FaBook, FaLightbulb, FaQuestionCircle, FaTrash, FaArrowLeft, FaProjectDiagram, FaShare } from 'react-icons/fa';
+import { format } from 'date-fns';
 import { ptBR, enUS } from 'date-fns/locale';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
@@ -236,7 +236,7 @@ export default function PostMortemEditor() {
 
         setGenerating(true);
         try {
-            const response = await api.post(`/postmortem/${id}/rca/five-whys`, {
+            await api.post(`/postmortem/${id}/rca/five-whys`, {
                 initial_problem: rcaForm.initial_problem
             });
             
@@ -259,7 +259,7 @@ export default function PostMortemEditor() {
 
         setGenerating(true);
         try {
-            const response = await api.post(`/postmortem/${id}/rca/fishbone`, {
+            await api.post(`/postmortem/${id}/rca/fishbone`, {
                 problem_statement: rcaForm.initial_problem
             });
             

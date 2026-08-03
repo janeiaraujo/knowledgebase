@@ -64,6 +64,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Lint primeiro: falha em segundos, sem banco, e pega a classe de erro
+      # que o build nao pega - variavel fora de escopo, hook condicional.
+      - name: Lint
+        run: npm run lint
+
       # Testes de unidade rodam antes do banco: nao dependem de Mongo e
       # falham rapido se a logica de permissao/auth quebrou.
       - name: Run unit tests
@@ -104,6 +109,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Lint
+        run: npm run lint
 
       # Roda antes do build: chave de traducao quebrada nao derruba o
       # build, so aparece como caminho da chave na tela do usuario.

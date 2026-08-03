@@ -1,6 +1,5 @@
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
-import { requirePermission } from '../../middlewares/rbac.middleware.js';
 import { toObjectId } from '../../utils/mongodb.js';
 
 export default async function analyticsRoutes(fastify, options) {

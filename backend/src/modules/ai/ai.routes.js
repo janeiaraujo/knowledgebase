@@ -2,7 +2,6 @@ import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission } from '../../middlewares/rbac.middleware.js';
 import { toObjectId } from '../../utils/mongodb.js';
-import Joi from 'joi';
 import { getOpenAI, requireAI } from '../../utils/ai.js';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8MB, mesmo teto pratico do upload de arquivos

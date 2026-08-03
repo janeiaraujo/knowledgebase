@@ -782,10 +782,13 @@ export default async function reportsRoutes(fastify, options) {
     }
 
     async function generateTeamPerformance(db, tenantId, startDate) {
+        // TODO: kbsByUser e reviewsByUser sao calculados e descartados - o
+        // relatorio nunca os usa. Sao duas agregacoes caras rodando a toa.
+        // Ou o relatorio deveria mostra-los, ou as consultas deveriam sair.
         const [
             userStats,
-            kbsByUser,
-            reviewsByUser
+            _kbsByUser,
+            _reviewsByUser
         ] = await Promise.all([
             db.collection('users').aggregate([
                 { $match: { tenant_id: tenantId, status: 'active' } },
@@ -909,7 +912,7 @@ export default async function reportsRoutes(fastify, options) {
                 }
                 break;
             
-            case 'weekly':
+            case 'weekly': {
                 const targetDay = schedule.day || 1; // Default Monday
                 const daysUntil = (targetDay - now.getDay() + 7) % 7 || 7;
                 nextRun.setDate(now.getDate() + daysUntil);
@@ -917,6 +920,7 @@ export default async function reportsRoutes(fastify, options) {
                     nextRun.setDate(nextRun.getDate() + 7);
                 }
                 break;
+            }
             
             case 'monthly':
                 nextRun.setDate(schedule.day || 1);

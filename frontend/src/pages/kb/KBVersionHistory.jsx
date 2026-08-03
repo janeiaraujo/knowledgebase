@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Card, Button, Badge, ListGroup, Modal, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { recordAPI } from '../../services/api';
 
@@ -55,7 +55,6 @@ function computeDiff(oldText, newText) {
 export default function KBVersionHistory() {
   const { t } = useTranslation();
   const { id } = useParams();
-  const navigate = useNavigate();
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCompare, setShowCompare] = useState(false);
