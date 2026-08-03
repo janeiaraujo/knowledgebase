@@ -138,9 +138,19 @@ export default function Layout() {
               {/* Notifications */}
               <NotificationDropdown />
               
+              {/* Quick Capture Button */}
+              <Link
+                to="/quick-capture"
+                className="btn btn-outline-primary d-none d-sm-inline-flex align-items-center gap-1"
+                title="Captura Rápida"
+              >
+                <i className="bi bi-lightning-charge"></i>
+                <span className="d-none d-md-inline">Captura Rápida</span>
+              </Link>
+
               {/* New KB Button */}
-              <Link 
-                to="/kb/new" 
+              <Link
+                to="/kb/new"
                 className="btn btn-primary d-none d-sm-inline-flex align-items-center gap-1"
               >
                 <i className="bi bi-plus-lg"></i>
