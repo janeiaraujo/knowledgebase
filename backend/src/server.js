@@ -6,6 +6,7 @@ import rateLimit from '@fastify/rate-limit';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import { createIndexes } from './db/indexes.js';
+import { translateReplyPayload } from './i18n/index.js';
 
 dotenv.config();
 
@@ -246,6 +247,14 @@ await fastify.register(gamificationRoutes, { prefix: '/api/gamification' });
 await fastify.register(helpCenterRoutes, { prefix: '/api/help-center' });
 
 // Error handler
+// Traduz `error` e `message` de toda resposta para o idioma do usuario.
+// Fica aqui, na borda, em vez de em cada `throw`: sao ~255 mensagens em 15
+// modulos, escritas parte em ingles e parte em portugues. Texto fora do
+// catalogo passa intacto - pode ser conteudo do proprio usuario.
+fastify.addHook('preSerialization', async (request, reply, payload) =>
+    translateReplyPayload(request, payload)
+);
+
 fastify.setErrorHandler((error, request, reply) => {
     fastify.log.error(error);
 
