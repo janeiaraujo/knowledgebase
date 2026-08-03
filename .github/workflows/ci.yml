@@ -3,8 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+  # Sem filtro de branch de destino: PR empilhado sobre outra branch
+  # (base != main) tambem precisa de CI. Com o filtro anterior ele ficava
+  # sem nenhum check, e a protecao da main so cobria o PR de baixo.
   pull_request:
-    branches: [main]
 
 jobs:
   version-sync:
