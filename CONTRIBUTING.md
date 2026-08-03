@@ -106,6 +106,8 @@ Encontrou uma vulnerabilidade? Não abra issue pública — envie um e-mail ao m
 
 As rotas de `/api/auth` têm limites de requisição próprios, definidos em código (não em variável de ambiente), e o login bloqueia a conta por 15 minutos após 5 senhas erradas. Ao mexer nesse módulo, preserve as duas camadas: o limite por IP barra volume de uma origem, o bloqueio por conta barra tentativa distribuída contra um usuário específico.
 
+O `POST /api/events/ingest` é a única rota pública de escrita e tem limite **por token**, não por IP — várias fontes de monitoramento costumam sair do mesmo IP de saída, e limitar por IP faria uma ferramenta ruidosa derrubar a ingestão das outras.
+
 ## Reportando bugs
 
 Inclua na issue:

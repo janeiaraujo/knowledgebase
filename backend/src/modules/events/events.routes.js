@@ -42,7 +42,23 @@ export default async function eventRoutes(fastify, options) {
   // ==================== INGESTAO DE EVENTOS (publico, autenticado por token) ====================
 
   // Ingest external events - Zabbix, Grafana, Datadog, Sentry, etc.
-  fastify.post('/ingest', async (request, reply) => {
+  //
+  // Unica rota publica de escrita do sistema. O limite e por TOKEN, nao por
+  // IP: varias fontes costumam sair do mesmo IP de saida (NAT), e limitar
+  // por IP faria uma ferramenta ruidosa derrubar a ingestao das outras.
+  // Sem token identificavel, cai para o IP.
+  //
+  // 120/min e folgado para monitoramento normal e ainda contem um loop
+  // descontrolado ou um token vazado.
+  fastify.post('/ingest', {
+    config: {
+      rateLimit: {
+        max: 120,
+        timeWindow: '1 minute',
+        keyGenerator: (request) => request.headers['x-api-token'] || request.ip
+      }
+    }
+  }, async (request, reply) => {
     const db = fastify.db();
     const apiToken = request.headers['x-api-token'];
 
