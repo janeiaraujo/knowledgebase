@@ -4,19 +4,20 @@ import { Card, Badge, Button, Spinner, Form, ListGroup, Alert } from 'react-boot
 import { format, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { incidentAPI } from '../../services/api';
 
 const SEVERITY_CONFIG = {
-  low: { label: 'Baixa', color: 'success' },
-  medium: { label: 'Média', color: 'warning' },
-  high: { label: 'Alta', color: 'danger' },
-  critical: { label: 'Crítica', color: 'dark' }
+  low: { labelKey: 'incidents.severityLevels.low', color: 'success' },
+  medium: { labelKey: 'incidents.severityLevels.medium', color: 'warning' },
+  high: { labelKey: 'incidents.severityLevels.high', color: 'danger' },
+  critical: { labelKey: 'incidents.severityLevels.critical', color: 'dark' }
 };
 
 const STATUS_CONFIG = {
-  open: { label: 'Aberto', color: 'danger', icon: 'bi-broadcast' },
-  acknowledged: { label: 'Reconhecido', color: 'warning', icon: 'bi-pause-circle' },
-  resolved: { label: 'Resolvido', color: 'success', icon: 'bi-check-circle' }
+  open: { labelKey: 'incidents.statuses.open', color: 'danger', icon: 'bi-broadcast' },
+  acknowledged: { labelKey: 'incidents.statuses.acknowledged', color: 'warning', icon: 'bi-pause-circle' },
+  resolved: { labelKey: 'incidents.statuses.resolved', color: 'success', icon: 'bi-check-circle' }
 };
 
 const TIMELINE_ICONS = {
@@ -31,6 +32,7 @@ const TIMELINE_ICONS = {
 };
 
 export default function IncidentView() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -49,7 +51,7 @@ export default function IncidentView() {
       setRelatedKBs(data.relatedKBs || []);
     } catch (err) {
       console.error('Failed to load incident:', err);
-      toast.error('Erro ao carregar incidente');
+      toast.error(t('incidents.loadOneError'));
     } finally {
       setLoading(false);
     }
@@ -63,11 +65,11 @@ export default function IncidentView() {
     setTransitioning(true);
     try {
       const { data } = await incidentAPI.updateStatus(id, nextStatus);
-      toast.success(STATUS_CONFIG[nextStatus]?.label ? `Status: ${STATUS_CONFIG[nextStatus].label}` : 'Status atualizado');
+      toast.success(t('incidents.statusChanged', { status: t(STATUS_CONFIG[nextStatus].labelKey) }));
       setSuggestions(data.suggestions || null);
       await loadIncident();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Não foi possível mudar o status');
+      toast.error(err.response?.data?.error || t('incidents.statusChangeError'));
     } finally {
       setTransitioning(false);
     }
@@ -82,7 +84,7 @@ export default function IncidentView() {
       setNoteText('');
       await loadIncident();
     } catch (err) {
-      toast.error('Erro ao adicionar nota');
+      toast.error(t('incidents.noteError'));
     } finally {
       setAddingNote(false);
     }
@@ -126,8 +128,8 @@ export default function IncidentView() {
     return (
       <Card className="border-0 shadow-sm">
         <Card.Body className="text-center py-5">
-          <p className="text-muted">Incidente não encontrado</p>
-          <Link to="/incidents" className="btn btn-outline-secondary">Voltar</Link>
+          <p className="text-muted">{t('incidents.notFound')}</p>
+          <Link to="/incidents" className="btn btn-outline-secondary">{t('common.back')}</Link>
         </Card.Body>
       </Card>
     );
@@ -140,23 +142,23 @@ export default function IncidentView() {
     <>
       <div className="mb-3">
         <Link to="/incidents" className="btn btn-link ps-0">
-          <i className="bi bi-arrow-left me-2"></i>Voltar para Incidentes
+          <i className="bi bi-arrow-left me-2"></i>{t('incidents.backToList')}
         </Link>
       </div>
 
       {suggestions && (
         <Alert variant="success" onClose={() => setSuggestions(null)} dismissible>
-          <Alert.Heading className="h6"><i className="bi bi-check-circle me-2"></i>Incidente resolvido</Alert.Heading>
-          <p className="mb-2 small">Boas práticas recomendam registrar o aprendizado enquanto está fresco:</p>
+          <Alert.Heading className="h6"><i className="bi bi-check-circle me-2"></i>{t('incidents.resolvedTitle')}</Alert.Heading>
+          <p className="mb-2 small">{t('incidents.resolvedHelp')}</p>
           <div className="d-flex gap-2 flex-wrap">
             {suggestions.kb && (
               <Button size="sm" variant="success" onClick={goToQuickCapture}>
-                <i className="bi bi-lightning-charge me-1"></i>Criar KB a partir deste incidente
+                <i className="bi bi-lightning-charge me-1"></i>{t('incidents.createKb')}
               </Button>
             )}
             {suggestions.postmortem && (
               <Button size="sm" variant="outline-success" onClick={goToPostmortem}>
-                <i className="bi bi-file-earmark-text me-1"></i>Criar Post-Mortem
+                <i className="bi bi-file-earmark-text me-1"></i>{t('incidents.createPostmortem')}
               </Button>
             )}
           </div>
@@ -168,17 +170,17 @@ export default function IncidentView() {
           <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
               <div className="d-flex align-items-center gap-2 mb-2">
-                <Badge bg={status.color} className="fs-6"><i className={`bi ${status.icon} me-1`}></i>{status.label}</Badge>
-                <Badge bg={sev.color}>{sev.label}</Badge>
+                <Badge bg={status.color} className="fs-6"><i className={`bi ${status.icon} me-1`}></i>{t(status.labelKey)}</Badge>
+                <Badge bg={sev.color}>{t(sev.labelKey)}</Badge>
                 {incident.created_via === 'auto_ingest' && (
-                  <Badge bg="secondary"><i className="bi bi-robot me-1"></i>Aberto automaticamente</Badge>
+                  <Badge bg="secondary"><i className="bi bi-robot me-1"></i>{t('incidents.autoOpened')}</Badge>
                 )}
               </div>
               <h3 className="mb-1">{incident.title}</h3>
               {incident.description && <p className="text-muted mb-2">{incident.description}</p>}
               {incident.affected_services?.length > 0 && (
                 <div className="mb-2">
-                  <small className="text-muted">Serviços afetados: </small>
+                  <small className="text-muted">{t('incidents.affectedServices')}: </small>
                   {incident.affected_services.map(s => (
                     <Badge key={s} bg="light" text="dark" className="me-1 border">{s}</Badge>
                   ))}
@@ -192,17 +194,17 @@ export default function IncidentView() {
             <div className="d-flex gap-2">
               {incident.status === 'open' && (
                 <Button variant="warning" disabled={transitioning} onClick={() => handleTransition('acknowledged')}>
-                  <i className="bi bi-pause-circle me-1"></i>Reconhecer
+                  <i className="bi bi-pause-circle me-1"></i>{t('incidents.acknowledge')}
                 </Button>
               )}
               {(incident.status === 'open' || incident.status === 'acknowledged') && (
                 <Button variant="success" disabled={transitioning} onClick={() => handleTransition('resolved')}>
-                  <i className="bi bi-check-circle me-1"></i>Resolver
+                  <i className="bi bi-check-circle me-1"></i>{t('incidents.resolve')}
                 </Button>
               )}
               {incident.status !== 'open' && (
                 <Button variant="outline-danger" disabled={transitioning} onClick={() => handleTransition('open')}>
-                  <i className="bi bi-arrow-counterclockwise me-1"></i>Reabrir
+                  <i className="bi bi-arrow-counterclockwise me-1"></i>{t('incidents.reopen')}
                 </Button>
               )}
             </div>
@@ -213,7 +215,7 @@ export default function IncidentView() {
       <div className="row">
         <div className="col-lg-8">
           <Card className="border-0 shadow-sm mb-4">
-            <Card.Header><i className="bi bi-clock-history me-2"></i>Linha do tempo</Card.Header>
+            <Card.Header><i className="bi bi-clock-history me-2"></i>{t('incidents.timeline')}</Card.Header>
             <ListGroup variant="flush">
               {(incident.timeline || []).slice().reverse().map((entry, i) => (
                 <ListGroup.Item key={i} className="d-flex gap-2">
@@ -230,12 +232,12 @@ export default function IncidentView() {
             <Card.Body>
               <Form onSubmit={handleAddNote} className="d-flex gap-2">
                 <Form.Control
-                  placeholder="Adicionar nota ao incidente..."
+                  placeholder={t('incidents.addNotePlaceholder')}
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
                 />
                 <Button type="submit" variant="outline-primary" disabled={addingNote || !noteText.trim()}>
-                  {addingNote ? <Spinner size="sm" animation="border" /> : 'Adicionar'}
+                  {addingNote ? <Spinner size="sm" animation="border" /> : t('common.add')}
                 </Button>
               </Form>
             </Card.Body>
@@ -244,10 +246,10 @@ export default function IncidentView() {
 
         <div className="col-lg-4">
           <Card className="border-0 shadow-sm">
-            <Card.Header><i className="bi bi-journal-text me-2"></i>KBs relacionados</Card.Header>
+            <Card.Header><i className="bi bi-journal-text me-2"></i>{t('incidents.relatedKbs')}</Card.Header>
             <ListGroup variant="flush">
               {relatedKBs.length === 0 ? (
-                <ListGroup.Item className="text-muted small">Nenhum KB vinculado ainda</ListGroup.Item>
+                <ListGroup.Item className="text-muted small">{t('incidents.noRelatedKbs')}</ListGroup.Item>
               ) : (
                 relatedKBs.map(kb => (
                   <ListGroup.Item key={kb._id}>
@@ -258,7 +260,7 @@ export default function IncidentView() {
             </ListGroup>
             <Card.Body>
               <Button size="sm" variant="outline-primary" className="w-100" onClick={goToQuickCapture}>
-                <i className="bi bi-lightning-charge me-1"></i>Criar KB a partir deste incidente
+                <i className="bi bi-lightning-charge me-1"></i>{t('incidents.createKb')}
               </Button>
             </Card.Body>
           </Card>

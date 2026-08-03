@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col, Card, Form, Button, Badge, Dropdown, ButtonGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
@@ -13,12 +14,12 @@ const IconTag = () => <i className="bi bi-tag"></i>;
 const IconFolder = () => <i className="bi bi-folder"></i>;
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'Todos os Status' },
-  { value: 'draft', label: 'Rascunho' },
-  { value: 'in_review', label: 'Em Revisão' },
-  { value: 'approved', label: 'Aprovado' },
-  { value: 'published', label: 'Publicado' },
-  { value: 'rejected', label: 'Rejeitado' },
+  { value: '', labelKey: 'kb.statusFilter.all' },
+  { value: 'draft', labelKey: 'kb.status.draft' },
+  { value: 'in_review', labelKey: 'kb.status.in_review' },
+  { value: 'approved', labelKey: 'kb.status.approved' },
+  { value: 'published', labelKey: 'kb.status.published' },
+  { value: 'rejected', labelKey: 'kb.status.rejected' },
 ];
 
 const STATUS_BADGES = {
@@ -32,16 +33,17 @@ const STATUS_BADGES = {
 };
 
 const STATUS_LABELS = {
-  captured: 'Capturado',
-  draft: 'Rascunho',
-  in_review: 'Em Revisão',
-  approved: 'Aprovado',
-  published: 'Publicado',
-  rejected: 'Rejeitado',
-  deprecated: 'Descontinuado'
+  captured: 'kb.status.captured',
+  draft: 'kb.status.draft',
+  in_review: 'kb.status.in_review',
+  approved: 'kb.status.approved',
+  published: 'kb.status.published',
+  rejected: 'kb.status.rejected',
+  deprecated: 'kb.status.deprecated'
 };
 
 export default function KBList() {
+  const { t } = useTranslation();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
@@ -166,7 +168,7 @@ export default function KBList() {
       />
       
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Base de Conhecimento</h2>
+        <h2>{t('kb.title')}</h2>
         <div>
           {selectedRecords.length > 0 && (
             <ButtonGroup className="me-2">
@@ -196,7 +198,7 @@ export default function KBList() {
         <Col md={5}>
           <Form.Control
             type="search"
-            placeholder="Pesquisar KBs..."
+            placeholder={t('kb.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -204,7 +206,7 @@ export default function KBList() {
         <Col md={3}>
           <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             {STATUS_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
             ))}
           </Form.Select>
         </Col>
@@ -227,7 +229,7 @@ export default function KBList() {
               className="w-100"
             >
               <IconCheck className="me-1" />
-              {selectedRecords.length === filteredRecords.length ? 'Limpar' : 'Selecionar'}
+              {selectedRecords.length === filteredRecords.length ? t('common.clear') : t('common.select')}
             </Button>
           )}
         </Col>
@@ -247,7 +249,7 @@ export default function KBList() {
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 size="sm"
               >
-                <option value="">Todas as Categorias</option>
+                <option value="">{t('kb.allCategories')}</option>
                 {categories.map(cat => (
                   <option key={cat._id} value={cat._id}>{cat.name}</option>
                 ))}
@@ -265,7 +267,7 @@ export default function KBList() {
                 onChange={(e) => setTagFilter(e.target.value)}
                 size="sm"
               >
-                <option value="">Todas as Tags</option>
+                <option value="">{t('kb.allTags')}</option>
                 {tags.map(tag => (
                   <option key={tag._id} value={tag._id}>{tag.name}</option>
                 ))}
@@ -280,7 +282,7 @@ export default function KBList() {
               className="w-100"
             >
               <IconTimes className="me-1" />
-              Limpar Filtros
+              {t('kb.clearFilters')}
             </Button>
           </Col>
         </Row>
@@ -289,7 +291,7 @@ export default function KBList() {
       {isFetching && (
         <div className="text-center py-2 mb-3">
           <div className="spinner-border spinner-border-sm text-primary me-2" />
-          <small className="text-muted">Carregando...</small>
+          <small className="text-muted">{t('common.loading')}</small>
         </div>
       )}
       
@@ -310,7 +312,7 @@ export default function KBList() {
                       onClick={(e) => e.stopPropagation()}
                     />
                     <Badge bg={STATUS_BADGES[record.status] || 'secondary'}>
-                      {STATUS_LABELS[record.status] || record.status}
+                      {STATUS_LABELS[record.status] ? t(STATUS_LABELS[record.status]) : record.status}
                     </Badge>
                   </div>
                   {record.views > 0 && (

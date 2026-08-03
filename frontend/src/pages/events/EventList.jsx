@@ -4,11 +4,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'react-toastify';
+import { useTranslation, Trans } from 'react-i18next';
 import { eventAPI } from '../../services/api';
 
 const SEVERITY_COLORS = { info: 'secondary', low: 'success', medium: 'warning', high: 'danger', critical: 'dark' };
 
 export default function EventList() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
@@ -34,10 +36,10 @@ export default function EventList() {
     setConverting(eventId);
     try {
       const { data } = await eventAPI.convertToIncident(eventId);
-      toast.success('Incidente criado a partir do evento');
+      toast.success(t('events.incidentCreated'));
       navigate(`/incidents/${data.incidentId}`);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao converter evento em incidente');
+      toast.error(err.response?.data?.error || t('events.convertError'));
     } finally {
       setConverting(null);
     }
@@ -46,34 +48,36 @@ export default function EventList() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2 className="mb-0">Eventos</h2>
+        <h2 className="mb-0">{t('nav.items.events')}</h2>
         <Link to="/integrations" className="btn btn-outline-primary btn-sm">
-          <i className="bi bi-hdd-network me-1"></i>Gerenciar fontes de eventos
+          <i className="bi bi-hdd-network me-1"></i>{t('events.manageSources')}
         </Link>
       </div>
 
       <Card className="border-0 shadow-sm">
-        <Card.Header><i className="bi bi-activity me-2"></i>Eventos recentes</Card.Header>
+        <Card.Header><i className="bi bi-activity me-2"></i>{t('events.recent')}</Card.Header>
         {loadingEvents ? (
           <Card.Body className="text-center py-5"><Spinner animation="border" variant="primary" /></Card.Body>
         ) : events.length === 0 ? (
           <Card.Body className="text-center py-5">
             <i className="bi bi-inbox fs-1 text-muted"></i>
-            <p className="text-muted mt-3 mb-0">Nenhum evento recebido ainda</p>
+            <p className="text-muted mt-3 mb-0">{t('events.empty')}</p>
             <p className="text-muted small">
-              Configure uma fonte em <Link to="/integrations">Integrações → Entrada</Link> para começar a receber
-              eventos de monitoramento (Zabbix, Grafana, Datadog, Sentry...).
+              <Trans i18nKey="events.emptyHelp">
+                Configure uma fonte em <Link to="/integrations">Integrações</Link> para começar a receber
+                eventos de monitoramento (Zabbix, Grafana, Datadog, Sentry...).
+              </Trans>
             </p>
           </Card.Body>
         ) : (
           <Table hover responsive className="mb-0 align-middle">
             <thead>
               <tr>
-                <th>Título</th>
-                <th>Fonte</th>
-                <th>Severidade</th>
-                <th>Ocorrências</th>
-                <th>Recebido</th>
+                <th>{t('common.title')}</th>
+                <th>{t('events.source')}</th>
+                <th>{t('incidents.severity')}</th>
+                <th>{t('events.occurrences')}</th>
+                <th>{t('events.receivedAt')}</th>
                 <th></th>
               </tr>
             </thead>
@@ -90,7 +94,7 @@ export default function EventList() {
                   <td>
                     {ev.related_incidents?.length > 0 ? (
                       <Button size="sm" variant="outline-secondary" onClick={() => navigate(`/incidents/${ev.related_incidents[0]}`)}>
-                        Ver incidente
+                        {t('events.viewIncident')}
                       </Button>
                     ) : (
                       <Button
@@ -99,7 +103,7 @@ export default function EventList() {
                         disabled={converting === ev._id}
                         onClick={() => handleConvert(ev._id)}
                       >
-                        {converting === ev._id ? <Spinner size="sm" animation="border" /> : 'Converter em incidente'}
+                        {converting === ev._id ? <Spinner size="sm" animation="border" /> : t('events.convertToIncident')}
                       </Button>
                     )}
                   </td>
