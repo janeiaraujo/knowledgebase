@@ -8,10 +8,9 @@ import { hashPassword } from '../auth/auth.service.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import {
-    storeFileWithRedundancy,
+    storeFile,
     deleteLocalCopy,
-    deleteFromR2,
-    hasR2Config
+    deleteFromR2
 } from '../../utils/storage.js';
 
 const SUPPORTED_LANGUAGES = ['pt', 'en'];
@@ -37,8 +36,6 @@ const publicProfile = (user) => ({
     created_at: user.created_at,
     last_login: user.last_login,
     avatar_url: user.avatar?.url || null,
-    // URL da copia local, usada pelo frontend como fallback se a do R2 falhar
-    avatar_fallback_url: user.avatar?.local_url || null,
     preferences: {
         language: user.preferences?.language || 'pt',
         theme: user.preferences?.theme || 'system'
@@ -189,7 +186,7 @@ export default async function userRoutes(fastify, options) {
             const tenantIdStr = request.tenantId.toString();
             const fileName = `avatar-${request.currentUser._id}-${crypto.randomBytes(8).toString('hex')}.${extension}`;
 
-            const stored = await storeFileWithRedundancy({
+            const stored = await storeFile({
                 tenantId: tenantIdStr,
                 fileName,
                 buffer,
@@ -210,8 +207,6 @@ export default async function userRoutes(fastify, options) {
                     $set: {
                         avatar: {
                             url: stored.url,
-                            local_url: stored.localUrl,
-                            r2_url: stored.r2Url,
                             key: stored.key,
                             file_name: fileName,
                             storage: stored.storage,
@@ -256,19 +251,21 @@ export default async function userRoutes(fastify, options) {
         return { success: true, user: publicProfile(updated) };
     });
 
-    // Limpeza best-effort das duas copias: falhar aqui nao pode quebrar a
-    // troca/remocao do avatar, que ja foi persistida.
+    // Limpeza best-effort: falhar aqui nao pode quebrar a troca/remocao do
+    // avatar, que ja foi persistida. Remove de onde o arquivo realmente esta,
+    // conforme o `storage` gravado no upload.
     function removePreviousAvatar(avatar, tenantIdStr, logger) {
+        if (avatar.storage === 'r2' && avatar.key) {
+            deleteFromR2(avatar.key).catch(error => {
+                logger?.warn?.({ err: error }, 'Falha ao remover avatar anterior do R2');
+            });
+            return;
+        }
+
         try {
             deleteLocalCopy(tenantIdStr, avatar.file_name);
         } catch (error) {
             logger?.warn?.({ err: error }, 'Falha ao remover cópia local do avatar anterior');
-        }
-
-        if (avatar.r2_url && avatar.key && hasR2Config()) {
-            deleteFromR2(avatar.key).catch(error => {
-                logger?.warn?.({ err: error }, 'Falha ao remover avatar anterior do R2');
-            });
         }
     }
 
