@@ -21,8 +21,58 @@
 
 ---
 
+## Screenshots
+
+<table>
+<tr>
+<td width="50%">
+
+**Captura Rápida** — texto, voz, logs e imagens; a IA gera o artigo
+<img src="docs/screenshots/quick-capture.png" alt="Tela de Captura Rápida, com campos de problema, solução, logs e upload de imagens">
+
+</td>
+<td width="50%">
+
+**Incidentes** — lifecycle completo: aberto → reconhecido → resolvido
+<img src="docs/screenshots/incidents.png" alt="Lista de incidentes com severidade, status e origem (manual ou automática)">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Knowledge Base** — biblioteca de artigos com workflow de revisão
+<img src="docs/screenshots/kb-list.png" alt="Lista de KBs com status de rascunho, revisão e publicado">
+
+</td>
+<td width="50%">
+
+**Artigo de KB** — gerado a partir de um incidente, pronto para revisão
+<img src="docs/screenshots/kb-view.png" alt="Visualização de um artigo de KB em revisão">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Busca Inteligente** — combina texto, busca semântica (IA) e análise de problema
+<img src="docs/screenshots/smart-search.png" alt="Tela de busca inteligente">
+
+</td>
+<td width="50%">
+
+**Post-Mortem** — templates Google SRE, Netflix e AWS Well-Architected
+<img src="docs/screenshots/postmortem.png" alt="Modal de criação de post-mortem com templates">
+
+</td>
+</tr>
+</table>
+
+---
+
 ## Índice
 
+- [Screenshots](#screenshots)
 - [Principais recursos](#principais-recursos)
 - [Stack](#stack)
 - [Começando](#começando)
