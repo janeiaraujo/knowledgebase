@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Form, Button, Spinner, Alert } from 'react-bootstrap';
 import { commentAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 function Comment({ comment, onReply, onDelete, onEdit, currentUserId, userRole }) {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -89,7 +91,7 @@ function Comment({ comment, onReply, onDelete, onEdit, currentUserId, userRole }
                   size="sm" 
                   className="p-0 text-muted"
                   onClick={() => {
-                    if (window.confirm('Tem certeza que deseja excluir este comentário?')) {
+                    if (window.confirm(t('kbComments.temCertezaQueDesejaExcluirEste'))) {
                       onDelete(comment._id);
                     }
                   }}
@@ -125,7 +127,7 @@ function Comment({ comment, onReply, onDelete, onEdit, currentUserId, userRole }
                     setEditContent(comment.content);
                   }}
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -140,7 +142,7 @@ function Comment({ comment, onReply, onDelete, onEdit, currentUserId, userRole }
               className="p-0 text-muted"
               onClick={() => setShowReplyForm(!showReplyForm)}
             >
-              <i className="bi bi-reply me-1"></i>Responder
+              <i className="bi bi-reply me-1"></i>{t('kbComments.responder')}
             </Button>
           )}
           
@@ -149,7 +151,7 @@ function Comment({ comment, onReply, onDelete, onEdit, currentUserId, userRole }
               <Form.Control
                 as="textarea"
                 rows={2}
-                placeholder="Escreva sua resposta..."
+                placeholder={t('kbComments.escrevaSuaResposta')}
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 className="mb-2"
@@ -170,7 +172,7 @@ function Comment({ comment, onReply, onDelete, onEdit, currentUserId, userRole }
                     setReplyContent('');
                   }}
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -199,6 +201,7 @@ function Comment({ comment, onReply, onDelete, onEdit, currentUserId, userRole }
 }
 
 export default function KBComments({ recordId }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -337,7 +340,7 @@ export default function KBComments({ recordId }) {
           <Form.Control
             as="textarea"
             rows={3}
-            placeholder="Adicione um comentário..."
+            placeholder={t('kbComments.adicioneUmComentario')}
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
           />
@@ -349,12 +352,12 @@ export default function KBComments({ recordId }) {
           {submitting ? (
             <>
               <Spinner size="sm" className="me-2" />
-              Enviando...
+              {t('kbComments.enviando')}
             </>
           ) : (
             <>
               <i className="bi bi-send me-2"></i>
-              Comentar
+              {t('kbComments.comentar')}
             </>
           )}
         </Button>
@@ -378,7 +381,7 @@ export default function KBComments({ recordId }) {
       ) : (
         <div className="text-center py-4 text-muted">
           <i className="bi bi-chat-dots fs-1 d-block mb-2"></i>
-          <p className="mb-0">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+          <p className="mb-0">{t('kbComments.nenhumComentarioAindaSejaOPrimeiro')}</p>
         </div>
       )}
     </div>

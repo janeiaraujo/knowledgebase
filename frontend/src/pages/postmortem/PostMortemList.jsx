@@ -16,6 +16,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Table, Badge, Button, Modal, Form, Tabs, Tab, Spinner, Alert, ListGroup, ProgressBar, Accordion, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FaFileAlt, FaClock, FaUser, FaPlus, FaCheck, FaTimes, FaRobot, FaChartBar, FaFilter, FaExclamationTriangle, FaEye, FaEdit, FaTrash, FaDownload, FaBook, FaLightbulb, FaHistory, FaQuestionCircle, FaChevronRight, FaPlay, FaPause, FaFlag, FaUserCheck } from 'react-icons/fa';
@@ -50,6 +51,7 @@ const timelineTypes = {
 };
 
 export default function PostMortemList() {
+  const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -128,7 +130,7 @@ export default function PostMortemList() {
             }));
         } catch (error) {
             console.error('Error loading post-mortems:', error);
-            toast.error('Erro ao carregar post-mortems');
+            toast.error(t('postMortemList.erroAoCarregarPostMortems'));
         } finally {
             setLoading(false);
         }
@@ -156,7 +158,7 @@ export default function PostMortemList() {
     // Create new post-mortem
     const createPostMortem = async () => {
         if (!newForm.title.trim()) {
-            toast.warning('Informe o título');
+            toast.warning(t('postMortemList.informeOTitulo'));
             return;
         }
 
@@ -166,24 +168,24 @@ export default function PostMortemList() {
                 affected_services: newForm.affected_services.split(',').map(s => s.trim()).filter(Boolean)
             });
 
-            toast.success('Post-mortem criado!');
+            toast.success(t('postMortemList.postMortemCriado'));
             setShowCreateModal(false);
             navigate(`/postmortem/${response.data.postmortem_id}`);
         } catch (error) {
-            toast.error('Erro ao criar post-mortem');
+            toast.error(t('postMortemList.erroAoCriarPostMortem'));
         }
     };
 
     // Delete post-mortem
     const deletePostMortem = async (id) => {
-        if (!window.confirm('Confirma exclusão do post-mortem?')) return;
+        if (!window.confirm(t('postMortemList.confirmaExclusaoDoPostMortem'))) return;
 
         try {
             await api.delete(`/postmortem/${id}`);
-            toast.success('Post-mortem excluído');
+            toast.success(t('postMortemList.postMortemExcluido'));
             loadPostmortems();
         } catch (error) {
-            toast.error('Erro ao excluir');
+            toast.error(t('postMortemList.erroAoExcluir'));
         }
     };
 
@@ -207,14 +209,14 @@ export default function PostMortemList() {
                         <div>
                             <h2>
                                 <FaFileAlt className="me-2" />
-                                Post-Mortems
+                                {t('postMortemList.postMortems')}
                             </h2>
                             <p className="text-muted mb-0">
-                                Documentação de incidentes e análise de causa raiz
+                                {t('postMortemList.documentacaoDeIncidentesEAnaliseDe')}
                             </p>
                         </div>
                         <Button variant="primary" onClick={() => setShowCreateModal(true)}>
-                            <FaPlus className="me-1" /> Novo Post-Mortem
+                            <FaPlus className="me-1" /> {t('postMortemList.novoPostMortem')}
                         </Button>
                     </div>
                 </Col>
@@ -227,7 +229,7 @@ export default function PostMortemList() {
                         <Card className="text-center h-100">
                             <Card.Body>
                                 <h3>{stats.total}</h3>
-                                <small className="text-muted">Total</small>
+                                <small className="text-muted">{t('postMortemList.total')}</small>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -235,7 +237,7 @@ export default function PostMortemList() {
                         <Card className="text-center h-100">
                             <Card.Body>
                                 <h3 className="text-danger">{stats.by_severity?.critical || 0}</h3>
-                                <small className="text-muted">Críticos</small>
+                                <small className="text-muted">{t('postMortemList.criticos')}</small>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -243,7 +245,7 @@ export default function PostMortemList() {
                         <Card className="text-center h-100">
                             <Card.Body>
                                 <h3>{stats.avg_resolution_minutes ? `${Math.round(stats.avg_resolution_minutes)}min` : '-'}</h3>
-                                <small className="text-muted">MTTR Médio</small>
+                                <small className="text-muted">{t('postMortemList.mttrMedio')}</small>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -251,7 +253,7 @@ export default function PostMortemList() {
                         <Card className="text-center h-100">
                             <Card.Body>
                                 <h3 className="text-success">{stats.action_items?.completed || 0}</h3>
-                                <small className="text-muted">Ações Concluídas</small>
+                                <small className="text-muted">{t('postMortemList.acoesConcluidas')}</small>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -264,12 +266,12 @@ export default function PostMortemList() {
                     <Row className="align-items-end">
                         <Col md={3}>
                             <Form.Group>
-                                <Form.Label><FaFilter className="me-1" /> Status</Form.Label>
+                                <Form.Label><FaFilter className="me-1" /> {t('common.status')}</Form.Label>
                                 <Form.Select
                                     value={filters.status}
                                     onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
                                 >
-                                    <option value="">Todos</option>
+                                    <option value="">{t('postMortemList.todos')}</option>
                                     {Object.entries(statusConfig).map(([value, config]) => (
                                         <option key={value} value={value}>{config.label}</option>
                                     ))}
@@ -278,12 +280,12 @@ export default function PostMortemList() {
                         </Col>
                         <Col md={3}>
                             <Form.Group>
-                                <Form.Label>Severidade</Form.Label>
+                                <Form.Label>{t('postMortemList.severidade')}</Form.Label>
                                 <Form.Select
                                     value={filters.severity}
                                     onChange={e => setFilters(prev => ({ ...prev, severity: e.target.value }))}
                                 >
-                                    <option value="">Todas</option>
+                                    <option value="">{t('postMortemList.todas')}</option>
                                     {Object.entries(severityConfig).map(([value, config]) => (
                                         <option key={value} value={value}>{config.label}</option>
                                     ))}
@@ -292,10 +294,10 @@ export default function PostMortemList() {
                         </Col>
                         <Col md={4}>
                             <Form.Group>
-                                <Form.Label>Buscar</Form.Label>
+                                <Form.Label>{t('postMortemList.buscar')}</Form.Label>
                                 <Form.Control
                                     type="text"
-                                    placeholder="Buscar por título..."
+                                    placeholder={t('postMortemList.buscarPorTitulo')}
                                     value={filters.search}
                                     onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
                                 />
@@ -303,7 +305,7 @@ export default function PostMortemList() {
                         </Col>
                         <Col md={2} className="text-end">
                             <Button variant="outline-secondary" onClick={() => setFilters({ status: '', severity: '', search: '' })}>
-                                <FaTimes className="me-1" /> Limpar
+                                <FaTimes className="me-1" /> {t('postMortemList.limpar')}
                             </Button>
                         </Col>
                     </Row>
@@ -320,18 +322,18 @@ export default function PostMortemList() {
                     ) : postmortems.length === 0 ? (
                         <Alert variant="info" className="text-center">
                             <FaLightbulb className="me-2" />
-                            Nenhum post-mortem encontrado
+                            {t('postMortemList.nenhumPostMortemEncontrado')}
                         </Alert>
                     ) : (
                         <Table responsive hover>
                             <thead>
                                 <tr>
-                                    <th>Severidade</th>
-                                    <th>Título</th>
-                                    <th>Data do Incidente</th>
-                                    <th>Status</th>
-                                    <th>Serviços</th>
-                                    <th>Ações</th>
+                                    <th>{t('postMortemList.severidade')}</th>
+                                    <th>{t('common.title')}</th>
+                                    <th>{t('postMortemList.dataDoIncidente')}</th>
+                                    <th>{t('common.status')}</th>
+                                    <th>{t('postMortemList.servicos')}</th>
+                                    <th>{t('reviews.actions')}</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -396,7 +398,7 @@ export default function PostMortemList() {
                                 disabled={pagination.page === 1}
                                 onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
                             >
-                                Anterior
+                                {t('search.previous')}
                             </Button>
                             <span className="align-self-center">
                                 Página {pagination.page} de {pagination.pages}
@@ -406,7 +408,7 @@ export default function PostMortemList() {
                                 disabled={pagination.page === pagination.pages}
                                 onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
                             >
-                                Próxima
+                                {t('search.next')}
                             </Button>
                         </div>
                     )}
@@ -418,16 +420,16 @@ export default function PostMortemList() {
                 <Modal.Header closeButton>
                     <Modal.Title>
                         <FaPlus className="me-2" />
-                        Novo Post-Mortem
+                        {t('postMortemList.novoPostMortem')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Título do Incidente *</Form.Label>
+                            <Form.Label>{t('postMortemList.tituloDoIncidente')}</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ex: Indisponibilidade do serviço de pagamentos"
+                                placeholder={t('postMortemList.exIndisponibilidadeDoServicoDePaga')}
                                 value={newForm.title}
                                 onChange={e => setNewForm(prev => ({ ...prev, title: e.target.value }))}
                             />
@@ -436,7 +438,7 @@ export default function PostMortemList() {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Data do Incidente</Form.Label>
+                                    <Form.Label>{t('postMortemList.dataDoIncidente')}</Form.Label>
                                     <Form.Control
                                         type="date"
                                         value={newForm.incident_date}
@@ -446,7 +448,7 @@ export default function PostMortemList() {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Severidade</Form.Label>
+                                    <Form.Label>{t('postMortemList.severidade')}</Form.Label>
                                     <Form.Select
                                         value={newForm.severity}
                                         onChange={e => setNewForm(prev => ({ ...prev, severity: e.target.value }))}
@@ -462,7 +464,7 @@ export default function PostMortemList() {
                         </Row>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Template</Form.Label>
+                            <Form.Label>{t('postMortemList.template')}</Form.Label>
                             <div className="d-flex flex-wrap gap-2">
                                 {templates.map(template => (
                                     <Card 
@@ -481,10 +483,10 @@ export default function PostMortemList() {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Serviços Afetados</Form.Label>
+                            <Form.Label>{t('postMortemList.servicosAfetados')}</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Ex: API, Frontend, Database (separados por vírgula)"
+                                placeholder={t('postMortemList.exApiFrontendDatabaseSeparadosPor')}
                                 value={newForm.affected_services}
                                 onChange={e => setNewForm(prev => ({ ...prev, affected_services: e.target.value }))}
                             />
@@ -493,10 +495,10 @@ export default function PostMortemList() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
-                        Cancelar
+                        {t('common.cancel')}
                     </Button>
                     <Button variant="primary" onClick={createPostMortem}>
-                        <FaPlus className="me-1" /> Criar
+                        <FaPlus className="me-1" /> {t('postMortemList.criar')}
                     </Button>
                 </Modal.Footer>
             </Modal>

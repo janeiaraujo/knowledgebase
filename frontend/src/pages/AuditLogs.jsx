@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Table, Form, Button, Badge, Row, Col, InputGroup, Pagination, Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
@@ -58,6 +59,7 @@ const ENTITY_LABELS = {
 };
 
 export default function AuditLogs() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -184,9 +186,9 @@ export default function AuditLogs() {
       <Card className="border-0 shadow-sm">
         <Card.Body className="text-center py-5">
           <i className="bi bi-shield-lock display-1 text-muted"></i>
-          <h4 className="mt-3">Acesso Restrito</h4>
-          <p className="text-muted">Apenas administradores podem visualizar os logs de auditoria.</p>
-          <Link to="/" className="btn btn-primary">Voltar ao Dashboard</Link>
+          <h4 className="mt-3">{t('auditLogs.acessoRestrito')}</h4>
+          <p className="text-muted">{t('auditLogs.apenasAdministradoresPodemVisualiz')}</p>
+          <Link to="/" className="btn btn-primary">{t('auditLogs.voltarAoDashboard')}</Link>
         </Card.Body>
       </Card>
     );
@@ -197,10 +199,10 @@ export default function AuditLogs() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">
           <i className="bi bi-journal-text me-2"></i>
-          Logs de Auditoria
+          {t('auditLogs.logsDeAuditoria')}
         </h2>
         <Button variant="outline-secondary" size="sm" onClick={() => fetchLogs()}>
-          <i className="bi bi-arrow-clockwise me-1"></i>Atualizar
+          <i className="bi bi-arrow-clockwise me-1"></i>{t('auditLogs.atualizar')}
         </Button>
       </div>
       
@@ -210,13 +212,13 @@ export default function AuditLogs() {
           <Row className="g-3">
             <Col md={3}>
               <Form.Group>
-                <Form.Label className="small text-muted">Ação</Form.Label>
+                <Form.Label className="small text-muted">{t('auditLogs.acao')}</Form.Label>
                 <Form.Select 
                   size="sm"
                   value={filters.action}
                   onChange={(e) => handleFilterChange('action', e.target.value)}
                 >
-                  <option value="">Todas as ações</option>
+                  <option value="">{t('auditLogs.todasAsAcoes')}</option>
                   {Object.entries(ACTION_LABELS).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
                   ))}
@@ -226,13 +228,13 @@ export default function AuditLogs() {
             
             <Col md={2}>
               <Form.Group>
-                <Form.Label className="small text-muted">Tipo</Form.Label>
+                <Form.Label className="small text-muted">{t('gpsEditor.type')}</Form.Label>
                 <Form.Select 
                   size="sm"
                   value={filters.entity_type}
                   onChange={(e) => handleFilterChange('entity_type', e.target.value)}
                 >
-                  <option value="">Todos os tipos</option>
+                  <option value="">{t('auditLogs.todosOsTipos')}</option>
                   {Object.entries(ENTITY_LABELS).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
                   ))}
@@ -242,13 +244,13 @@ export default function AuditLogs() {
             
             <Col md={2}>
               <Form.Group>
-                <Form.Label className="small text-muted">Usuário</Form.Label>
+                <Form.Label className="small text-muted">{t('userActivity.user')}</Form.Label>
                 <Form.Select 
                   size="sm"
                   value={filters.user_id}
                   onChange={(e) => handleFilterChange('user_id', e.target.value)}
                 >
-                  <option value="">Todos os usuários</option>
+                  <option value="">{t('auditLogs.todosOsUsuarios')}</option>
                   {users.map(u => (
                     <option key={u._id} value={u._id}>{u.name || u.email}</option>
                   ))}
@@ -270,7 +272,7 @@ export default function AuditLogs() {
             
             <Col md={2}>
               <Form.Group>
-                <Form.Label className="small text-muted">Até</Form.Label>
+                <Form.Label className="small text-muted">{t('auditLogs.ate')}</Form.Label>
                 <Form.Control
                   type="date"
                   size="sm"
@@ -285,7 +287,7 @@ export default function AuditLogs() {
                 variant="outline-secondary" 
                 size="sm"
                 onClick={clearFilters}
-                title="Limpar filtros"
+                title={t('auditLogs.limparFiltros')}
               >
                 <i className="bi bi-x-lg"></i>
               </Button>
@@ -300,19 +302,19 @@ export default function AuditLogs() {
           {loading ? (
             <div className="text-center py-5">
               <div className="spinner-border" role="status">
-                <span className="visually-hidden">Carregando...</span>
+                <span className="visually-hidden">{t('common.loading')}</span>
               </div>
             </div>
           ) : logs.length > 0 ? (
             <Table hover responsive className="mb-0">
               <thead className="bg-light">
                 <tr>
-                  <th style={{ width: '150px' }}>Data/Hora</th>
-                  <th style={{ width: '150px' }}>Usuário</th>
-                  <th style={{ width: '120px' }}>Ação</th>
-                  <th style={{ width: '100px' }}>Tipo</th>
-                  <th>Descrição</th>
-                  <th style={{ width: '80px' }}>Detalhes</th>
+                  <th style={{ width: '150px' }}>{t('auditLogs.dataHora')}</th>
+                  <th style={{ width: '150px' }}>{t('userActivity.user')}</th>
+                  <th style={{ width: '120px' }}>{t('auditLogs.acao')}</th>
+                  <th style={{ width: '100px' }}>{t('gpsEditor.type')}</th>
+                  <th>{t('common.description')}</th>
+                  <th style={{ width: '80px' }}>{t('postmortem.details')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -368,7 +370,7 @@ export default function AuditLogs() {
           ) : (
             <div className="text-center py-5">
               <i className="bi bi-journal-x display-4 text-muted"></i>
-              <p className="text-muted mt-3">Nenhum log encontrado com os filtros selecionados</p>
+              <p className="text-muted mt-3">{t('auditLogs.nenhumLogEncontradoComOsFiltros')}</p>
             </div>
           )}
         </Card.Body>
@@ -432,7 +434,7 @@ export default function AuditLogs() {
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="bi bi-journal-text me-2"></i>
-            Detalhes do Log
+            {t('auditLogs.detalhesDoLog')}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -440,7 +442,7 @@ export default function AuditLogs() {
             <div>
               <Row className="mb-3">
                 <Col md={6}>
-                  <small className="text-muted">Data/Hora</small>
+                  <small className="text-muted">{t('auditLogs.dataHora')}</small>
                   <p className="mb-0">{formatDate(selectedLog.created_at)}</p>
                 </Col>
                 <Col md={6}>
@@ -451,13 +453,13 @@ export default function AuditLogs() {
               
               <Row className="mb-3">
                 <Col md={6}>
-                  <small className="text-muted">Usuário</small>
+                  <small className="text-muted">{t('userActivity.user')}</small>
                   <p className="mb-0">
                     {selectedLog.user_info?.name || selectedLog.user_info?.email || 'Sistema'}
                   </p>
                 </Col>
                 <Col md={6}>
-                  <small className="text-muted">User Agent</small>
+                  <small className="text-muted">{t('auditLogs.userAgent')}</small>
                   <p className="mb-0 small text-truncate" title={selectedLog.user_agent}>
                     {selectedLog.user_agent || 'N/A'}
                   </p>
@@ -466,7 +468,7 @@ export default function AuditLogs() {
               
               <Row className="mb-3">
                 <Col md={4}>
-                  <small className="text-muted">Ação</small>
+                  <small className="text-muted">{t('auditLogs.acao')}</small>
                   <p className="mb-0">
                     <Badge bg={ACTION_BADGES[selectedLog.action] || 'secondary'}>
                       {ACTION_LABELS[selectedLog.action] || selectedLog.action}
@@ -474,25 +476,25 @@ export default function AuditLogs() {
                   </p>
                 </Col>
                 <Col md={4}>
-                  <small className="text-muted">Tipo de Entidade</small>
+                  <small className="text-muted">{t('auditLogs.tipoDeEntidade')}</small>
                   <p className="mb-0">{ENTITY_LABELS[selectedLog.entity_type] || selectedLog.entity_type}</p>
                 </Col>
                 <Col md={4}>
-                  <small className="text-muted">ID da Entidade</small>
+                  <small className="text-muted">{t('auditLogs.idDaEntidade')}</small>
                   <p className="mb-0 font-monospace small">{selectedLog.entity_id || 'N/A'}</p>
                 </Col>
               </Row>
               
               {selectedLog.description && (
                 <div className="mb-3">
-                  <small className="text-muted">Descrição</small>
+                  <small className="text-muted">{t('common.description')}</small>
                   <p className="mb-0">{selectedLog.description}</p>
                 </div>
               )}
               
               {selectedLog.changes && Object.keys(selectedLog.changes).length > 0 && (
                 <div className="mb-3">
-                  <small className="text-muted">Alterações</small>
+                  <small className="text-muted">{t('auditLogs.alteracoes')}</small>
                   <div className="bg-light p-3 rounded mt-1">
                     <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>
                       {JSON.stringify(selectedLog.changes, null, 2)}
@@ -503,7 +505,7 @@ export default function AuditLogs() {
               
               {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
                 <div>
-                  <small className="text-muted">Metadados</small>
+                  <small className="text-muted">{t('auditLogs.metadados')}</small>
                   <div className="bg-light p-3 rounded mt-1">
                     <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap' }}>
                       {JSON.stringify(selectedLog.metadata, null, 2)}
@@ -516,7 +518,7 @@ export default function AuditLogs() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
-            Fechar
+            {t('postmortem.close')}
           </Button>
         </Modal.Footer>
       </Modal>

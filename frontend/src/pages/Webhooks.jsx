@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Table, Button, Badge, Form, Modal, Row, Col, Alert, Spinner, Tabs, Tab } from 'react-bootstrap';
 import api from '../services/api';
 
@@ -17,6 +18,7 @@ const WEBHOOK_EVENTS = [
 ];
 
 export default function Webhooks() {
+  const { t } = useTranslation();
   const [webhooks, setWebhooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -93,7 +95,7 @@ export default function Webhooks() {
   };
 
   const handleDelete = async (webhookId) => {
-    if (!window.confirm('Tem certeza que deseja excluir este webhook?')) return;
+    if (!window.confirm(t('webhooks.temCertezaQueDesejaExcluirEste'))) return;
 
     try {
       await api.delete(`/webhooks/${webhookId}`);
@@ -168,10 +170,10 @@ export default function Webhooks() {
         <div>
           <h2 className="mb-1">
             <i className="bi bi-link-45deg me-2"></i>
-            Webhooks
+            {t('webhooks.webhooks')}
           </h2>
           <p className="text-muted mb-0">
-            Configure integrações para receber notificações quando eventos ocorrerem
+            {t('webhooks.configureIntegracoesParaReceberNot')}
           </p>
         </div>
         <Button variant="primary" onClick={() => {
@@ -180,7 +182,7 @@ export default function Webhooks() {
           setShowModal(true);
         }}>
           <i className="bi bi-plus-lg me-2"></i>
-          Novo Webhook
+          {t('webhooks.novoWebhook')}
         </Button>
       </div>
 
@@ -196,19 +198,19 @@ export default function Webhooks() {
           ) : webhooks.length === 0 ? (
             <div className="text-center py-5">
               <i className="bi bi-link-45deg display-1 text-muted"></i>
-              <h5 className="mt-3">Nenhum webhook configurado</h5>
-              <p className="text-muted">Crie um webhook para integrar com sistemas externos</p>
+              <h5 className="mt-3">{t('webhooks.nenhumWebhookConfigurado')}</h5>
+              <p className="text-muted">{t('webhooks.crieUmWebhookParaIntegrarCom')}</p>
             </div>
           ) : (
             <Table responsive hover className="mb-0">
               <thead className="bg-light">
                 <tr>
-                  <th>Nome</th>
-                  <th>URL</th>
-                  <th>Eventos</th>
-                  <th>Status</th>
-                  <th>Estatísticas</th>
-                  <th className="text-end">Ações</th>
+                  <th>{t('gpsEditor.name')}</th>
+                  <th>{t('webhooks.url')}</th>
+                  <th>{t('webhooks.eventos')}</th>
+                  <th>{t('common.status')}</th>
+                  <th>{t('webhooks.estatisticas')}</th>
+                  <th className="text-end">{t('reviews.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -252,7 +254,7 @@ export default function Webhooks() {
                           variant="outline-primary" 
                           onClick={() => handleTest(webhook._id)}
                           disabled={testing === webhook._id}
-                          title="Testar"
+                          title={t('webhooks.testar')}
                         >
                           {testing === webhook._id ? (
                             <Spinner animation="border" size="sm" />
@@ -263,14 +265,14 @@ export default function Webhooks() {
                         <Button 
                           variant="outline-secondary" 
                           onClick={() => handleViewDeliveries(webhook)}
-                          title="Ver Entregas"
+                          title={t('webhooks.verEntregas')}
                         >
                           <i className="bi bi-clock-history"></i>
                         </Button>
                         <Button 
                           variant="outline-secondary" 
                           onClick={() => handleEdit(webhook)}
-                          title="Editar"
+                          title={t('common.edit')}
                         >
                           <i className="bi bi-pencil"></i>
                         </Button>
@@ -284,7 +286,7 @@ export default function Webhooks() {
                         <Button 
                           variant="outline-danger" 
                           onClick={() => handleDelete(webhook._id)}
-                          title="Excluir"
+                          title={t('common.delete')}
                         >
                           <i className="bi bi-trash"></i>
                         </Button>
@@ -317,19 +319,19 @@ export default function Webhooks() {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Nome *</Form.Label>
+                  <Form.Label>{t('webhooks.nome')}</Form.Label>
                   <Form.Control
                     type="text"
                     value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
-                    placeholder="Ex: Integração Slack"
+                    placeholder={t('webhooks.exIntegracaoSlack')}
                     required
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>URL do Endpoint *</Form.Label>
+                  <Form.Label>{t('webhooks.urlDoEndpoint')}</Form.Label>
                   <Form.Control
                     type="url"
                     value={form.url}
@@ -342,7 +344,7 @@ export default function Webhooks() {
             </Row>
 
             <Form.Group className="mb-3">
-              <Form.Label>Eventos para Notificar</Form.Label>
+              <Form.Label>{t('webhooks.eventosParaNotificar')}</Form.Label>
               <div className="border rounded p-3">
                 {Object.entries(groupedEvents).map(([group, events]) => (
                   <div key={group} className="mb-3">
@@ -375,14 +377,14 @@ export default function Webhooks() {
             <Form.Check
               type="switch"
               id="webhook-active"
-              label="Webhook ativo"
+              label={t('webhooks.webhookAtivo')}
               checked={form.is_active}
               onChange={e => setForm({ ...form, is_active: e.target.checked })}
             />
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button variant="primary" type="submit">
               {editingWebhook ? 'Salvar' : 'Criar Webhook'}
@@ -405,16 +407,16 @@ export default function Webhooks() {
               <Spinner animation="border" />
             </div>
           ) : deliveries.length === 0 ? (
-            <Alert variant="info">Nenhuma entrega registrada ainda</Alert>
+            <Alert variant="info">{t('webhooks.nenhumaEntregaRegistradaAinda')}</Alert>
           ) : (
             <Table responsive size="sm">
               <thead>
                 <tr>
-                  <th>Data</th>
-                  <th>Evento</th>
-                  <th>Status</th>
-                  <th>Código HTTP</th>
-                  <th>Duração</th>
+                  <th>{t('webhooks.data')}</th>
+                  <th>{t('webhooks.evento')}</th>
+                  <th>{t('common.status')}</th>
+                  <th>{t('webhooks.codigoHttp')}</th>
+                  <th>{t('webhooks.duracao')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -437,7 +439,7 @@ export default function Webhooks() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeliveries(false)}>
-            Fechar
+            {t('postmortem.close')}
           </Button>
         </Modal.Footer>
       </Modal>

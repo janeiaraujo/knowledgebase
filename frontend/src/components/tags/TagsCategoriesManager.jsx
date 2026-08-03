@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Table, Button, Modal, Form, Badge, Spinner, Alert, Row, Col, Tabs, Tab } from 'react-bootstrap';
 import { tagAPI, categoryAPI } from '../../services/api';
 
 export default function TagsCategoriesManager() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('tags');
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -161,7 +163,7 @@ export default function TagsCategoriesManager() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Tags & Categorias</h2>
+        <h2 className="mb-0">{t('tagsCategoriesManager.tagsCategorias')}</h2>
       </div>
       
       {error && (
@@ -174,7 +176,7 @@ export default function TagsCategoriesManager() {
         <Tab eventKey="tags" title={<><i className="bi bi-tags me-2"></i>Tags ({tags.length})</>}>
           <Card className="border-0 shadow-sm">
             <Card.Header className="bg-white d-flex justify-content-between align-items-center py-3">
-              <h5 className="mb-0">Gerenciar Tags</h5>
+              <h5 className="mb-0">{t('tagsCategoriesManager.gerenciarTags')}</h5>
               <Button 
                 variant="primary" 
                 size="sm"
@@ -184,7 +186,7 @@ export default function TagsCategoriesManager() {
                   setShowTagModal(true);
                 }}
               >
-                <i className="bi bi-plus-lg me-1"></i>Nova Tag
+                <i className="bi bi-plus-lg me-1"></i>{t('tagsCategoriesManager.novaTag')}
               </Button>
             </Card.Header>
             <Card.Body className="p-0">
@@ -192,10 +194,10 @@ export default function TagsCategoriesManager() {
                 <Table responsive className="mb-0">
                   <thead>
                     <tr>
-                      <th>Tag</th>
-                      <th>Descrição</th>
-                      <th>KBs</th>
-                      <th width="120">Ações</th>
+                      <th>{t('tagsCategoriesManager.tag')}</th>
+                      <th>{t('common.description')}</th>
+                      <th>{t('tagsCategoriesManager.kbs')}</th>
+                      <th width="120">{t('reviews.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -240,7 +242,7 @@ export default function TagsCategoriesManager() {
               ) : (
                 <div className="text-center py-5 text-muted">
                   <i className="bi bi-tags fs-1 d-block mb-3"></i>
-                  <p className="mb-0">Nenhuma tag criada ainda</p>
+                  <p className="mb-0">{t('tagsCategoriesManager.nenhumaTagCriadaAinda')}</p>
                 </div>
               )}
             </Card.Body>
@@ -250,7 +252,7 @@ export default function TagsCategoriesManager() {
         <Tab eventKey="categories" title={<><i className="bi bi-folder me-2"></i>Categorias ({categories.length})</>}>
           <Card className="border-0 shadow-sm">
             <Card.Header className="bg-white d-flex justify-content-between align-items-center py-3">
-              <h5 className="mb-0">Gerenciar Categorias</h5>
+              <h5 className="mb-0">{t('tagsCategoriesManager.gerenciarCategorias')}</h5>
               <Button 
                 variant="primary" 
                 size="sm"
@@ -260,7 +262,7 @@ export default function TagsCategoriesManager() {
                   setShowCategoryModal(true);
                 }}
               >
-                <i className="bi bi-plus-lg me-1"></i>Nova Categoria
+                <i className="bi bi-plus-lg me-1"></i>{t('tagsCategoriesManager.novaCategoria')}
               </Button>
             </Card.Header>
             <Card.Body className="p-0">
@@ -268,11 +270,11 @@ export default function TagsCategoriesManager() {
                 <Table responsive className="mb-0">
                   <thead>
                     <tr>
-                      <th>Categoria</th>
-                      <th>Descrição</th>
-                      <th>Pai</th>
-                      <th>KBs</th>
-                      <th width="120">Ações</th>
+                      <th>{t('search.category')}</th>
+                      <th>{t('common.description')}</th>
+                      <th>{t('tagsCategoriesManager.pai')}</th>
+                      <th>{t('tagsCategoriesManager.kbs')}</th>
+                      <th width="120">{t('reviews.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -316,7 +318,7 @@ export default function TagsCategoriesManager() {
               ) : (
                 <div className="text-center py-5 text-muted">
                   <i className="bi bi-folder fs-1 d-block mb-3"></i>
-                  <p className="mb-0">Nenhuma categoria criada ainda</p>
+                  <p className="mb-0">{t('tagsCategoriesManager.nenhumaCategoriaCriadaAinda')}</p>
                 </div>
               )}
             </Card.Body>
@@ -332,7 +334,7 @@ export default function TagsCategoriesManager() {
         <Form onSubmit={handleTagSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Nome *</Form.Label>
+              <Form.Label>{t('tagsCategoriesManager.nome')}</Form.Label>
               <Form.Control
                 type="text"
                 value={tagForm.name}
@@ -343,7 +345,7 @@ export default function TagsCategoriesManager() {
             </Form.Group>
             
             <Form.Group className="mb-3">
-              <Form.Label>Cor</Form.Label>
+              <Form.Label>{t('tagsCategoriesManager.cor')}</Form.Label>
               <div className="d-flex gap-2 align-items-center">
                 <Form.Control
                   type="color"
@@ -358,7 +360,7 @@ export default function TagsCategoriesManager() {
             </Form.Group>
             
             <Form.Group className="mb-3">
-              <Form.Label>Descrição</Form.Label>
+              <Form.Label>{t('common.description')}</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={2}
@@ -370,7 +372,7 @@ export default function TagsCategoriesManager() {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowTagModal(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={submitting}>
               {submitting ? <Spinner size="sm" /> : 'Salvar'}
@@ -389,7 +391,7 @@ export default function TagsCategoriesManager() {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Nome *</Form.Label>
+                  <Form.Label>{t('tagsCategoriesManager.nome')}</Form.Label>
                   <Form.Control
                     type="text"
                     value={categoryForm.name}
@@ -401,12 +403,12 @@ export default function TagsCategoriesManager() {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Categoria Pai</Form.Label>
+                  <Form.Label>{t('tagsCategoriesManager.categoriaPai')}</Form.Label>
                   <Form.Select
                     value={categoryForm.parent_id}
                     onChange={(e) => setCategoryForm({ ...categoryForm, parent_id: e.target.value })}
                   >
-                    <option value="">Nenhuma (raiz)</option>
+                    <option value="">{t('tagsCategoriesManager.nenhumaRaiz')}</option>
                     {categories
                       .filter(c => c._id !== editingItem?._id)
                       .map(cat => (
@@ -419,7 +421,7 @@ export default function TagsCategoriesManager() {
             </Row>
             
             <Form.Group className="mb-3">
-              <Form.Label>Descrição</Form.Label>
+              <Form.Label>{t('common.description')}</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={2}
@@ -432,7 +434,7 @@ export default function TagsCategoriesManager() {
             <Row>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Ícone</Form.Label>
+                  <Form.Label>{t('tagsCategoriesManager.icone')}</Form.Label>
                   <Form.Select
                     value={categoryForm.icon}
                     onChange={(e) => setCategoryForm({ ...categoryForm, icon: e.target.value })}
@@ -448,7 +450,7 @@ export default function TagsCategoriesManager() {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Cor</Form.Label>
+                  <Form.Label>{t('tagsCategoriesManager.cor')}</Form.Label>
                   <Form.Control
                     type="color"
                     value={categoryForm.color}
@@ -459,7 +461,7 @@ export default function TagsCategoriesManager() {
               </Col>
               <Col md={4}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Ordem</Form.Label>
+                  <Form.Label>{t('tagsCategoriesManager.ordem')}</Form.Label>
                   <Form.Control
                     type="number"
                     value={categoryForm.order}
@@ -472,7 +474,7 @@ export default function TagsCategoriesManager() {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowCategoryModal(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={submitting}>
               {submitting ? <Spinner size="sm" /> : 'Salvar'}

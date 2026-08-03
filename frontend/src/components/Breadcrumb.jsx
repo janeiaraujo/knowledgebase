@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Breadcrumb as BsBreadcrumb } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -31,6 +32,7 @@ const ROUTE_LABELS = {
 };
 
 export default function Breadcrumb({ items, currentPage }) {
+  const { t } = useTranslation();
   const location = useLocation();
 
   // Auto-generate from path if items not provided
@@ -69,7 +71,7 @@ export default function Breadcrumb({ items, currentPage }) {
     <BsBreadcrumb className="mb-3 bg-transparent p-0">
       <BsBreadcrumb.Item linkAs={Link} linkProps={{ to: '/' }}>
         <i className="bi bi-house-door me-1"></i>
-        Home
+        {t('breadcrumb.home')}
       </BsBreadcrumb.Item>
       {breadcrumbItems.map((item, index) => (
         <BsBreadcrumb.Item

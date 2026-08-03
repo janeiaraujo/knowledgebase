@@ -172,14 +172,12 @@ describe('i18n', () => {
     test('nao sobra texto em portugues cru nas telas ja traduzidas', () => {
         // Lista fechada: telas que ja passaram pela traducao nao podem
         // regredir. Telas ainda nao traduzidas ficam de fora ate a vez delas.
-        const TRADUZIDAS = [
-            'pages/Settings.jsx', 'pages/Reviews.jsx', 'pages/Favorites.jsx',
-            'pages/Notifications.jsx', 'pages/Search.jsx', 'pages/SmartSearch.jsx',
-            'pages/Integrations.jsx', 'pages/kb/KBView.jsx',
-            'pages/Reports.jsx', 'pages/UserActivity.jsx',
-            'pages/gps/GPSFlowEditor.jsx', 'pages/postmortem/PostMortemEditor.jsx',
-            'components/integrations/InboundEventSources.jsx'
-        ];
+        // Todo arquivo que ja chama useTranslation entra na catraca: se
+        // uma tela traduzida voltar a ter texto fixo, o teste acusa. Os
+        // arquivos que ainda nao traduzem ficam de fora ate a vez deles.
+        const TRADUZIDAS = SOURCES
+            .filter(({ code }) => code.includes('useTranslation'))
+            .map(({ file }) => file);
         const atributoLiteral = /(?:placeholder|title|label)\s*=\s*"([^"]*)"/gi;
 
         // Tokens tecnicos (URL, host, e-mail, caminho) sao iguais em

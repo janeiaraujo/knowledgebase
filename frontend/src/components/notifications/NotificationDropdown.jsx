@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dropdown, Badge, ListGroup, Spinner, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useNotifications } from '../../contexts/NotificationContext';
 import api from '../../services/api';
 
 const NotificationDropdown = () => {
+  const { t } = useTranslation();
   const { 
     notifications: realtimeNotifications, 
     unreadCount, 
@@ -113,7 +115,7 @@ const NotificationDropdown = () => {
           <span 
             className="position-absolute bottom-0 end-0 bg-success rounded-circle"
             style={{ width: '8px', height: '8px' }}
-            title="Conectado em tempo real"
+            title={t('notificationDropdown.conectadoEmTempoReal')}
           ></span>
         )}
       </Dropdown.Toggle>
@@ -125,10 +127,10 @@ const NotificationDropdown = () => {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center p-3 border-bottom bg-light">
           <div>
-            <strong>Notificações</strong>
+            <strong>{t('notificationDropdown.notificacoes')}</strong>
             {connected && (
               <Badge bg="success" className="ms-2" style={{ fontSize: '0.6rem' }}>
-                <i className="bi bi-lightning-charge me-1"></i>Live
+                <i className="bi bi-lightning-charge me-1"></i>{t('notificationDropdown.live')}
               </Badge>
             )}
           </div>
@@ -138,7 +140,7 @@ const NotificationDropdown = () => {
               size="sm" 
               className="p-0 text-muted"
               onClick={handleMarkAllAsRead}
-              title="Marcar todas como lidas"
+              title={t('notificationDropdown.marcarTodasComoLidas')}
             >
               <i className="bi bi-check-all"></i>
             </Button>
@@ -147,7 +149,7 @@ const NotificationDropdown = () => {
               size="sm" 
               className="p-0 text-muted"
               onClick={requestNotificationPermission}
-              title="Ativar notificações do navegador"
+              title={t('notificationDropdown.ativarNotificacoesDoNavegador')}
             >
               <i className="bi bi-bell-fill"></i>
             </Button>
@@ -163,7 +165,7 @@ const NotificationDropdown = () => {
           ) : notifications.length === 0 ? (
             <div className="text-center py-4 text-muted">
               <i className="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
-              <span>Nenhuma notificação</span>
+              <span>{t('notificationDropdown.nenhumaNotificacao')}</span>
             </div>
           ) : (
             <ListGroup variant="flush">
@@ -233,7 +235,7 @@ const NotificationDropdown = () => {
             className="text-decoration-none small"
             onClick={() => setShowDropdown(false)}
           >
-            Ver todas as notificações
+            {t('notificationDropdown.verTodasAsNotificacoes')}
           </Link>
         </div>
       </Dropdown.Menu>

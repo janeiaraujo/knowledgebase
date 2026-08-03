@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Table, Button, Modal, Form, Badge, Spinner, Alert, InputGroup } from 'react-bootstrap';
 import api from '../../services/api';
 
 export default function TagsSettings() {
+  const { t } = useTranslation();
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -113,7 +115,7 @@ export default function TagsSettings() {
     return (
       <div className="text-center py-5">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2 text-muted">Carregando tags...</p>
+        <p className="mt-2 text-muted">{t('tagsSettings.carregandoTags')}</p>
       </div>
     );
   }
@@ -137,13 +139,13 @@ export default function TagsSettings() {
           <div>
             <h5 className="mb-0">
               <i className="bi bi-tags me-2"></i>
-              Gerenciar Tags
+              {t('tagsSettings.gerenciarTags')}
             </h5>
-            <small className="text-muted">Configure as tags disponíveis para categorizar KBs</small>
+            <small className="text-muted">{t('tagsSettings.configureAsTagsDisponiveisParaCate')}</small>
           </div>
           <Button variant="primary" onClick={() => handleOpenModal()}>
             <i className="bi bi-plus-lg me-1"></i>
-            Nova Tag
+            {t('tagsSettings.novaTag')}
           </Button>
         </Card.Header>
         
@@ -151,21 +153,21 @@ export default function TagsSettings() {
           {tags.length === 0 ? (
             <div className="text-center py-5">
               <i className="bi bi-tags text-muted" style={{ fontSize: '3rem' }}></i>
-              <p className="text-muted mt-3">Nenhuma tag cadastrada</p>
+              <p className="text-muted mt-3">{t('tagsSettings.nenhumaTagCadastrada')}</p>
               <Button variant="outline-primary" onClick={() => handleOpenModal()}>
                 <i className="bi bi-plus-lg me-1"></i>
-                Criar primeira tag
+                {t('tagsSettings.criarPrimeiraTag')}
               </Button>
             </div>
           ) : (
             <Table hover responsive className="mb-0">
               <thead className="bg-light">
                 <tr>
-                  <th>Tag</th>
-                  <th>Descrição</th>
-                  <th>KBs Vinculados</th>
-                  <th>Criada em</th>
-                  <th className="text-end">Ações</th>
+                  <th>{t('tagsSettings.tag')}</th>
+                  <th>{t('common.description')}</th>
+                  <th>{t('tagsSettings.kbsVinculados')}</th>
+                  <th>{t('tagsSettings.criadaEm')}</th>
+                  <th className="text-end">{t('reviews.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -228,10 +230,10 @@ export default function TagsSettings() {
         <Form onSubmit={handleSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Nome da Tag *</Form.Label>
+              <Form.Label>{t('tagsSettings.nomeDaTag')}</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Ex: Urgente, Tutorial, FAQ..."
+                placeholder={t('tagsSettings.exUrgenteTutorialFaq')}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
@@ -239,7 +241,7 @@ export default function TagsSettings() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Cor</Form.Label>
+              <Form.Label>{t('tagsSettings.cor')}</Form.Label>
               <div className="d-flex flex-wrap gap-2 mb-2">
                 {predefinedColors.map(color => (
                   <div
@@ -257,7 +259,7 @@ export default function TagsSettings() {
                 ))}
               </div>
               <InputGroup size="sm">
-                <InputGroup.Text>Personalizada</InputGroup.Text>
+                <InputGroup.Text>{t('tagsSettings.personalizada')}</InputGroup.Text>
                 <Form.Control
                   type="color"
                   value={formData.color}
@@ -274,18 +276,18 @@ export default function TagsSettings() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Descrição</Form.Label>
+              <Form.Label>{t('common.description')}</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={2}
-                placeholder="Descrição opcional da tag"
+                placeholder={t('tagsSettings.descricaoOpcionalDaTag')}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </Form.Group>
 
             <div className="mt-3 p-3 bg-light rounded">
-              <small className="text-muted">Pré-visualização:</small>
+              <small className="text-muted">{t('tagsSettings.preVisualizacao')}</small>
               <div className="mt-2">
                 <Badge 
                   style={{ backgroundColor: formData.color }}
@@ -298,13 +300,13 @@ export default function TagsSettings() {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary" disabled={saving || !formData.name}>
               {saving ? (
                 <>
                   <Spinner size="sm" animation="border" className="me-1" />
-                  Salvando...
+                  {t('integrations.saving')}
                 </>
               ) : (
                 <>
@@ -320,10 +322,10 @@ export default function TagsSettings() {
       {/* Modal de Confirmação de Exclusão */}
       <Modal show={deleteModal} onHide={() => setDeleteModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Confirmar Exclusão</Modal.Title>
+          <Modal.Title>{t('tagsSettings.confirmarExclusao')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Tem certeza que deseja excluir a tag <strong>{tagToDelete?.name}</strong>?</p>
+          <p>{t('tagsSettings.temCertezaQueDesejaExcluirA')} <strong>{tagToDelete?.name}</strong>?</p>
           {tagToDelete?.usage_count > 0 && (
             <Alert variant="warning">
               <i className="bi bi-exclamation-triangle me-2"></i>
@@ -334,18 +336,18 @@ export default function TagsSettings() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setDeleteModal(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button variant="danger" onClick={handleDelete} disabled={deleting}>
             {deleting ? (
               <>
                 <Spinner size="sm" animation="border" className="me-1" />
-                Excluindo...
+                {t('tagsSettings.excluindo')}
               </>
             ) : (
               <>
                 <i className="bi bi-trash me-1"></i>
-                Excluir
+                {t('common.delete')}
               </>
             )}
           </Button>

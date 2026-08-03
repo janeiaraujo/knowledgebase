@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import DepartmentsTab from '../components/admin/DepartmentsTab';
 import GroupsTab from '../components/admin/GroupsTab';
@@ -6,6 +7,7 @@ import UsersTab from '../components/admin/UsersTab';
 import KBAccessTab from '../components/admin/KBAccessTab';
 
 export default function Admin() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('departments');
 
@@ -14,8 +16,8 @@ export default function Admin() {
     return (
       <div className="container mt-5">
         <div className="alert alert-danger">
-          <h4>Acesso Negado</h4>
-          <p>Apenas administradores e owners podem acessar esta página.</p>
+          <h4>{t('admin.acessoNegado')}</h4>
+          <p>{t('admin.apenasAdministradoresEOwnersPodemA')}</p>
         </div>
       </div>
     );
@@ -27,9 +29,9 @@ export default function Admin() {
         <div className="col">
           <h2 className="mb-0">
             <i className="bi bi-gear-fill me-2"></i>
-            Administração
+            {t('admin.administracao')}
           </h2>
-          <p className="text-muted">Gerencie departamentos, grupos, usuários e permissões</p>
+          <p className="text-muted">{t('admin.gerencieDepartamentosGruposUsuario')}</p>
         </div>
       </div>
 
@@ -43,7 +45,7 @@ export default function Admin() {
                 type="button"
               >
                 <i className="bi bi-diagram-3 me-2"></i>
-                Departamentos
+                {t('admin.departamentos')}
               </button>
             </li>
             <li className="nav-item" role="presentation">
@@ -53,7 +55,7 @@ export default function Admin() {
                 type="button"
               >
                 <i className="bi bi-people-fill me-2"></i>
-                Grupos
+                {t('admin.grupos')}
               </button>
             </li>
             <li className="nav-item" role="presentation">
@@ -63,7 +65,7 @@ export default function Admin() {
                 type="button"
               >
                 <i className="bi bi-person-badge me-2"></i>
-                Usuários
+                {t('admin.usuarios')}
               </button>
             </li>
             <li className="nav-item" role="presentation">
@@ -73,7 +75,7 @@ export default function Admin() {
                 type="button"
               >
                 <i className="bi bi-shield-lock me-2"></i>
-                Controle de Acesso
+                {t('admin.controleDeAcesso')}
               </button>
             </li>
           </ul>

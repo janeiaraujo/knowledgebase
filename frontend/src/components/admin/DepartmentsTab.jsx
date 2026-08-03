@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 
 export default function DepartmentsTab() {
+  const { t } = useTranslation();
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -23,7 +25,7 @@ export default function DepartmentsTab() {
       setDepartments(response.data.departments || []);
     } catch (error) {
       console.error('Erro ao carregar departamentos:', error);
-      alert('Erro ao carregar departamentos');
+      alert(t('departmentsTab.erroAoCarregarDepartamentos'));
     } finally {
       setLoading(false);
     }
@@ -113,7 +115,7 @@ export default function DepartmentsTab() {
     return (
       <div className="text-center py-5">
         <div className="spinner-border" role="status">
-          <span className="visually-hidden">Carregando...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -122,7 +124,7 @@ export default function DepartmentsTab() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">Departamentos</h4>
+        <h4 className="mb-0">{t('departmentsTab.departamentos')}</h4>
         <button
           className="btn btn-primary"
           onClick={() => {
@@ -132,14 +134,14 @@ export default function DepartmentsTab() {
           }}
         >
           <i className="bi bi-plus-circle me-2"></i>
-          Novo Departamento
+          {t('departmentsTab.novoDepartamento')}
         </button>
       </div>
 
       {departments.length === 0 ? (
         <div className="alert alert-info">
           <i className="bi bi-info-circle me-2"></i>
-          Nenhum departamento cadastrado. Crie o primeiro!
+          {t('departmentsTab.nenhumDepartamentoCadastradoCrieOP')}
         </div>
       ) : (
         <div>{buildDepartmentTree(departments)}</div>
@@ -163,7 +165,7 @@ export default function DepartmentsTab() {
               <form onSubmit={handleSubmit}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Nome *</label>
+                    <label className="form-label">{t('departmentsTab.nome')}</label>
                     <input
                       type="text"
                       className="form-control"
@@ -173,7 +175,7 @@ export default function DepartmentsTab() {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Descrição</label>
+                    <label className="form-label">{t('common.description')}</label>
                     <textarea
                       className="form-control"
                       rows="3"
@@ -182,13 +184,13 @@ export default function DepartmentsTab() {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Departamento Pai (hierarquia)</label>
+                    <label className="form-label">{t('departmentsTab.departamentoPaiHierarquia')}</label>
                     <select
                       className="form-select"
                       value={formData.parent_department_id}
                       onChange={(e) => setFormData({ ...formData, parent_department_id: e.target.value })}
                     >
-                      <option value="">Nenhum (nível raiz)</option>
+                      <option value="">{t('departmentsTab.nenhumNivelRaiz')}</option>
                       {departments
                         .filter(d => !editingDept || d._id !== editingDept._id)
                         .map(dept => (
@@ -205,7 +207,7 @@ export default function DepartmentsTab() {
                     className="btn btn-secondary"
                     onClick={() => setShowModal(false)}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </button>
                   <button type="submit" className="btn btn-primary">
                     {editingDept ? 'Salvar' : 'Criar'}

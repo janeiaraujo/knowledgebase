@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Badge, ProgressBar, Button, Tab, Tabs, Table, Spinner, OverlayTrigger, Tooltip, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
@@ -39,6 +40,7 @@ const CATEGORY_LABELS = {
 };
 
 export default function Gamification() {
+  const { t } = useTranslation();
     const { user } = useAuth();
     const [profile, setProfile] = useState(null);
     const [badges, setBadges] = useState(null);
@@ -72,7 +74,7 @@ export default function Gamification() {
             setChallenges(challengesRes.data.challenges);
         } catch (error) {
             console.error('Error loading gamification data:', error);
-            toast.error('Erro ao carregar dados de gamificação');
+            toast.error(t('gamification.erroAoCarregarDadosDeGamificacao'));
         } finally {
             setLoading(false);
         }
@@ -91,7 +93,7 @@ export default function Gamification() {
         return (
             <div className="text-center py-5">
                 <Spinner animation="border" />
-                <p className="mt-2">Carregando...</p>
+                <p className="mt-2">{t('common.loading')}</p>
             </div>
         );
     }
@@ -102,15 +104,15 @@ export default function Gamification() {
                 <Col>
                     <h2 className="mb-1">
                         <i className="bi bi-trophy me-2"></i>
-                        Gamificação
+                        {t('gamification.gamificacao')}
                     </h2>
-                    <p className="text-muted">Acompanhe seu progresso e conquistas</p>
+                    <p className="text-muted">{t('gamification.acompanheSeuProgressoEConquistas')}</p>
                 </Col>
             </Row>
 
             <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-4">
                 {/* Overview Tab */}
-                <Tab eventKey="overview" title={<span><i className="bi bi-person-circle me-2"></i>Meu Perfil</span>}>
+                <Tab eventKey="overview" title={<span><i className="bi bi-person-circle me-2"></i>{t('gamification.meuPerfil')}</span>}>
                     <Row className="g-4">
                         {/* Profile Card */}
                         <Col lg={4}>
@@ -173,12 +175,12 @@ export default function Gamification() {
                                         <div className="text-center">
                                             <div className="fs-3">🔥</div>
                                             <div className="fw-bold">{profile?.current_streak || 0}</div>
-                                            <small className="text-muted">Sequência atual</small>
+                                            <small className="text-muted">{t('gamification.sequenciaAtual')}</small>
                                         </div>
                                         <div className="text-center">
                                             <div className="fs-3">🏆</div>
                                             <div className="fw-bold">{profile?.longest_streak || 0}</div>
-                                            <small className="text-muted">Recorde</small>
+                                            <small className="text-muted">{t('gamification.recorde')}</small>
                                         </div>
                                     </div>
                                 </Card.Body>
@@ -189,24 +191,24 @@ export default function Gamification() {
                                 <Card.Header className="bg-white">
                                     <h6 className="mb-0">
                                         <i className="bi bi-bar-chart me-2"></i>
-                                        Estatísticas
+                                        {t('gamification.estatisticas')}
                                     </h6>
                                 </Card.Header>
                                 <Card.Body>
                                     <div className="d-flex justify-content-between mb-2">
-                                        <span className="text-muted">KBs criados</span>
+                                        <span className="text-muted">{t('gamification.kbsCriados')}</span>
                                         <span className="fw-bold">{profile?.stats?.kbs_created || 0}</span>
                                     </div>
                                     <div className="d-flex justify-content-between mb-2">
-                                        <span className="text-muted">Comentários</span>
+                                        <span className="text-muted">{t('gamification.comentarios')}</span>
                                         <span className="fw-bold">{profile?.stats?.comments_made || 0}</span>
                                     </div>
                                     <div className="d-flex justify-content-between mb-2">
-                                        <span className="text-muted">Revisões</span>
+                                        <span className="text-muted">{t('gamification.revisoes')}</span>
                                         <span className="fw-bold">{profile?.stats?.reviews_completed || 0}</span>
                                     </div>
                                     <div className="d-flex justify-content-between">
-                                        <span className="text-muted">Favoritos recebidos</span>
+                                        <span className="text-muted">{t('gamification.favoritosRecebidos')}</span>
                                         <span className="fw-bold">{profile?.stats?.favorites_received || 0}</span>
                                     </div>
                                 </Card.Body>
@@ -219,7 +221,7 @@ export default function Gamification() {
                                 <Card.Header className="bg-white d-flex justify-content-between align-items-center">
                                     <h6 className="mb-0">
                                         <i className="bi bi-award me-2"></i>
-                                        Minhas Conquistas
+                                        {t('gamification.minhasConquistas')}
                                     </h6>
                                     <Badge bg="secondary">
                                         {badges?.earned || 0} / {badges?.total || 0}
@@ -251,7 +253,7 @@ export default function Gamification() {
                                             <Col xs={12}>
                                                 <Alert variant="info" className="text-center mb-0">
                                                     <i className="bi bi-info-circle me-2"></i>
-                                                    Você ainda não conquistou badges. Continue contribuindo!
+                                                    {t('gamification.voceAindaNaoConquistouBadgesContin')}
                                                 </Alert>
                                             </Col>
                                         )}
@@ -264,7 +266,7 @@ export default function Gamification() {
                                 <Card.Header className="bg-white">
                                     <h6 className="mb-0">
                                         <i className="bi bi-lightning me-2"></i>
-                                        Desafios Ativos
+                                        {t('gamification.desafiosAtivos')}
                                     </h6>
                                 </Card.Header>
                                 <Card.Body>
@@ -292,7 +294,7 @@ export default function Gamification() {
                                         ))
                                     ) : (
                                         <Alert variant="light" className="text-center mb-0">
-                                            Nenhum desafio ativo no momento
+                                            {t('gamification.nenhumDesafioAtivoNoMomento')}
                                         </Alert>
                                     )}
                                 </Card.Body>
@@ -302,7 +304,7 @@ export default function Gamification() {
                 </Tab>
 
                 {/* Badges Tab */}
-                <Tab eventKey="badges" title={<span><i className="bi bi-award me-2"></i>Badges</span>}>
+                <Tab eventKey="badges" title={<span><i className="bi bi-award me-2"></i>{t('gamification.badges')}</span>}>
                     {badges?.badges && Object.entries(badges.badges).map(([category, categoryBadges]) => (
                         <Card key={category} className="border-0 shadow-sm mb-4">
                             <Card.Header className="bg-white">
@@ -329,7 +331,7 @@ export default function Gamification() {
                                                     {badge.earned ? (
                                                         <>
                                                             <i className="bi bi-check me-1"></i>
-                                                            Conquistado
+                                                            {t('gamification.conquistado')}
                                                         </>
                                                     ) : (
                                                         `+${badge.points} pts`
@@ -350,31 +352,31 @@ export default function Gamification() {
                 </Tab>
 
                 {/* Leaderboard Tab */}
-                <Tab eventKey="leaderboard" title={<span><i className="bi bi-list-ol me-2"></i>Ranking</span>}>
+                <Tab eventKey="leaderboard" title={<span><i className="bi bi-list-ol me-2"></i>{t('gamification.ranking')}</span>}>
                     <Card className="border-0 shadow-sm">
                         <Card.Header className="bg-white d-flex justify-content-between align-items-center">
                             <h6 className="mb-0">
                                 <i className="bi bi-trophy me-2"></i>
-                                Top Contribuidores
+                                {t('gamification.topContribuidores')}
                             </h6>
                             <div className="btn-group btn-group-sm">
                                 <Button
                                     variant={leaderboardPeriod === 'week' ? 'primary' : 'outline-primary'}
                                     onClick={() => setLeaderboardPeriod('week')}
                                 >
-                                    Semana
+                                    {t('gamification.semana')}
                                 </Button>
                                 <Button
                                     variant={leaderboardPeriod === 'month' ? 'primary' : 'outline-primary'}
                                     onClick={() => setLeaderboardPeriod('month')}
                                 >
-                                    Mês
+                                    {t('gamification.mes')}
                                 </Button>
                                 <Button
                                     variant={leaderboardPeriod === 'all' ? 'primary' : 'outline-primary'}
                                     onClick={() => setLeaderboardPeriod('all')}
                                 >
-                                    Geral
+                                    {t('gamification.geral')}
                                 </Button>
                             </div>
                         </Card.Header>
@@ -383,11 +385,11 @@ export default function Gamification() {
                                 <thead>
                                     <tr>
                                         <th style={{ width: 60 }} className="text-center">#</th>
-                                        <th>Usuário</th>
-                                        <th className="text-center" style={{ width: 100 }}>Nível</th>
-                                        <th className="text-center" style={{ width: 100 }}>Badges</th>
+                                        <th>{t('userActivity.user')}</th>
+                                        <th className="text-center" style={{ width: 100 }}>{t('gamification.nivel')}</th>
+                                        <th className="text-center" style={{ width: 100 }}>{t('gamification.badges')}</th>
                                         <th className="text-center" style={{ width: 100 }}>🔥 Streak</th>
-                                        <th className="text-end" style={{ width: 120 }}>Pontos</th>
+                                        <th className="text-end" style={{ width: 120 }}>{t('gamification.pontos')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -435,7 +437,7 @@ export default function Gamification() {
                             <Card.Footer className="bg-light">
                                 <div className="d-flex justify-content-between align-items-center">
                                     <span>
-                                        Sua posição: <strong>#{leaderboard.current_user.rank}</strong>
+                                        {t('gamification.suaPosicao')} <strong>#{leaderboard.current_user.rank}</strong>
                                     </span>
                                     <span>
                                         <strong>{leaderboard.current_user.points}</strong> pontos

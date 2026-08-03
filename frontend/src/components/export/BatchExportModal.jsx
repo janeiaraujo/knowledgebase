@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Button, Form, Spinner, Alert, ListGroup, Badge } from 'react-bootstrap';
 import { exportAPI } from '../../services/api';
 import JSZip from 'jszip';
@@ -12,6 +13,7 @@ const IconCheck = () => <i className="bi bi-check-lg"></i>;
 const IconTimes = () => <i className="bi bi-x-lg"></i>;
 
 export default function BatchExportModal({ show, onHide, selectedRecords }) {
+  const { t } = useTranslation();
   const [format, setFormat] = useState('markdown');
   const [includeMetadata, setIncludeMetadata] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -134,7 +136,7 @@ export default function BatchExportModal({ show, onHide, selectedRecords }) {
         
         {/* Selected Items Preview */}
         <div className="mb-4">
-          <h6 className="text-muted mb-2">Selected Items:</h6>
+          <h6 className="text-muted mb-2">{t('batchExportModal.selectedItems')}</h6>
           <ListGroup 
             style={{ maxHeight: '150px', overflowY: 'auto' }}
             variant="flush"
@@ -156,14 +158,14 @@ export default function BatchExportModal({ show, onHide, selectedRecords }) {
         
         {/* Export Options */}
         <Form.Group className="mb-3">
-          <Form.Label>Export Format</Form.Label>
+          <Form.Label>{t('batchExportModal.exportFormat')}</Form.Label>
           <Form.Select
             value={format}
             onChange={(e) => setFormat(e.target.value)}
           >
-            <option value="markdown">Markdown (.md)</option>
-            <option value="html">HTML (.html)</option>
-            <option value="json">JSON (data only)</option>
+            <option value="markdown">{t('batchExportModal.markdownMd')}</option>
+            <option value="html">{t('batchExportModal.htmlHtml')}</option>
+            <option value="json">{t('batchExportModal.jsonDataOnly')}</option>
           </Form.Select>
           <Form.Text className="text-muted">
             {format === 'markdown' && 'Best for documentation and editing'}
@@ -175,7 +177,7 @@ export default function BatchExportModal({ show, onHide, selectedRecords }) {
         {format === 'json' && (
           <Form.Check
             type="checkbox"
-            label="Include metadata (tags, views, version)"
+            label={t('batchExportModal.includeMetadataTagsViewsVersion')}
             checked={includeMetadata}
             onChange={(e) => setIncludeMetadata(e.target.checked)}
             className="mb-3"
@@ -186,7 +188,7 @@ export default function BatchExportModal({ show, onHide, selectedRecords }) {
         {loading && (
           <div className="mt-3">
             <div className="d-flex justify-content-between mb-1">
-              <small>Exporting...</small>
+              <small>{t('batchExportModal.exporting')}</small>
               <small>{progress}%</small>
             </div>
             <div className="progress">
@@ -201,7 +203,7 @@ export default function BatchExportModal({ show, onHide, selectedRecords }) {
       
       <Modal.Footer>
         <Button variant="secondary" onClick={onHide} disabled={loading}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button 
           variant="primary" 
@@ -211,12 +213,12 @@ export default function BatchExportModal({ show, onHide, selectedRecords }) {
           {loading ? (
             <>
               <Spinner size="sm" animation="border" className="me-1" />
-              Exporting...
+              {t('batchExportModal.exporting')}
             </>
           ) : (
             <>
               <IconDownload className="me-1" />
-              Export
+              {t('batchExportModal.export')}
             </>
           )}
         </Button>
@@ -227,6 +229,7 @@ export default function BatchExportModal({ show, onHide, selectedRecords }) {
 
 // Utility component for single KB export dropdown
 export function ExportButton({ record, variant = 'outline-secondary', size = 'sm' }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   
   const handleExportMarkdown = async () => {
@@ -237,7 +240,7 @@ export function ExportButton({ record, variant = 'outline-secondary', size = 'sm
       saveAs(blob, `${sanitizeFilename(record.title)}.md`);
     } catch (err) {
       console.error('Export error:', err);
-      alert('Failed to export');
+      alert(t('batchExportModal.failedToExport'));
     } finally {
       setLoading(false);
     }
@@ -251,7 +254,7 @@ export function ExportButton({ record, variant = 'outline-secondary', size = 'sm
       saveAs(blob, `${sanitizeFilename(record.title)}.html`);
     } catch (err) {
       console.error('Export error:', err);
-      alert('Failed to export');
+      alert(t('batchExportModal.failedToExport'));
     } finally {
       setLoading(false);
     }
@@ -285,13 +288,13 @@ export function ExportButton({ record, variant = 'outline-secondary', size = 'sm
         <li>
           <button className="dropdown-item" onClick={handleExportMarkdown}>
             <IconFile className="me-2" />
-            Export as Markdown
+            {t('batchExportModal.exportAsMarkdown')}
           </button>
         </li>
         <li>
           <button className="dropdown-item" onClick={handleExportHTML}>
             <IconFile className="me-2" />
-            Export as HTML
+            {t('batchExportModal.exportAsHtml')}
           </button>
         </li>
       </ul>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Badge, Spinner, Alert, Form, ListGroup, ProgressBar } from 'react-bootstrap';
 import { analyticsAPI } from '../services/api';
 import { Link } from 'react-router-dom';
@@ -18,6 +19,7 @@ const IconFolder = () => <i className="bi bi-folder"></i>;
 const IconBrain = () => <i className="bi bi-cpu"></i>;
 
 export default function Analytics() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [period, setPeriod] = useState('30d');
@@ -116,7 +118,7 @@ export default function Analytics() {
     return (
       <Container fluid className="py-5 text-center">
         <Spinner animation="border" variant="primary" />
-        <p className="text-muted mt-2">Loading analytics...</p>
+        <p className="text-muted mt-2">{t('analytics.loadingAnalytics')}</p>
       </Container>
     );
   }
@@ -130,10 +132,10 @@ export default function Analytics() {
             <div>
               <h2 className="mb-1">
                 <IconChartLine className="me-2" />
-                Analytics Dashboard
+                {t('analytics.analyticsDashboard')}
               </h2>
               <p className="text-muted mb-0">
-                Insights and metrics for your knowledge base
+                {t('analytics.insightsAndMetricsForYourKnowledge')}
               </p>
             </div>
             
@@ -142,10 +144,10 @@ export default function Analytics() {
               onChange={(e) => setPeriod(e.target.value)}
               style={{ width: 'auto' }}
             >
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
-              <option value="90d">Last 90 Days</option>
-              <option value="1y">Last Year</option>
+              <option value="7d">{t('analytics.last7Days')}</option>
+              <option value="30d">{t('analytics.last30Days')}</option>
+              <option value="90d">{t('analytics.last90Days')}</option>
+              <option value="1y">{t('analytics.lastYear')}</option>
             </Form.Select>
           </div>
         </Col>
@@ -164,7 +166,7 @@ export default function Analytics() {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-start">
                 <div>
-                  <h6 className="text-white-50 mb-1">Total KBs</h6>
+                  <h6 className="text-white-50 mb-1">{t('analytics.totalKbs')}</h6>
                   <h2 className="mb-0">{overview?.totals?.kbs || 0}</h2>
                   <small>
                     +{overview?.periodStats?.kbsCreated || 0} {getPeriodLabel()}
@@ -181,7 +183,7 @@ export default function Analytics() {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-start">
                 <div>
-                  <h6 className="text-white-50 mb-1">Published</h6>
+                  <h6 className="text-white-50 mb-1">{t('analytics.published')}</h6>
                   <h2 className="mb-0">{overview?.totals?.published || 0}</h2>
                   <small>
                     {Math.round((overview?.totals?.published / overview?.totals?.kbs) * 100 || 0)}% of total
@@ -198,7 +200,7 @@ export default function Analytics() {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-start">
                 <div>
-                  <h6 className="text-white-50 mb-1">Total Views</h6>
+                  <h6 className="text-white-50 mb-1">{t('analytics.totalViews')}</h6>
                   <h2 className="mb-0">{overview?.views?.total || 0}</h2>
                   <small>
                     Avg {overview?.views?.average || 0} per KB
@@ -215,7 +217,7 @@ export default function Analytics() {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-start">
                 <div>
-                  <h6 className="text-dark-50 mb-1">In Review</h6>
+                  <h6 className="text-dark-50 mb-1">{t('analytics.inReview')}</h6>
                   <h2 className="mb-0">{overview?.totals?.inReview || 0}</h2>
                   <small>
                     {overview?.totals?.drafts || 0} drafts
@@ -235,7 +237,7 @@ export default function Analytics() {
             <Card.Header className="bg-white border-bottom">
               <h6 className="mb-0">
                 <IconFolder className="me-2 text-primary" />
-                Status Distribution
+                {t('analytics.statusDistribution')}
               </h6>
             </Card.Header>
             <Card.Body>
@@ -258,7 +260,7 @@ export default function Analytics() {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted text-center">No data</p>
+                <p className="text-muted text-center">{t('analytics.noData')}</p>
               )}
             </Card.Body>
           </Card>
@@ -270,7 +272,7 @@ export default function Analytics() {
             <Card.Header className="bg-white border-bottom">
               <h6 className="mb-0">
                 <IconFolder className="me-2 text-success" />
-                By Category
+                {t('analytics.byCategory')}
               </h6>
             </Card.Header>
             <Card.Body>
@@ -294,7 +296,7 @@ export default function Analytics() {
                   ))}
                 </ListGroup>
               ) : (
-                <p className="text-muted text-center">No categories used</p>
+                <p className="text-muted text-center">{t('analytics.noCategoriesUsed')}</p>
               )}
             </Card.Body>
           </Card>
@@ -306,7 +308,7 @@ export default function Analytics() {
             <Card.Header className="bg-white border-bottom">
               <h6 className="mb-0">
                 <IconTag className="me-2 text-info" />
-                Popular Tags
+                {t('analytics.popularTags')}
               </h6>
             </Card.Header>
             <Card.Body>
@@ -325,7 +327,7 @@ export default function Analytics() {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted text-center">No tags used</p>
+                <p className="text-muted text-center">{t('analytics.noTagsUsed')}</p>
               )}
             </Card.Body>
           </Card>
@@ -339,7 +341,7 @@ export default function Analytics() {
             <Card.Header className="bg-white border-bottom">
               <h6 className="mb-0">
                 <IconEye className="me-2 text-primary" />
-                Most Viewed KBs
+                {t('analytics.mostViewedKbs')}
               </h6>
             </Card.Header>
             <Card.Body className="p-0">
@@ -365,7 +367,7 @@ export default function Analytics() {
                   ))}
                 </ListGroup>
               ) : (
-                <p className="text-muted text-center py-4">No views recorded yet</p>
+                <p className="text-muted text-center py-4">{t('analytics.noViewsRecordedYet')}</p>
               )}
             </Card.Body>
           </Card>
@@ -408,7 +410,7 @@ export default function Analytics() {
                   ))}
                 </ListGroup>
               ) : (
-                <p className="text-muted text-center py-4">No activity in this period</p>
+                <p className="text-muted text-center py-4">{t('analytics.noActivityInThisPeriod')}</p>
               )}
             </Card.Body>
           </Card>
@@ -422,7 +424,7 @@ export default function Analytics() {
             <Card.Header className="bg-white border-bottom">
               <h6 className="mb-0">
                 <IconHistory className="me-2 text-secondary" />
-                Recent Activity
+                {t('analytics.recentActivity')}
               </h6>
             </Card.Header>
             <Card.Body className="p-0">
@@ -450,7 +452,7 @@ export default function Analytics() {
                   ))}
                 </ListGroup>
               ) : (
-                <p className="text-muted text-center py-4">No recent activity</p>
+                <p className="text-muted text-center py-4">{t('analytics.noRecentActivity')}</p>
               )}
             </Card.Body>
           </Card>

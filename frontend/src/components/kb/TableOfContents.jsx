@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Nav, Card } from 'react-bootstrap';
 
 const TableOfContents = ({ content, onNavigate }) => {
+  const { t } = useTranslation();
   const [headings, setHeadings] = useState([]);
   const [activeId, setActiveId] = useState('');
 
@@ -68,7 +70,7 @@ const TableOfContents = ({ content, onNavigate }) => {
       <Card.Header className="bg-light border-0">
         <small className="fw-bold text-uppercase text-muted">
           <i className="bi bi-list-ul me-2"></i>
-          Índice
+          {t('tableOfContents.indice')}
         </small>
       </Card.Header>
       <Card.Body className="py-2 px-0" style={{ maxHeight: '400px', overflowY: 'auto' }}>

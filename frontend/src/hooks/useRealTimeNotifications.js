@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
 
@@ -14,6 +15,7 @@ const WS_URL = import.meta.env.VITE_WS_URL ||
     `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
 
 export function useRealTimeNotifications() {
+  const { t } = useTranslation();
     const { token, isAuthenticated } = useAuth();
     const [connected, setConnected] = useState(false);
     const [notifications, setNotifications] = useState([]);
@@ -92,7 +94,7 @@ export function useRealTimeNotifications() {
             case 'kb_created':
                 toast.info(
                     <div>
-                        <strong>Novo KB criado</strong>
+                        <strong>{t('useRealTimeNotifications.novoKbCriado')}</strong>
                         <br />
                         <small>{data.kb?.title}</small>
                     </div>,
@@ -103,7 +105,7 @@ export function useRealTimeNotifications() {
             case 'kb_updated':
                 toast.info(
                     <div>
-                        <strong>KB atualizado</strong>
+                        <strong>{t('useRealTimeNotifications.kbAtualizado')}</strong>
                         <br />
                         <small>{data.kb?.title}</small>
                     </div>,
@@ -114,7 +116,7 @@ export function useRealTimeNotifications() {
             case 'comment_added':
                 toast.info(
                     <div>
-                        <strong>Novo comentário</strong>
+                        <strong>{t('useRealTimeNotifications.novoComentario')}</strong>
                         <br />
                         <small>{data.comment?.content?.slice(0, 50)}...</small>
                     </div>,
@@ -147,7 +149,7 @@ export function useRealTimeNotifications() {
             case 'review_needed':
                 toast.info(
                     <div>
-                        <strong>Revisão necessária</strong>
+                        <strong>{t('useRealTimeNotifications.revisaoNecessaria')}</strong>
                         <br />
                         <small>{data.kb?.title}</small>
                     </div>,
@@ -158,7 +160,7 @@ export function useRealTimeNotifications() {
             case 'mention':
                 toast.info(
                     <div>
-                        <strong>Você foi mencionado</strong>
+                        <strong>{t('useRealTimeNotifications.voceFoiMencionado')}</strong>
                         <br />
                         <small>Por {data.by} em {data.context}</small>
                     </div>,

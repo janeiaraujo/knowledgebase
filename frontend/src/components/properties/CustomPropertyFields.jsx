@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import RichTextEditor from '../RichTextEditor';
 
 export default function CustomPropertyFields({ properties, values, onChange, errors }) {
+  const { t } = useTranslation();
   const handleChange = (propertyId, value) => {
     onChange({
       ...values,
@@ -56,7 +58,7 @@ export default function CustomPropertyFields({ properties, values, onChange, err
             onChange={(e) => handleChange(property._id, e.target.value)}
             required={property.required}
           >
-            <option value="">Selecione...</option>
+            <option value="">{t('customPropertyFields.selecione')}</option>
             {property.options.map((option, idx) => (
               <option key={idx} value={option}>{option}</option>
             ))}
