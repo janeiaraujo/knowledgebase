@@ -1,17 +1,93 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Table, Badge, Button, Modal, Form, Spinner, Alert } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Button, Modal, Form, Spinner, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'react-toastify';
 import { eventAPI } from '../../services/api';
 
-const SOURCE_LABELS = {
-  zabbix: 'Zabbix',
-  grafana: 'Grafana',
-  datadog: 'Datadog',
-  sentry: 'Sentry',
-  custom: 'Customizado'
-};
+// Catalogo de fontes de eventos, no mesmo padrao visual das integrações de
+// saída (icone, cor, descrição, lista de recursos). Cada uma pode ter
+// múltiplos tokens (ex.: "Zabbix produção" + "Zabbix staging").
+const SOURCES = [
+  {
+    type: 'zabbix',
+    name: 'Zabbix',
+    description: 'Triggers do Zabbix viram eventos aqui, prontos para virar incidente',
+    icon: 'bi-diagram-3',
+    color: '#D40000',
+    features: [
+      'Media Type webhook nativo',
+      'Abertura de incidente por severidade',
+      'Deduplicação automática (5 min)',
+      'Correlação com KBs existentes'
+    ]
+  },
+  {
+    type: 'grafana',
+    name: 'Grafana',
+    description: 'Alert rules do Grafana enviadas via Contact Point webhook',
+    icon: 'bi-bar-chart-line',
+    color: '#F46800',
+    features: [
+      'Contact Point tipo webhook',
+      'Abertura de incidente por severidade',
+      'Deduplicação automática (5 min)',
+      'Metadata completo do alerta'
+    ]
+  },
+  {
+    type: 'datadog',
+    name: 'Datadog',
+    description: 'Monitors do Datadog enviados via Webhooks integration',
+    icon: 'bi-graph-up',
+    color: '#632CA6',
+    features: [
+      'Webhooks integration nativa',
+      'Abertura de incidente por severidade',
+      'Correlação de incidentes',
+      'Metadata completo do alerta'
+    ]
+  },
+  {
+    type: 'sentry',
+    name: 'Sentry',
+    description: 'Erros de aplicação capturados pelo Sentry viram eventos aqui',
+    icon: 'bi-bug',
+    color: '#362D59',
+    features: [
+      'Internal Integration webhook',
+      'Abertura de incidente por severidade',
+      'Stack trace nos metadados',
+      'Correlação com KBs existentes'
+    ]
+  },
+  {
+    type: 'pagerduty',
+    name: 'PagerDuty',
+    description: 'Incidentes/alertas do PagerDuty viram eventos aqui',
+    icon: 'bi-bell',
+    color: '#06AC38',
+    features: [
+      'Webhook v3 (Event Orchestration)',
+      'Abertura de incidente por severidade',
+      'KB gerado vincula de volta ao alerta',
+      'Deduplicação automática (5 min)'
+    ]
+  },
+  {
+    type: 'custom',
+    name: 'Customizado',
+    description: 'Qualquer sistema que fale HTTP/JSON - scripts internos, outra ferramenta',
+    icon: 'bi-code-slash',
+    color: '#6c757d',
+    features: [
+      'Mesma autenticação por token',
+      'Schema simples e documentado',
+      'Abertura de incidente por severidade',
+      'Ideal para automações internas'
+    ]
+  }
+];
 
 function samplePayload(source) {
   return {
@@ -76,6 +152,11 @@ export default function InboundEventSources() {
     loadTokens();
   }, [loadTokens]);
 
+  const openModalForSource = (sourceType) => {
+    setTokenForm(prev => ({ ...prev, source: sourceType }));
+    setShowTokenModal(true);
+  };
+
   const handleCreateToken = async (e) => {
     e.preventDefault();
     if (!tokenForm.label.trim()) return;
@@ -125,76 +206,100 @@ export default function InboundEventSources() {
 
   return (
     <>
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <span><i className="bi bi-hdd-network me-2"></i>Fontes de Eventos</span>
-          <Button size="sm" variant="primary" onClick={() => setShowTokenModal(true)}>
-            <i className="bi bi-plus-lg me-1"></i>Novo token
-          </Button>
-        </Card.Header>
-        <Card.Body>
-          <p className="text-muted small mb-3">
-            Integrações de <strong>entrada</strong>: ferramentas de monitoramento (Zabbix, Grafana, Datadog, Sentry
-            ou outra) enviam eventos <em>para dentro</em> desta plataforma via <code>POST /api/events/ingest</code>,
-            autenticando com um token próprio no header <code>x-api-token</code>. Um token pode, opcionalmente, abrir
-            incidentes automaticamente quando a severidade do alerta atingir um piso configurado.
-          </p>
+      <p className="text-muted small mb-3">
+        Integrações de <strong>entrada</strong>: ferramentas de monitoramento enviam eventos <em>para dentro</em>
+        desta plataforma via <code>POST /api/events/ingest</code>, autenticando com um token próprio no header{' '}
+        <code>x-api-token</code>. Um token pode, opcionalmente, abrir incidentes automaticamente quando a
+        severidade do alerta atingir um piso configurado.
+      </p>
 
-          <details className="mb-3">
-            <summary className="text-primary small" style={{ cursor: 'pointer' }}>
-              Ver exemplo de requisição (curl)
-            </summary>
-            <pre className="bg-body-secondary p-2 rounded small mt-2" style={{ whiteSpace: 'pre-wrap' }}>
-              {sampleCurl('zabbix')}
-            </pre>
-          </details>
+      <details className="mb-4">
+        <summary className="text-primary small" style={{ cursor: 'pointer' }}>
+          Ver exemplo de requisição (curl)
+        </summary>
+        <pre className="bg-body-secondary p-2 rounded small mt-2" style={{ whiteSpace: 'pre-wrap' }}>
+          {sampleCurl('zabbix')}
+        </pre>
+      </details>
 
-          {loadingTokens ? (
-            <div className="text-center py-3"><Spinner size="sm" animation="border" /></div>
-          ) : tokens.length === 0 ? (
-            <p className="text-muted small mb-0">Nenhuma fonte configurada ainda.</p>
-          ) : (
-            <Table size="sm" responsive className="mb-0 align-middle">
-              <thead>
-                <tr>
-                  <th>Label</th>
-                  <th>Fonte</th>
-                  <th>Token</th>
-                  <th>Auto-incidente</th>
-                  <th>Último uso</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {tokens.map(t => (
-                  <tr key={t._id}>
-                    <td>{t.label}</td>
-                    <td>{SOURCE_LABELS[t.source] || t.source}</td>
-                    <td><code>{t.token_preview}</code></td>
-                    <td>
-                      {t.auto_create_incident ? (
-                        <Badge bg="success">≥ {t.auto_create_severity_threshold}</Badge>
-                      ) : (
-                        <span className="text-muted small">manual</span>
-                      )}
-                    </td>
-                    <td className="text-muted small">
-                      {t.last_used_at
-                        ? formatDistanceToNow(new Date(t.last_used_at), { addSuffix: true, locale: ptBR })
-                        : 'nunca usado'}
-                    </td>
-                    <td>
-                      <Button size="sm" variant="outline-danger" onClick={() => handleRevoke(t._id)}>
-                        <i className="bi bi-trash"></i>
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </Card.Body>
-      </Card>
+      {loadingTokens ? (
+        <div className="text-center py-4"><Spinner animation="border" variant="primary" /></div>
+      ) : (
+        <Row xs={1} md={2} lg={3} className="g-4">
+          {SOURCES.map(source => {
+            const sourceTokens = tokens.filter(t => t.source === source.type);
+            const configured = sourceTokens.length > 0;
+
+            return (
+              <Col key={source.type}>
+                <Card className={`h-100 shadow-sm border-0 ${configured ? 'border-start border-success border-4' : ''}`}>
+                  <Card.Body>
+                    <div className="d-flex align-items-start mb-3">
+                      <div className="p-3 rounded me-3" style={{ backgroundColor: `${source.color}15` }}>
+                        <i className={`bi ${source.icon}`} style={{ color: source.color, fontSize: '1.5rem' }}></i>
+                      </div>
+                      <div className="flex-grow-1">
+                        <h5 className="mb-1">{source.name}</h5>
+                        {configured ? (
+                          <Badge bg="success" className="d-flex align-items-center gap-1" style={{ width: 'fit-content' }}>
+                            <i className="bi bi-check"></i>
+                            {sourceTokens.length === 1 ? '1 token ativo' : `${sourceTokens.length} tokens ativos`}
+                          </Badge>
+                        ) : (
+                          <Badge bg="secondary">Não configurado</Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-muted small mb-3">{source.description}</p>
+
+                    <div className="mb-3">
+                      <small className="text-muted fw-semibold">Recursos:</small>
+                      <ul className="small mb-0 ps-3">
+                        {source.features.slice(0, 3).map((feature, idx) => (
+                          <li key={idx}>{feature}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {sourceTokens.length > 0 && (
+                      <div className="border-top pt-2 mt-2">
+                        {sourceTokens.map(t => (
+                          <div key={t._id} className="d-flex align-items-center justify-content-between small mb-1">
+                            <div className="text-truncate me-2">
+                              <span className="fw-medium">{t.label}</span>{' '}
+                              <code className="text-muted">{t.token_preview}</code>
+                              {t.auto_create_incident && (
+                                <Badge bg="success" className="ms-1">auto ≥ {t.auto_create_severity_threshold}</Badge>
+                              )}
+                            </div>
+                            <OverlayTrigger overlay={<Tooltip>Revogar</Tooltip>}>
+                              <Button size="sm" variant="outline-danger" onClick={() => handleRevoke(t._id)}>
+                                <i className="bi bi-trash"></i>
+                              </Button>
+                            </OverlayTrigger>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </Card.Body>
+                  <Card.Footer className="bg-white border-0 pt-0">
+                    <Button
+                      variant={configured ? 'outline-primary' : 'primary'}
+                      size="sm"
+                      className="w-100"
+                      onClick={() => openModalForSource(source.type)}
+                    >
+                      <i className="bi bi-plus-lg me-1"></i>
+                      {configured ? 'Adicionar outro token' : 'Configurar'}
+                    </Button>
+                  </Card.Footer>
+                </Card>
+              </Col>
+            );
+          })}
+        </Row>
+      )}
 
       {/* Modal: novo token */}
       <Modal show={showTokenModal} onHide={closeTokenModal}>
@@ -261,8 +366,8 @@ export default function InboundEventSources() {
                   value={tokenForm.source}
                   onChange={(e) => setTokenForm(prev => ({ ...prev, source: e.target.value }))}
                 >
-                  {Object.entries(SOURCE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
+                  {SOURCES.map(source => (
+                    <option key={source.type} value={source.type}>{source.name}</option>
                   ))}
                 </Form.Select>
               </Form.Group>
