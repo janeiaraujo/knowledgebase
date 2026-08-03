@@ -39,7 +39,7 @@ export default function ResetPassword() {
       // parada numa tela final sem próximo passo.
       setTimeout(() => navigate('/login?reset=success'), 2500);
     } catch (err) {
-      setError(err.response?.data?.error || t('auth.forgot.failed'));
+      setError(err.response?.data?.error || t('auth.reset.failed'));
     } finally {
       setLoading(false);
     }
