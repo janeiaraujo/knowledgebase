@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 /**
@@ -16,6 +17,7 @@ const getSpeechRecognitionCtor = () =>
   (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) || null;
 
 export default function VoiceRecorderButton({ onTranscript, lang = 'pt-BR', label = 'Ditar por voz' }) {
+  const { t } = useTranslation();
   const [isRecording, setIsRecording] = useState(false);
   const [interimText, setInterimText] = useState('');
   const [permissionError, setPermissionError] = useState(false);
@@ -82,7 +84,7 @@ export default function VoiceRecorderButton({ onTranscript, lang = 'pt-BR', labe
 
   if (!isSupported) {
     return (
-      <OverlayTrigger overlay={<Tooltip>Ditado por voz não é suportado neste navegador (funciona no Chrome/Edge)</Tooltip>}>
+      <OverlayTrigger overlay={<Tooltip>{t('voiceRecorderButton.ditadoPorVozNaoESuportado')}</Tooltip>}>
         <span className="d-inline-block">
           <button type="button" className="btn btn-sm btn-outline-secondary" disabled style={{ pointerEvents: 'none' }}>
             <i className="bi bi-mic-mute"></i>
@@ -108,7 +110,7 @@ export default function VoiceRecorderButton({ onTranscript, lang = 'pt-BR', labe
       )}
       {permissionError && (
         <small className="text-danger mt-1">
-          Permissão de microfone negada. Habilite o acesso ao microfone para este site.
+          {t('voiceRecorderButton.permissaoDeMicrofoneNegadaHabilite')}
         </small>
       )}
     </div>

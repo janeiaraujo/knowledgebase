@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, Form, Button, Badge, Alert, Row, Col, Tabs, Tab, Table, Modal } from 'react-bootstrap';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function KBPermissions() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -145,14 +147,14 @@ export default function KBPermissions() {
     return (
       <div className="text-center py-5">
         <div className="spinner-border" role="status">
-          <span className="visually-hidden">Carregando...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </div>
       </div>
     );
   }
   
   if (!record) {
-    return <Alert variant="danger">KB não encontrado</Alert>;
+    return <Alert variant="danger">{t('kbPermissions.kbNaoEncontrado')}</Alert>;
   }
   
   // Check if user can manage permissions
@@ -162,9 +164,9 @@ export default function KBPermissions() {
     return (
       <Alert variant="warning">
         <i className="bi bi-shield-lock me-2"></i>
-        Você não tem permissão para gerenciar as permissões deste KB.
+        {t('kbPermissions.voceNaoTemPermissaoParaGerenciar')}
         <Link to={`/kb/${id}`} className="btn btn-sm btn-outline-secondary ms-3">
-          Voltar para KB
+          {t('kbPermissions.voltarParaKb')}
         </Link>
       </Alert>
     );
@@ -175,7 +177,7 @@ export default function KBPermissions() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <Link to={`/kb/${id}`} className="text-decoration-none text-muted">
-            <i className="bi bi-arrow-left me-2"></i>Voltar para KB
+            <i className="bi bi-arrow-left me-2"></i>{t('kbPermissions.voltarParaKb')}
           </Link>
           <h2 className="mt-2 mb-0">
             <i className="bi bi-shield-lock me-2"></i>
@@ -190,11 +192,11 @@ export default function KBPermissions() {
           {saving ? (
             <>
               <span className="spinner-border spinner-border-sm me-2"></span>
-              Salvando...
+              {t('integrations.saving')}
             </>
           ) : (
             <>
-              <i className="bi bi-check-lg me-2"></i>Salvar Permissões
+              <i className="bi bi-check-lg me-2"></i>{t('kbPermissions.salvarPermissoes')}
             </>
           )}
         </Button>
@@ -209,7 +211,7 @@ export default function KBPermissions() {
             <Card.Header className="bg-white border-0 py-3">
               <h5 className="mb-0">
                 <i className="bi bi-eye me-2"></i>
-                Visibilidade
+                {t('kbPermissions.visibilidade')}
               </h5>
             </Card.Header>
             <Card.Body>
@@ -220,8 +222,8 @@ export default function KBPermissions() {
                   name="visibility"
                   label={
                     <div>
-                      <strong>Público</strong>
-                      <p className="text-muted mb-0 small">Todos os usuários do tenant podem ver este KB</p>
+                      <strong>{t('kbPermissions.publico')}</strong>
+                      <p className="text-muted mb-0 small">{t('kbPermissions.todosOsUsuariosDoTenantPodem')}</p>
                     </div>
                   }
                   checked={permissions.visibility === 'public'}
@@ -236,8 +238,8 @@ export default function KBPermissions() {
                   name="visibility"
                   label={
                     <div>
-                      <strong>Restrito</strong>
-                      <p className="text-muted mb-0 small">Apenas departamentos, grupos e usuários selecionados podem ver</p>
+                      <strong>{t('kbPermissions.restrito')}</strong>
+                      <p className="text-muted mb-0 small">{t('kbPermissions.apenasDepartamentosGruposEUsuarios')}</p>
                     </div>
                   }
                   checked={permissions.visibility === 'restricted'}
@@ -252,8 +254,8 @@ export default function KBPermissions() {
                   name="visibility"
                   label={
                     <div>
-                      <strong>Privado</strong>
-                      <p className="text-muted mb-0 small">Apenas o criador e administradores podem ver</p>
+                      <strong>{t('kbPermissions.privado')}</strong>
+                      <p className="text-muted mb-0 small">{t('kbPermissions.apenasOCriadorEAdministradoresPode')}</p>
                     </div>
                   }
                   checked={permissions.visibility === 'private'}
@@ -268,7 +270,7 @@ export default function KBPermissions() {
               <Card.Header className="bg-white border-0 py-3">
                 <h5 className="mb-0">
                   <i className="bi bi-people me-2"></i>
-                  Acesso Restrito
+                  {t('kbPermissions.acessoRestrito')}
                 </h5>
               </Card.Header>
               <Card.Body>
@@ -291,7 +293,7 @@ export default function KBPermissions() {
                           ))}
                         </Row>
                       ) : (
-                        <p className="text-muted">Nenhum departamento cadastrado</p>
+                        <p className="text-muted">{t('kbPermissions.nenhumDepartamentoCadastrado')}</p>
                       )}
                     </div>
                   </Tab>
@@ -314,7 +316,7 @@ export default function KBPermissions() {
                           ))}
                         </Row>
                       ) : (
-                        <p className="text-muted">Nenhum grupo cadastrado</p>
+                        <p className="text-muted">{t('kbPermissions.nenhumGrupoCadastrado')}</p>
                       )}
                     </div>
                   </Tab>
@@ -327,7 +329,7 @@ export default function KBPermissions() {
             <Card.Header className="bg-white border-0 py-3 d-flex justify-content-between align-items-center">
               <h5 className="mb-0">
                 <i className="bi bi-person-check me-2"></i>
-                Permissões Individuais
+                {t('kbPermissions.permissoesIndividuais')}
               </h5>
               <Button 
                 variant="outline-primary" 
@@ -337,12 +339,12 @@ export default function KBPermissions() {
                   setShowAddUserModal(true);
                 }}
               >
-                <i className="bi bi-plus-lg me-1"></i>Adicionar Usuário
+                <i className="bi bi-plus-lg me-1"></i>{t('kbPermissions.adicionarUsuario')}
               </Button>
             </Card.Header>
             <Card.Body>
               <h6 className="text-muted mb-3">
-                <i className="bi bi-pencil me-2"></i>Editores
+                <i className="bi bi-pencil me-2"></i>{t('kbPermissions.editores')}
                 <Badge bg="primary" pill className="ms-2">{permissions.editors.length}</Badge>
               </h6>
               
@@ -370,11 +372,11 @@ export default function KBPermissions() {
                   </tbody>
                 </Table>
               ) : (
-                <p className="text-muted small mb-4">Nenhum editor adicional</p>
+                <p className="text-muted small mb-4">{t('kbPermissions.nenhumEditorAdicional')}</p>
               )}
               
               <h6 className="text-muted mb-3">
-                <i className="bi bi-eye me-2"></i>Visualizadores
+                <i className="bi bi-eye me-2"></i>{t('kbPermissions.visualizadores')}
                 <Badge bg="secondary" pill className="ms-2">{permissions.viewers.length}</Badge>
               </h6>
               
@@ -402,7 +404,7 @@ export default function KBPermissions() {
                   </tbody>
                 </Table>
               ) : (
-                <p className="text-muted small">Nenhum visualizador adicional</p>
+                <p className="text-muted small">{t('kbPermissions.nenhumVisualizadorAdicional')}</p>
               )}
             </Card.Body>
           </Card>
@@ -413,19 +415,19 @@ export default function KBPermissions() {
             <Card.Header className="bg-white border-0 py-3">
               <h5 className="mb-0">
                 <i className="bi bi-info-circle me-2"></i>
-                Informações
+                {t('kbPermissions.informacoes')}
               </h5>
             </Card.Header>
             <Card.Body>
-              <p className="small text-muted mb-2"><strong>Status:</strong></p>
+              <p className="small text-muted mb-2"><strong>{t('kbPermissions.status')}</strong></p>
               <Badge bg={getStatusBadge(record.status)} className="mb-3">
                 {getStatusLabel(record.status)}
               </Badge>
               
-              <p className="small text-muted mb-2"><strong>Criado por:</strong></p>
+              <p className="small text-muted mb-2"><strong>{t('kbPermissions.criadoPor')}</strong></p>
               <p className="mb-3">{record.creator_info?.name || record.creator_info?.email || 'Desconhecido'}</p>
               
-              <p className="small text-muted mb-2"><strong>Criado em:</strong></p>
+              <p className="small text-muted mb-2"><strong>{t('kbPermissions.criadoEm')}</strong></p>
               <p className="mb-0">{new Date(record.created_at).toLocaleDateString('pt-BR')}</p>
             </Card.Body>
           </Card>
@@ -434,20 +436,20 @@ export default function KBPermissions() {
             <Card.Body>
               <h6>
                 <i className="bi bi-lightbulb me-2 text-warning"></i>
-                Dicas
+                {t('kbPermissions.dicas')}
               </h6>
               <ul className="small text-muted mb-0">
                 <li className="mb-2">
-                  <strong>Público:</strong> Ideal para documentação geral
+                  <strong>{t('kbPermissions.publico2')}</strong> {t('kbPermissions.idealParaDocumentacaoGeral')}
                 </li>
                 <li className="mb-2">
-                  <strong>Restrito:</strong> Use para informações de equipe específica
+                  <strong>{t('kbPermissions.restrito2')}</strong> {t('kbPermissions.useParaInformacoesDeEquipeEspecifi')}
                 </li>
                 <li className="mb-2">
-                  <strong>Privado:</strong> Para rascunhos ou informações sensíveis
+                  <strong>{t('kbPermissions.privado2')}</strong> {t('kbPermissions.paraRascunhosOuInformacoesSensivei')}
                 </li>
                 <li>
-                  <strong>Editores:</strong> Podem modificar o conteúdo
+                  <strong>{t('kbPermissions.editores2')}</strong> {t('kbPermissions.podemModificarOConteudo')}
                 </li>
               </ul>
             </Card.Body>
@@ -458,27 +460,27 @@ export default function KBPermissions() {
       {/* Add User Modal */}
       <Modal show={showAddUserModal} onHide={() => setShowAddUserModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Adicionar Usuário</Modal.Title>
+          <Modal.Title>{t('kbPermissions.adicionarUsuario')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group className="mb-3">
-            <Form.Label>Tipo de Permissão</Form.Label>
+            <Form.Label>{t('kbPermissions.tipoDePermissao')}</Form.Label>
             <Form.Select 
               value={addUserType}
               onChange={(e) => setAddUserType(e.target.value)}
             >
-              <option value="viewer">Visualizador</option>
-              <option value="editor">Editor</option>
+              <option value="viewer">{t('kbPermissions.visualizador')}</option>
+              <option value="editor">{t('kbPermissions.editor')}</option>
             </Form.Select>
           </Form.Group>
           
           <Form.Group>
-            <Form.Label>Usuário</Form.Label>
+            <Form.Label>{t('userActivity.user')}</Form.Label>
             <Form.Select
               value={selectedUserId}
               onChange={(e) => setSelectedUserId(e.target.value)}
             >
-              <option value="">Selecione um usuário...</option>
+              <option value="">{t('kbPermissions.selecioneUmUsuario')}</option>
               {users
                 .filter(u => 
                   !permissions.editors.includes(u._id) && 
@@ -495,10 +497,10 @@ export default function KBPermissions() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowAddUserModal(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" onClick={addUserPermission} disabled={!selectedUserId}>
-            Adicionar
+            {t('common.add')}
           </Button>
         </Modal.Footer>
       </Modal>

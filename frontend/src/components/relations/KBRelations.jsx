@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Button, Badge, Modal, Form, ListGroup, Spinner, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { relationAPI } from '../../services/api';
@@ -13,6 +14,7 @@ const RELATION_TYPE_INFO = {
 };
 
 export default function KBRelations({ recordId }) {
+  const { t } = useTranslation();
   const [relations, setRelations] = useState({ outgoing: [], incoming: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,7 +40,7 @@ export default function KBRelations({ recordId }) {
   };
   
   const handleDeleteRelation = async (relationId) => {
-    if (!window.confirm('Remover esta relação?')) return;
+    if (!window.confirm(t('kbRelations.removerEstaRelacao'))) return;
     
     try {
       await relationAPI.delete(relationId);
@@ -75,7 +77,7 @@ export default function KBRelations({ recordId }) {
           onClick={() => setShowAddModal(true)}
         >
           <i className="bi bi-plus-lg me-1"></i>
-          Adicionar
+          {t('common.add')}
         </Button>
       </div>
       
@@ -88,8 +90,8 @@ export default function KBRelations({ recordId }) {
       {totalRelations === 0 ? (
         <div className="text-center py-4 text-muted">
           <i className="bi bi-link-45deg fs-1 d-block mb-2"></i>
-          <p className="mb-0">Nenhuma relação definida</p>
-          <small>Relacione este KB com outros para criar uma rede de conhecimento</small>
+          <p className="mb-0">{t('kbRelations.nenhumaRelacaoDefinida')}</p>
+          <small>{t('kbRelations.relacioneEsteKbComOutrosPara')}</small>
         </div>
       ) : (
         <>
@@ -98,7 +100,7 @@ export default function KBRelations({ recordId }) {
             <div className="mb-3">
               <small className="text-muted d-block mb-2">
                 <i className="bi bi-box-arrow-up-right me-1"></i>
-                Este KB...
+                {t('kbRelations.esteKb')}
               </small>
               <ListGroup variant="flush">
                 {relations.outgoing.map(rel => {
@@ -125,7 +127,7 @@ export default function KBRelations({ recordId }) {
                         size="sm"
                         className="text-danger p-0"
                         onClick={() => handleDeleteRelation(rel._id)}
-                        title="Remover relação"
+                        title={t('kbRelations.removerRelacao')}
                       >
                         <i className="bi bi-x-lg"></i>
                       </Button>
@@ -141,7 +143,7 @@ export default function KBRelations({ recordId }) {
             <div>
               <small className="text-muted d-block mb-2">
                 <i className="bi bi-box-arrow-in-down-left me-1"></i>
-                Outros KBs...
+                {t('kbRelations.outrosKbs')}
               </small>
               <ListGroup variant="flush">
                 {relations.incoming.map(rel => {
@@ -159,7 +161,7 @@ export default function KBRelations({ recordId }) {
                           <i className={`${typeInfo.icon} me-1`}></i>
                           {typeInfo.label}
                         </Badge>
-                        <span className="text-muted">este KB</span>
+                        <span className="text-muted">{t('kbRelations.thisKbLower')}</span>
                       </div>
                     </ListGroup.Item>
                   );
@@ -182,6 +184,7 @@ export default function KBRelations({ recordId }) {
 }
 
 function AddRelationModal({ show, onHide, recordId, onRelationAdded }) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -254,7 +257,7 @@ function AddRelationModal({ show, onHide, recordId, onRelationAdded }) {
   return (
     <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>Adicionar Relação</Modal.Title>
+        <Modal.Title>{t('kbRelations.adicionarRelacao')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {error && (
@@ -266,10 +269,10 @@ function AddRelationModal({ show, onHide, recordId, onRelationAdded }) {
         {!selectedRecord ? (
           <>
             <Form.Group className="mb-3">
-              <Form.Label>Buscar KB</Form.Label>
+              <Form.Label>{t('kbRelations.buscarKb')}</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Digite para buscar..."
+                placeholder={t('kbRelations.digiteParaBuscar')}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 autoFocus
@@ -302,7 +305,7 @@ function AddRelationModal({ show, onHide, recordId, onRelationAdded }) {
             
             {!searching && searchQuery.length >= 2 && searchResults.length === 0 && (
               <div className="text-center py-3 text-muted">
-                Nenhum KB encontrado
+                {t('kbRelations.nenhumKbEncontrado')}
               </div>
             )}
           </>
@@ -310,7 +313,7 @@ function AddRelationModal({ show, onHide, recordId, onRelationAdded }) {
           <>
             <Alert variant="info" className="d-flex justify-content-between align-items-center">
               <div>
-                <strong>KB selecionado:</strong> {selectedRecord.title}
+                <strong>{t('kbRelations.kbSelecionado')}</strong> {selectedRecord.title}
               </div>
               <Button
                 variant="link"
@@ -318,12 +321,12 @@ function AddRelationModal({ show, onHide, recordId, onRelationAdded }) {
                 className="p-0"
                 onClick={() => setSelectedRecord(null)}
               >
-                Alterar
+                {t('kbRelations.alterar')}
               </Button>
             </Alert>
             
             <Form.Group>
-              <Form.Label>Tipo de Relação</Form.Label>
+              <Form.Label>{t('kbRelations.tipoDeRelacao')}</Form.Label>
               <Form.Select
                 value={relationType}
                 onChange={(e) => setRelationType(e.target.value)}
@@ -335,7 +338,7 @@ function AddRelationModal({ show, onHide, recordId, onRelationAdded }) {
                 ))}
               </Form.Select>
               <Form.Text className="text-muted">
-                Este KB <strong>{RELATION_TYPE_INFO[relationType].label.toLowerCase()}</strong> "{selectedRecord.title}"
+                {t('kbRelations.esteKb2')} <strong>{RELATION_TYPE_INFO[relationType].label.toLowerCase()}</strong> "{selectedRecord.title}"
               </Form.Text>
             </Form.Group>
           </>
@@ -343,7 +346,7 @@ function AddRelationModal({ show, onHide, recordId, onRelationAdded }) {
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onHide}>
-          Cancelar
+          {t('common.cancel')}
         </Button>
         <Button 
           variant="primary" 

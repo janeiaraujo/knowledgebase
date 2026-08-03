@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -54,13 +55,14 @@ import HelpCenter from './pages/HelpCenter';
 import Layout from './components/Layout';
 
 const ProtectedRoute = ({ children }) => {
+  const { t } = useTranslation();
   const { isAuthenticated, loading } = useAuth();
   
   if (loading) {
     return (
       <div className="spinner-overlay">
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -70,13 +72,14 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const PublicRoute = ({ children }) => {
+  const { t } = useTranslation();
   const { isAuthenticated, loading } = useAuth();
   
   if (loading) {
     return (
       <div className="spinner-overlay">
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -86,6 +89,7 @@ const PublicRoute = ({ children }) => {
 };
 
 function AppRoutes() {
+  const { t } = useTranslation();
   return (
     <Routes>
       {/* Public Routes */}

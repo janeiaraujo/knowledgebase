@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 
 const ROLES = [
@@ -9,6 +10,7 @@ const ROLES = [
 ];
 
 export default function UsersTab() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export default function UsersTab() {
       setGroups(groupsRes.data.groups || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      alert('Erro ao carregar dados');
+      alert(t('usersTab.erroAoCarregarDados'));
     } finally {
       setLoading(false);
     }
@@ -103,7 +105,7 @@ export default function UsersTab() {
     return (
       <div className="text-center py-5">
         <div className="spinner-border" role="status">
-          <span className="visually-hidden">Carregando...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -112,7 +114,7 @@ export default function UsersTab() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">Usuários</h4>
+        <h4 className="mb-0">{t('usersTab.usuarios')}</h4>
         <div className="d-flex gap-2">
           <select
             className="form-select"
@@ -120,7 +122,7 @@ export default function UsersTab() {
             onChange={(e) => setFilterRole(e.target.value)}
             style={{ width: 'auto' }}
           >
-            <option value="">Todos os Roles</option>
+            <option value="">{t('usersTab.todosOsRoles')}</option>
             {ROLES.map(role => (
               <option key={role.value} value={role.value}>
                 {role.label}
@@ -136,7 +138,7 @@ export default function UsersTab() {
             }}
           >
             <i className="bi bi-plus-circle me-2"></i>
-            Novo Usuário
+            {t('usersTab.novoUsuario')}
           </button>
         </div>
       </div>
@@ -144,18 +146,18 @@ export default function UsersTab() {
       {filteredUsers.length === 0 ? (
         <div className="alert alert-info">
           <i className="bi bi-info-circle me-2"></i>
-          Nenhum usuário encontrado.
+          {t('usersTab.nenhumUsuarioEncontrado')}
         </div>
       ) : (
         <div className="table-responsive">
           <table className="table table-hover">
             <thead>
               <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Criado em</th>
-                <th>Ações</th>
+                <th>{t('gpsEditor.name')}</th>
+                <th>{t('usersTab.email')}</th>
+                <th>{t('usersTab.role')}</th>
+                <th>{t('usersTab.criadoEm')}</th>
+                <th>{t('reviews.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -180,14 +182,14 @@ export default function UsersTab() {
                         <button
                           className="btn btn-outline-primary"
                           onClick={() => handleEdit(user)}
-                          title="Editar"
+                          title={t('common.edit')}
                         >
                           <i className="bi bi-pencil"></i>
                         </button>
                         <button
                           className="btn btn-outline-danger"
                           onClick={() => handleDelete(user._id, user.name)}
-                          title="Excluir"
+                          title={t('common.delete')}
                         >
                           <i className="bi bi-trash"></i>
                         </button>
@@ -204,7 +206,7 @@ export default function UsersTab() {
       {/* Estatísticas */}
       <div className="row mt-4">
         <div className="col-md-12">
-          <h5 className="mb-3">Estatísticas</h5>
+          <h5 className="mb-3">{t('usersTab.estatisticas')}</h5>
         </div>
         {ROLES.map(role => {
           const count = users.filter(u => u.role === role.value).length;
@@ -239,7 +241,7 @@ export default function UsersTab() {
               <form onSubmit={handleSubmit}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Nome *</label>
+                    <label className="form-label">{t('usersTab.nome')}</label>
                     <input
                       type="text"
                       className="form-control"
@@ -249,7 +251,7 @@ export default function UsersTab() {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Email *</label>
+                    <label className="form-label">{t('usersTab.email2')}</label>
                     <input
                       type="email"
                       className="form-control"
@@ -273,7 +275,7 @@ export default function UsersTab() {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Role (Permissão) *</label>
+                    <label className="form-label">{t('usersTab.rolePermissao')}</label>
                     <select
                       className="form-select"
                       value={formData.role}
@@ -287,10 +289,10 @@ export default function UsersTab() {
                       ))}
                     </select>
                     <div className="form-text">
-                      <strong>Admin:</strong> Acesso total<br />
-                      <strong>Revisor:</strong> Aprovar KBs<br />
-                      <strong>Editor:</strong> Criar e editar KBs próprias<br />
-                      <strong>Visualizador:</strong> Apenas leitura
+                      <strong>{t('usersTab.admin')}</strong> {t('usersTab.acessoTotal')}<br />
+                      <strong>{t('usersTab.revisor')}</strong> {t('usersTab.aprovarKbs')}<br />
+                      <strong>{t('usersTab.editor')}</strong> {t('usersTab.criarEEditarKbsProprias')}<br />
+                      <strong>{t('usersTab.visualizador')}</strong> {t('usersTab.apenasLeitura')}
                     </div>
                   </div>
                 </div>
@@ -300,7 +302,7 @@ export default function UsersTab() {
                     className="btn btn-secondary"
                     onClick={() => setShowModal(false)}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </button>
                   <button type="submit" className="btn btn-primary">
                     {editingUser ? 'Salvar' : 'Criar'}

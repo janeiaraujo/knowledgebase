@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge, Form, Dropdown, Button, InputGroup } from 'react-bootstrap';
 import { tagAPI, categoryAPI } from '../../services/api';
 
@@ -11,6 +12,7 @@ const QUICK_CREATE_COLORS = [
 
 // Tag Selector Component
 export function TagSelector({ selectedTags = [], onChange }) {
+  const { t } = useTranslation();
   const [tags, setTags] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -107,7 +109,7 @@ export function TagSelector({ selectedTags = [], onChange }) {
       <div className="position-relative">
         <Form.Control
           type="text"
-          placeholder="Buscar ou selecionar tags..."
+          placeholder={t('tagSelector.buscarOuSelecionarTags')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onFocus={() => setShowDropdown(true)}
@@ -121,7 +123,7 @@ export function TagSelector({ selectedTags = [], onChange }) {
             style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
           >
             {loading ? (
-              <div className="p-2 text-center text-muted">Carregando...</div>
+              <div className="p-2 text-center text-muted">{t('common.loading')}</div>
             ) : filteredTags.length > 0 ? (
               filteredTags.map(tag => (
                 <div 
@@ -176,6 +178,7 @@ export function TagSelector({ selectedTags = [], onChange }) {
 
 // Category Selector Component
 export function CategorySelector({ selectedCategory, onChange }) {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -263,7 +266,7 @@ export function CategorySelector({ selectedCategory, onChange }) {
           onChange={(e) => onChange(e.target.value || null)}
           disabled={loading}
         >
-          <option value="">Selecione uma categoria...</option>
+          <option value="">{t('tagSelector.selecioneUmaCategoria')}</option>
           {categoryOptions.map(cat => (
             <option key={cat._id} value={cat._id}>
               {cat.displayName}
@@ -274,7 +277,7 @@ export function CategorySelector({ selectedCategory, onChange }) {
           variant="outline-secondary"
           size="sm"
           onClick={() => setShowCreate(prev => !prev)}
-          title="Criar nova categoria"
+          title={t('tagSelector.criarNovaCategoria')}
         >
           <i className="bi bi-plus-lg"></i>
         </Button>
@@ -283,7 +286,7 @@ export function CategorySelector({ selectedCategory, onChange }) {
       {showCreate && (
         <InputGroup size="sm" className="mt-2">
           <Form.Control
-            placeholder="Nome da nova categoria"
+            placeholder={t('tagSelector.nomeDaNovaCategoria')}
             value={newCategoryName}
             autoFocus
             onChange={(e) => setNewCategoryName(e.target.value)}
@@ -312,6 +315,7 @@ export function CategorySelector({ selectedCategory, onChange }) {
 
 // Display component for showing tags on a KB
 export function TagsDisplay({ tagIds = [], showEmpty = false }) {
+  const { t } = useTranslation();
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -341,7 +345,7 @@ export function TagsDisplay({ tagIds = [], showEmpty = false }) {
   
   if (tags.length === 0) {
     return showEmpty ? (
-      <span className="text-muted">Sem tags</span>
+      <span className="text-muted">{t('tagSelector.semTags')}</span>
     ) : null;
   }
   
@@ -364,6 +368,7 @@ export function TagsDisplay({ tagIds = [], showEmpty = false }) {
 
 // Display component for showing category on a KB
 export function CategoryDisplay({ categoryId, showEmpty = false }) {
+  const { t } = useTranslation();
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -393,7 +398,7 @@ export function CategoryDisplay({ categoryId, showEmpty = false }) {
   
   if (!category) {
     return showEmpty ? (
-      <span className="text-muted">Sem categoria</span>
+      <span className="text-muted">{t('tagSelector.semCategoria')}</span>
     ) : null;
   }
   

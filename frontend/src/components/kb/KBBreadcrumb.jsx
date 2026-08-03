@@ -1,17 +1,19 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Breadcrumb } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 const KBBreadcrumb = ({ record, category }) => {
+  const { t } = useTranslation();
   return (
     <Breadcrumb className="mb-3">
       <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/dashboard' }}>
         <i className="bi bi-house-door me-1"></i>
-        Dashboard
+        {t('kbBreadcrumb.dashboard')}
       </Breadcrumb.Item>
       <Breadcrumb.Item linkAs={Link} linkProps={{ to: '/kb' }}>
         <i className="bi bi-journal-text me-1"></i>
-        Knowledge Base
+        {t('kbBreadcrumb.knowledgeBase')}
       </Breadcrumb.Item>
       {category && (
         <Breadcrumb.Item linkAs={Link} linkProps={{ to: `/kb?category=${category._id}` }}>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 
 const PROPERTY_TYPES = [
@@ -16,6 +17,7 @@ const PROPERTY_TYPES = [
 ];
 
 function PropertyModal({ show, onHide, property, onSave }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     type: 'text',
@@ -85,19 +87,19 @@ function PropertyModal({ show, onHide, property, onSave }) {
             
             <div className="modal-body">
               <div className="mb-3">
-                <label className="form-label">Nome da Propriedade</label>
+                <label className="form-label">{t('propertyManager.nomeDaPropriedade')}</label>
                 <input
                   type="text"
                   className="form-control"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  placeholder="Ex: Prioridade, Categoria, Responsável"
+                  placeholder={t('propertyManager.exPrioridadeCategoriaResponsavel')}
                 />
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Tipo</label>
+                <label className="form-label">{t('gpsEditor.type')}</label>
                 <select
                   className="form-select"
                   value={formData.type}
@@ -113,7 +115,7 @@ function PropertyModal({ show, onHide, property, onSave }) {
 
               {needsOptions && (
                 <div className="mb-3">
-                  <label className="form-label">Opções</label>
+                  <label className="form-label">{t('propertyManager.opcoes')}</label>
                   <div className="input-group mb-2">
                     <input
                       type="text"
@@ -121,7 +123,7 @@ function PropertyModal({ show, onHide, property, onSave }) {
                       value={optionInput}
                       onChange={(e) => setOptionInput(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddOption())}
-                      placeholder="Digite uma opção e pressione Enter"
+                      placeholder={t('propertyManager.digiteUmaOpcaoEPressioneEnter')}
                     />
                     <button 
                       type="button" 
@@ -156,14 +158,14 @@ function PropertyModal({ show, onHide, property, onSave }) {
                   onChange={(e) => setFormData({ ...formData, required: e.target.checked })}
                 />
                 <label className="form-check-label" htmlFor="required">
-                  Campo obrigatório
+                  {t('propertyManager.campoObrigatorio')}
                 </label>
               </div>
             </div>
 
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={onHide}>
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button type="submit" className="btn btn-primary">
                 {property ? 'Salvar Alterações' : 'Criar Propriedade'}
@@ -177,6 +179,7 @@ function PropertyModal({ show, onHide, property, onSave }) {
 }
 
 export default function PropertyManager() {
+  const { t } = useTranslation();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -209,7 +212,7 @@ export default function PropertyManager() {
       setEditingProperty(null);
     } catch (error) {
       console.error('Error saving property:', error);
-      alert('Erro ao salvar propriedade');
+      alert(t('propertyManager.erroAoSalvarPropriedade'));
     }
   };
 
@@ -223,7 +226,7 @@ export default function PropertyManager() {
       await loadProperties();
     } catch (error) {
       console.error('Error deleting property:', error);
-      alert('Erro ao excluir propriedade');
+      alert(t('propertyManager.erroAoExcluirPropriedade'));
     }
   };
 
@@ -245,25 +248,25 @@ export default function PropertyManager() {
     <div className="container-fluid py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2>Propriedades Customizadas</h2>
-          <p className="text-muted">Defina campos personalizados para seus registros de conhecimento</p>
+          <h2>{t('propertyManager.propriedadesCustomizadas')}</h2>
+          <p className="text-muted">{t('propertyManager.definaCamposPersonalizadosParaSeus')}</p>
         </div>
         <button className="btn btn-primary" onClick={handleNew}>
           <i className="bi bi-plus-circle me-2"></i>
-          Nova Propriedade
+          {t('propertyManager.novaPropriedade')}
         </button>
       </div>
 
       {properties.length === 0 ? (
         <div className="alert alert-info">
-          <h5>Nenhuma propriedade customizada criada</h5>
+          <h5>{t('propertyManager.nenhumaPropriedadeCustomizadaCriad')}</h5>
           <p className="mb-0">Crie propriedades personalizadas para adicionar campos aos seus registros, como prioridade, categoria, responsável, etc.</p>
         </div>
       ) : (
         <div className="card">
           <div className="list-group list-group-flush">
             {properties.map((property) => {
-              const typeInfo = PROPERTY_TYPES.find(t => t.value === property.type);
+              const typeInfo = PROPERTY_TYPES.find(tipo => tipo.value === property.type);
               return (
                 <div key={property._id} className="list-group-item">
                   <div className="d-flex align-items-center">
@@ -274,7 +277,7 @@ export default function PropertyManager() {
                         <span style={{ fontSize: '1.2rem' }}>{typeInfo?.icon}</span>
                         <strong>{property.name}</strong>
                         {property.required && (
-                          <span className="badge bg-danger">Obrigatório</span>
+                          <span className="badge bg-danger">{t('propertyManager.obrigatorio')}</span>
                         )}
                       </div>
                       <small className="text-muted">

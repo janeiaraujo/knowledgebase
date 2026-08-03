@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Button, Card, Row, Col, Badge, Form, Spinner, Alert } from 'react-bootstrap';
 import { templateAPI } from '../../services/api';
 
@@ -10,6 +11,7 @@ const IconCheck = () => <i className="bi bi-check-lg"></i>;
 const IconSearch = () => <i className="bi bi-search"></i>;
 
 export default function TemplateSelector({ show, onHide, onSelect }) {
+  const { t } = useTranslation();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,7 +33,7 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
       setTemplates(data.templates || []);
       
       // Extract unique categories
-      const cats = [...new Set(data.templates?.map(t => t.category) || [])];
+      const cats = [...new Set(data.templates?.map(tpl => tpl.category) || [])];
       setCategories(cats);
     } catch (err) {
       console.error('Error fetching templates:', err);
@@ -105,7 +107,7 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
       <Modal.Header closeButton>
         <Modal.Title>
           <IconFileAlt className="me-2" />
-          Choose a Template
+          {t('templateSelector.chooseATemplate')}
         </Modal.Title>
       </Modal.Header>
       
@@ -121,7 +123,7 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
           <Col md={6}>
             <Form.Control
               type="text"
-              placeholder="Search templates..."
+              placeholder={t('templateSelector.searchTemplates')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="border-0 bg-light"
@@ -133,7 +135,7 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="border-0 bg-light"
             >
-              <option value="">All Categories</option>
+              <option value="">{t('templateSelector.allCategories')}</option>
               {categories.map(cat => (
                 <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
               ))}
@@ -144,7 +146,7 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" variant="primary" />
-            <p className="text-muted mt-2">Loading templates...</p>
+            <p className="text-muted mt-2">{t('templateSelector.loadingTemplates')}</p>
           </div>
         ) : (
           <>
@@ -162,8 +164,8 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
                   <IconPlus className="text-muted" />
                 </div>
                 <div>
-                  <h6 className="mb-0">Start with Blank Document</h6>
-                  <small className="text-muted">Begin from scratch</small>
+                  <h6 className="mb-0">{t('templateSelector.startWithBlankDocument')}</h6>
+                  <small className="text-muted">{t('templateSelector.beginFromScratch')}</small>
                 </div>
               </Card.Body>
             </Card>
@@ -200,9 +202,9 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
                         <div className="d-flex justify-content-between align-items-center">
                           <small className="text-muted">
                             {template.is_system ? (
-                              <Badge bg="light" text="dark">System</Badge>
+                              <Badge bg="light" text="dark">{t('templateSelector.system')}</Badge>
                             ) : (
-                              <Badge bg="light" text="dark">Custom</Badge>
+                              <Badge bg="light" text="dark">{t('templateSelector.custom')}</Badge>
                             )}
                           </small>
                           <small className="text-muted">
@@ -217,7 +219,7 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
                 <Col xs={12}>
                   <div className="text-center py-4 text-muted">
                     <IconSearch size={32} className="mb-2" />
-                    <p>No templates found matching your criteria</p>
+                    <p>{t('templateSelector.noTemplatesFoundMatchingYourCriter')}</p>
                   </div>
                 </Col>
               )}
@@ -231,7 +233,7 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
           {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} available
         </small>
         <Button variant="secondary" onClick={onHide}>
-          Cancel
+          {t('common.cancel')}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -240,6 +242,7 @@ export default function TemplateSelector({ show, onHide, onSelect }) {
 
 // Template Manager Component for creating/editing templates
 export function TemplateManager() {
+  const { t } = useTranslation();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
@@ -275,7 +278,7 @@ export function TemplateManager() {
   };
   
   const handleDelete = async (templateId) => {
-    if (!window.confirm('Are you sure you want to delete this template?')) return;
+    if (!window.confirm(t('templateSelector.areYouSureYouWantTo'))) return;
     
     try {
       await templateAPI.delete(templateId);
@@ -359,14 +362,14 @@ export function TemplateManager() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h5 className="mb-0">
           <IconFileAlt className="me-2" />
-          KB Templates
+          {t('templateSelector.kbTemplates')}
         </h5>
         <div>
           <Button variant="outline-secondary" size="sm" className="me-2" onClick={handleSeedDefaults}>
-            Seed Defaults
+            {t('templateSelector.seedDefaults')}
           </Button>
           <Button variant="primary" size="sm" onClick={handleCreate}>
-            <IconPlus className="me-1" /> New Template
+            <IconPlus className="me-1" /> {t('templateSelector.newTemplate')}
           </Button>
         </div>
       </div>
@@ -403,7 +406,7 @@ export function TemplateManager() {
                         className="p-0 me-2"
                         onClick={() => handleEdit(template)}
                       >
-                        Edit
+                        {t('common.edit')}
                       </Button>
                       <Button 
                         variant="link" 
@@ -411,7 +414,7 @@ export function TemplateManager() {
                         className="p-0 me-2"
                         onClick={() => handleDuplicate(template)}
                       >
-                        Copy
+                        {t('templateSelector.copy')}
                       </Button>
                       <Button 
                         variant="link" 
@@ -419,7 +422,7 @@ export function TemplateManager() {
                         className="p-0 text-danger"
                         onClick={() => handleDelete(template._id)}
                       >
-                        Delete
+                        {t('common.delete')}
                       </Button>
                     </div>
                   )}
@@ -430,7 +433,7 @@ export function TemplateManager() {
                       className="p-0"
                       onClick={() => handleDuplicate(template)}
                     >
-                      Copy
+                      {t('templateSelector.copy')}
                     </Button>
                   )}
                 </div>
@@ -453,6 +456,7 @@ export function TemplateManager() {
 
 // Template Editor Modal
 function TemplateEditorModal({ show, onHide, template, onSave }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -505,7 +509,7 @@ function TemplateEditorModal({ show, onHide, template, onSave }) {
           <Row className="g-3">
             <Col md={8}>
               <Form.Group>
-                <Form.Label>Template Name *</Form.Label>
+                <Form.Label>{t('templateSelector.templateName')}</Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.name}
@@ -517,37 +521,37 @@ function TemplateEditorModal({ show, onHide, template, onSave }) {
             
             <Col md={4}>
               <Form.Group>
-                <Form.Label>Category</Form.Label>
+                <Form.Label>{t('templateSelector.category')}</Form.Label>
                 <Form.Select
                   value={formData.category}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                 >
-                  <option value="general">General</option>
-                  <option value="incident">Incident Response</option>
-                  <option value="guide">How-To Guide</option>
-                  <option value="troubleshooting">Troubleshooting</option>
-                  <option value="api">API Documentation</option>
-                  <option value="runbook">Runbook</option>
-                  <option value="meeting">Meeting Notes</option>
+                  <option value="general">{t('templateSelector.general')}</option>
+                  <option value="incident">{t('templateSelector.incidentResponse')}</option>
+                  <option value="guide">{t('templateSelector.howToGuide')}</option>
+                  <option value="troubleshooting">{t('templateSelector.troubleshooting')}</option>
+                  <option value="api">{t('templateSelector.apiDocumentation')}</option>
+                  <option value="runbook">{t('templateSelector.runbook')}</option>
+                  <option value="meeting">{t('templateSelector.meetingNotes')}</option>
                 </Form.Select>
               </Form.Group>
             </Col>
             
             <Col xs={12}>
               <Form.Group>
-                <Form.Label>Description</Form.Label>
+                <Form.Label>{t('common.description')}</Form.Label>
                 <Form.Control
                   type="text"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Brief description of this template"
+                  placeholder={t('templateSelector.briefDescriptionOfThisTemplate')}
                 />
               </Form.Group>
             </Col>
             
             <Col xs={12}>
               <Form.Group>
-                <Form.Label>Content (Markdown) *</Form.Label>
+                <Form.Label>{t('templateSelector.contentMarkdown')}</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={12}
@@ -557,7 +561,7 @@ function TemplateEditorModal({ show, onHide, template, onSave }) {
                   required
                 />
                 <Form.Text className="text-muted">
-                  Use Markdown formatting. Use placeholders like [Title] for fields users should fill in.
+                  {t('templateSelector.useMarkdownFormattingUsePlaceholde')}
                 </Form.Text>
               </Form.Group>
             </Col>
@@ -565,7 +569,7 @@ function TemplateEditorModal({ show, onHide, template, onSave }) {
             <Col xs={12}>
               <Form.Check
                 type="checkbox"
-                label="Set as default template for this category"
+                label={t('templateSelector.setAsDefaultTemplateForThis')}
                 checked={formData.is_default}
                 onChange={(e) => setFormData(prev => ({ ...prev, is_default: e.target.checked }))}
               />
@@ -575,18 +579,18 @@ function TemplateEditorModal({ show, onHide, template, onSave }) {
         
         <Modal.Footer>
           <Button variant="secondary" onClick={onHide}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" variant="primary" disabled={saving}>
             {saving ? (
               <>
                 <Spinner size="sm" animation="border" className="me-1" />
-                Saving...
+                {t('templateSelector.saving')}
               </>
             ) : (
               <>
                 <IconCheck className="me-1" />
-                Save Template
+                {t('templateSelector.saveTemplate')}
               </>
             )}
           </Button>

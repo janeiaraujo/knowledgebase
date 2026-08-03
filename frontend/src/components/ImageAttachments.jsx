@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { fileAPI, aiAPI } from '../services/api';
 
 /**
@@ -14,6 +15,7 @@ import { fileAPI, aiAPI } from '../services/api';
  * Item exposto: { fileId, url, filename, description }
  */
 export default function ImageAttachments({ onChange, context = '' }) {
+  const { t } = useTranslation();
   const [images, setImages] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef(null);
@@ -127,7 +129,7 @@ export default function ImageAttachments({ onChange, context = '' }) {
       >
         <i className="bi bi-image text-muted fs-4 d-block mb-1"></i>
         <small className="text-muted">
-          Clique para escolher, arraste imagens aqui, ou clique e cole (Ctrl+V) uma captura de tela
+          {t('imageAttachments.cliqueParaEscolherArrasteImagensAq')}
         </small>
         <input
           ref={inputRef}
@@ -160,7 +162,7 @@ export default function ImageAttachments({ onChange, context = '' }) {
                   className="btn-close btn-close-white bg-dark bg-opacity-50 rounded-circle position-absolute top-0 end-0 m-1 p-1"
                   style={{ fontSize: '0.6rem' }}
                   onClick={() => handleRemove(img.localId)}
-                  title="Remover"
+                  title={t('integrations.remove')}
                 />
               </div>
               <div className="card-body p-2">

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 
 export default function GroupsTab() {
+  const { t } = useTranslation();
   const [groups, setGroups] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [users, setUsers] = useState([]);
@@ -39,7 +41,7 @@ export default function GroupsTab() {
       setUsers(usersRes.data.users || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      alert('Erro ao carregar dados');
+      alert(t('groupsTab.erroAoCarregarDados'));
     } finally {
       setLoading(false);
     }
@@ -94,7 +96,7 @@ export default function GroupsTab() {
       setShowMembersModal(true);
     } catch (error) {
       console.error('Erro ao carregar membros:', error);
-      alert('Erro ao carregar membros');
+      alert(t('groupsTab.erroAoCarregarMembros'));
     }
   };
 
@@ -112,7 +114,7 @@ export default function GroupsTab() {
   };
 
   const handleRemoveMember = async (userId) => {
-    if (!confirm('Deseja remover este usuário do grupo?')) return;
+    if (!confirm(t('groupsTab.desejaRemoverEsteUsuarioDoGrupo'))) return;
     
     try {
       await api.delete(`/groups/${selectedGroup._id}/users/${userId}`);
@@ -120,7 +122,7 @@ export default function GroupsTab() {
       setGroupMembers(response.data.users || []);
     } catch (error) {
       console.error('Erro ao remover membro:', error);
-      alert('Erro ao remover membro');
+      alert(t('groupsTab.erroAoRemoverMembro'));
     }
   };
 
@@ -138,7 +140,7 @@ export default function GroupsTab() {
     return (
       <div className="text-center py-5">
         <div className="spinner-border" role="status">
-          <span className="visually-hidden">Carregando...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -147,7 +149,7 @@ export default function GroupsTab() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">Grupos</h4>
+        <h4 className="mb-0">{t('groupsTab.grupos')}</h4>
         <button
           className="btn btn-primary"
           onClick={() => {
@@ -157,14 +159,14 @@ export default function GroupsTab() {
           }}
         >
           <i className="bi bi-plus-circle me-2"></i>
-          Novo Grupo
+          {t('groupsTab.novoGrupo')}
         </button>
       </div>
 
       {groups.length === 0 ? (
         <div className="alert alert-info">
           <i className="bi bi-info-circle me-2"></i>
-          Nenhum grupo cadastrado. Crie o primeiro!
+          {t('groupsTab.nenhumGrupoCadastradoCrieOPrimeiro')}
         </div>
       ) : (
         <div className="accordion" id="groupsAccordion">
@@ -201,7 +203,7 @@ export default function GroupsTab() {
                             <button
                               className="btn btn-outline-info"
                               onClick={() => handleManageMembers(group)}
-                              title="Gerenciar Membros"
+                              title={t('groupsTab.gerenciarMembros')}
                             >
                               <i className="bi bi-people"></i>
                             </button>
@@ -247,7 +249,7 @@ export default function GroupsTab() {
               <form onSubmit={handleSubmit}>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label className="form-label">Nome *</label>
+                    <label className="form-label">{t('groupsTab.nome')}</label>
                     <input
                       type="text"
                       className="form-control"
@@ -257,7 +259,7 @@ export default function GroupsTab() {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Descrição</label>
+                    <label className="form-label">{t('common.description')}</label>
                     <textarea
                       className="form-control"
                       rows="2"
@@ -266,14 +268,14 @@ export default function GroupsTab() {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Departamento *</label>
+                    <label className="form-label">{t('groupsTab.departamento')}</label>
                     <select
                       className="form-select"
                       value={formData.department_id}
                       onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
                       required
                     >
-                      <option value="">Selecione...</option>
+                      <option value="">{t('groupsTab.selecione')}</option>
                       {departments.map(dept => (
                         <option key={dept._id} value={dept._id}>
                           {dept.name}
@@ -282,13 +284,13 @@ export default function GroupsTab() {
                     </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Grupo Pai (hierarquia)</label>
+                    <label className="form-label">{t('groupsTab.grupoPaiHierarquia')}</label>
                     <select
                       className="form-select"
                       value={formData.parent_group_id}
                       onChange={(e) => setFormData({ ...formData, parent_group_id: e.target.value })}
                     >
-                      <option value="">Nenhum (nível raiz)</option>
+                      <option value="">{t('groupsTab.nenhumNivelRaiz')}</option>
                       {groups
                         .filter(g => !editingGroup || g._id !== editingGroup._id)
                         .map(group => (
@@ -305,7 +307,7 @@ export default function GroupsTab() {
                     className="btn btn-secondary"
                     onClick={() => setShowModal(false)}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </button>
                   <button type="submit" className="btn btn-primary">
                     {editingGroup ? 'Salvar' : 'Criar'}
@@ -343,7 +345,7 @@ export default function GroupsTab() {
                         onChange={(e) => setMemberForm({ ...memberForm, user_id: e.target.value })}
                         required
                       >
-                        <option value="">Selecione um usuário...</option>
+                        <option value="">{t('groupsTab.selecioneUmUsuario')}</option>
                         {users
                           .filter(u => !groupMembers.find(m => m._id === u._id))
                           .map(user => (
@@ -357,14 +359,14 @@ export default function GroupsTab() {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Função no grupo (opcional)"
+                        placeholder={t('groupsTab.funcaoNoGrupoOpcional')}
                         value={memberForm.role_in_group}
                         onChange={(e) => setMemberForm({ ...memberForm, role_in_group: e.target.value })}
                       />
                     </div>
                     <div className="col-md-2">
                       <button type="submit" className="btn btn-primary w-100">
-                        <i className="bi bi-plus-circle"></i> Adicionar
+                        <i className="bi bi-plus-circle"></i> {t('common.add')}
                       </button>
                     </div>
                   </div>
@@ -375,7 +377,7 @@ export default function GroupsTab() {
                 {groupMembers.length === 0 ? (
                   <div className="alert alert-info">
                     <i className="bi bi-info-circle me-2"></i>
-                    Nenhum membro neste grupo ainda.
+                    {t('groupsTab.nenhumMembroNesteGrupoAinda')}
                   </div>
                 ) : (
                   <div className="list-group">
@@ -394,7 +396,7 @@ export default function GroupsTab() {
                             className="btn btn-sm btn-outline-danger"
                             onClick={() => handleRemoveMember(member._id)}
                           >
-                            <i className="bi bi-x-circle"></i> Remover
+                            <i className="bi bi-x-circle"></i> {t('integrations.remove')}
                           </button>
                         </div>
                       </div>
@@ -408,7 +410,7 @@ export default function GroupsTab() {
                   className="btn btn-secondary"
                   onClick={() => setShowMembersModal(false)}
                 >
-                  Fechar
+                  {t('postmortem.close')}
                 </button>
               </div>
             </div>

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 
 export default function KBAccessTab() {
+  const { t } = useTranslation();
   const [kbs, setKbs] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -33,7 +35,7 @@ export default function KBAccessTab() {
       setGroups(groupsRes.data.groups || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      alert('Erro ao carregar dados');
+      alert(t('kbAccessTab.erroAoCarregarDados'));
     } finally {
       setLoading(false);
     }
@@ -67,7 +69,7 @@ export default function KBAccessTab() {
 
   const handleBulkConfigure = () => {
     if (selectedKBs.length === 0) {
-      alert('Selecione ao menos um KB');
+      alert(t('kbAccessTab.selecioneAoMenosUmKb'));
       return;
     }
     setAccessData({
@@ -92,7 +94,7 @@ export default function KBAccessTab() {
         await api.post(`/kb-access/${selectedKB._id}`, accessData);
       }
       setShowModal(false);
-      alert('Controle de acesso configurado com sucesso!');
+      alert(t('kbAccessTab.controleDeAcessoConfiguradoComSuce'));
     } catch (error) {
       console.error('Erro ao configurar acesso:', error);
       alert(error.response?.data?.error || 'Erro ao configurar acesso');
@@ -139,7 +141,7 @@ export default function KBAccessTab() {
     return (
       <div className="text-center py-5">
         <div className="spinner-border" role="status">
-          <span className="visually-hidden">Carregando...</span>
+          <span className="visually-hidden">{t('common.loading')}</span>
         </div>
       </div>
     );
@@ -148,7 +150,7 @@ export default function KBAccessTab() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">Controle de Acesso a KBs</h4>
+        <h4 className="mb-0">{t('kbAccessTab.controleDeAcessoAKbs')}</h4>
         <button
           className="btn btn-warning"
           onClick={handleBulkConfigure}
@@ -161,13 +163,13 @@ export default function KBAccessTab() {
 
       <div className="alert alert-info">
         <i className="bi bi-info-circle me-2"></i>
-        <strong>Visibilidade:</strong> "Global" = todos veem | "Restrita" = apenas departamentos/grupos selecionados
+        <strong>{t('kbAccessTab.visibilidade')}</strong> "Global" = todos veem | "Restrita" = apenas departamentos/grupos selecionados
       </div>
 
       {kbs.length === 0 ? (
         <div className="alert alert-warning">
           <i className="bi bi-exclamation-triangle me-2"></i>
-          Nenhum KB cadastrado ainda.
+          {t('kbAccessTab.nenhumKbCadastradoAinda')}
         </div>
       ) : (
         <div className="table-responsive">
@@ -188,10 +190,10 @@ export default function KBAccessTab() {
                     checked={selectedKBs.length === kbs.length && kbs.length > 0}
                   />
                 </th>
-                <th>Título</th>
-                <th>Status</th>
-                <th>Criado por</th>
-                <th>Ações</th>
+                <th>{t('common.title')}</th>
+                <th>{t('common.status')}</th>
+                <th>{t('kbAccessTab.criadoPor')}</th>
+                <th>{t('reviews.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -224,7 +226,7 @@ export default function KBAccessTab() {
                       onClick={() => handleConfigureAccess(kb)}
                     >
                       <i className="bi bi-shield-lock me-1"></i>
-                      Configurar
+                      {t('integrations.configure')}
                     </button>
                   </td>
                 </tr>
@@ -256,7 +258,7 @@ export default function KBAccessTab() {
                   {/* Visibilidade */}
                   <div className="mb-4">
                     <label className="form-label">
-                      <strong>Visibilidade</strong>
+                      <strong>{t('kbAccessTab.visibilidade2')}</strong>
                     </label>
                     <div className="form-check">
                       <input
@@ -269,7 +271,7 @@ export default function KBAccessTab() {
                         onChange={(e) => setAccessData({ ...accessData, visibility: e.target.value })}
                       />
                       <label className="form-check-label" htmlFor="visibilityGlobal">
-                        <strong>Global</strong> - Todos os usuários podem ver
+                        <strong>{t('kbAccessTab.global')}</strong> - Todos os usuários podem ver
                       </label>
                     </div>
                     <div className="form-check">
@@ -283,7 +285,7 @@ export default function KBAccessTab() {
                         onChange={(e) => setAccessData({ ...accessData, visibility: e.target.value })}
                       />
                       <label className="form-check-label" htmlFor="visibilityRestricted">
-                        <strong>Restrita</strong> - Apenas departamentos/grupos selecionados
+                        <strong>{t('kbAccessTab.restrita')}</strong> - Apenas departamentos/grupos selecionados
                       </label>
                     </div>
                   </div>
@@ -293,11 +295,11 @@ export default function KBAccessTab() {
                     <>
                       <div className="mb-4">
                         <label className="form-label">
-                          <strong>Departamentos com Acesso</strong>
+                          <strong>{t('kbAccessTab.departamentosComAcesso')}</strong>
                         </label>
                         {departments.length === 0 ? (
                           <div className="alert alert-warning">
-                            Nenhum departamento cadastrado
+                            {t('kbAccessTab.nenhumDepartamentoCadastrado')}
                           </div>
                         ) : (
                           <div className="list-group">
@@ -323,11 +325,11 @@ export default function KBAccessTab() {
                       {/* Grupos */}
                       <div className="mb-3">
                         <label className="form-label">
-                          <strong>Grupos com Acesso</strong>
+                          <strong>{t('kbAccessTab.gruposComAcesso')}</strong>
                         </label>
                         {groups.length === 0 ? (
                           <div className="alert alert-warning">
-                            Nenhum grupo cadastrado
+                            {t('kbAccessTab.nenhumGrupoCadastrado')}
                           </div>
                         ) : (
                           <div className="list-group" style={{ maxHeight: '200px', overflowY: 'auto' }}>
@@ -361,11 +363,11 @@ export default function KBAccessTab() {
                     className="btn btn-secondary"
                     onClick={() => setShowModal(false)}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </button>
                   <button type="submit" className="btn btn-primary">
                     <i className="bi bi-shield-check me-2"></i>
-                    Salvar Configuração
+                    {t('kbAccessTab.salvarConfiguracao')}
                   </button>
                 </div>
               </form>

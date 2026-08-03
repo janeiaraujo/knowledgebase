@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Table, Button, Badge, Form, Row, Col, Spinner, Modal, Alert, Pagination } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import api, { gpsAPI } from '../../services/api';
@@ -11,6 +12,7 @@ const STATUS_CONFIG = {
 };
 
 export default function GPSSessions() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +93,7 @@ export default function GPSSessions() {
   };
 
   const handleAbandonSession = async (sessionId) => {
-    if (!window.confirm('Tem certeza que deseja abandonar esta sessão?')) return;
+    if (!window.confirm(t('gpsSessions.temCertezaQueDesejaAbandonarEsta'))) return;
 
     try {
       await api.post(`/gps/sessions/${sessionId}/abandon`);
@@ -102,7 +104,7 @@ export default function GPSSessions() {
   };
 
   const handleDeleteSession = async (sessionId) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta sessão? Esta ação não pode ser desfeita.')) return;
+    if (!window.confirm(t('gpsSessions.temCertezaQueDesejaExcluirEsta'))) return;
     
     try {
       setLoading(true);
@@ -118,7 +120,7 @@ export default function GPSSessions() {
         <div class="d-flex">
           <div class="toast-body">
             <i class="bi bi-check-circle me-2"></i>
-            Sessão excluída com sucesso!
+            {t('gpsSessions.sessaoExcluidaComSucesso')}
           </div>
           <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
@@ -129,7 +131,7 @@ export default function GPSSessions() {
       setTimeout(() => toastEl.remove(), 3000);
     } catch (err) {
       console.error('Erro ao excluir sessão:', err);
-      alert('Erro ao excluir sessão: ' + (err.response?.data?.error || err.message));
+      alert(t('gpsSessions.erroAoExcluirSessao') + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }
@@ -169,15 +171,15 @@ export default function GPSSessions() {
         <div>
           <h2 className="mb-1">
             <i className="bi bi-clock-history me-2"></i>
-            Histórico de Sessões GPS
+            {t('gpsSessions.historicoDeSessoesGps')}
           </h2>
           <p className="text-muted mb-0">
-            Visualize e gerencie suas sessões de diagnóstico guiado
+            {t('gpsSessions.visualizeEGerencieSuasSessoesDe')}
           </p>
         </div>
         <Link to="/gps/flows" className="btn btn-primary">
           <i className="bi bi-play-circle me-2"></i>
-          Nova Sessão
+          {t('gpsSessions.novaSessao')}
         </Link>
       </div>
 
@@ -186,7 +188,7 @@ export default function GPSSessions() {
         <Card.Body>
           <Row className="g-3 align-items-end">
             <Col md={4}>
-              <Form.Label className="small text-muted">Status</Form.Label>
+              <Form.Label className="small text-muted">{t('common.status')}</Form.Label>
               <Form.Select 
                 value={statusFilter} 
                 onChange={(e) => {
@@ -194,14 +196,14 @@ export default function GPSSessions() {
                   setPagination(prev => ({ ...prev, page: 1 }));
                 }}
               >
-                <option value="">Todos os status</option>
-                <option value="active">Em Andamento</option>
-                <option value="completed">Concluídos</option>
-                <option value="abandoned">Abandonados</option>
+                <option value="">{t('gpsSessions.todosOsStatus')}</option>
+                <option value="active">{t('gpsSessions.emAndamento')}</option>
+                <option value="completed">{t('gpsSessions.concluidos')}</option>
+                <option value="abandoned">{t('gpsSessions.abandonados')}</option>
               </Form.Select>
             </Col>
             <Col md={4}>
-              <Form.Label className="small text-muted">Fluxo</Form.Label>
+              <Form.Label className="small text-muted">{t('gpsSessions.fluxo')}</Form.Label>
               <Form.Select 
                 value={flowFilter} 
                 onChange={(e) => {
@@ -209,7 +211,7 @@ export default function GPSSessions() {
                   setPagination(prev => ({ ...prev, page: 1 }));
                 }}
               >
-                <option value="">Todos os fluxos</option>
+                <option value="">{t('gpsSessions.todosOsFluxos')}</option>
                 {flows.map(flow => (
                   <option key={flow._id} value={flow._id}>{flow.name}</option>
                 ))}
@@ -225,7 +227,7 @@ export default function GPSSessions() {
                 }}
               >
                 <i className="bi bi-x-lg me-1"></i>
-                Limpar Filtros
+                {t('gpsSessions.limparFiltros')}
               </Button>
             </Col>
           </Row>
@@ -246,12 +248,12 @@ export default function GPSSessions() {
           {loading ? (
             <div className="text-center py-5">
               <Spinner animation="border" variant="primary" />
-              <p className="mt-2 text-muted">Carregando sessões...</p>
+              <p className="mt-2 text-muted">{t('gpsSessions.carregandoSessoes')}</p>
             </div>
           ) : sessions.length === 0 ? (
             <div className="text-center py-5">
               <i className="bi bi-compass display-1 text-muted"></i>
-              <h5 className="mt-3">Nenhuma sessão encontrada</h5>
+              <h5 className="mt-3">{t('gpsSessions.nenhumaSessaoEncontrada')}</h5>
               <p className="text-muted">
                 {statusFilter || flowFilter 
                   ? 'Tente ajustar os filtros' 
@@ -259,19 +261,19 @@ export default function GPSSessions() {
               </p>
               <Link to="/gps/flows" className="btn btn-primary mt-2">
                 <i className="bi bi-play-circle me-2"></i>
-                Iniciar Nova Sessão
+                {t('gpsSessions.iniciarNovaSessao')}
               </Link>
             </div>
           ) : (
             <Table responsive hover className="mb-0">
               <thead className="bg-light">
                 <tr>
-                  <th>Fluxo</th>
-                  <th>Iniciado em</th>
-                  <th>Duração</th>
-                  <th>Status</th>
-                  <th>Progresso</th>
-                  <th className="text-end">Ações</th>
+                  <th>{t('gpsSessions.fluxo')}</th>
+                  <th>{t('gpsSessions.iniciadoEm')}</th>
+                  <th>{t('gpsSessions.duracao')}</th>
+                  <th>{t('common.status')}</th>
+                  <th>{t('gpsSessions.progresso')}</th>
+                  <th className="text-end">{t('reviews.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -321,7 +323,7 @@ export default function GPSSessions() {
                           <Button 
                             variant="outline-primary" 
                             onClick={() => handleViewDetails(session)}
-                            title="Ver Detalhes"
+                            title={t('gpsSessions.verDetalhes')}
                           >
                             <i className="bi bi-eye"></i>
                           </Button>
@@ -330,14 +332,14 @@ export default function GPSSessions() {
                               <Button 
                                 variant="primary" 
                                 onClick={() => handleContinueSession(session._id)}
-                                title="Continuar Sessão"
+                                title={t('gpsSessions.continuarSessao')}
                               >
                                 <i className="bi bi-play-fill"></i>
                               </Button>
                               <Button 
                                 variant="outline-danger" 
                                 onClick={() => handleAbandonSession(session._id)}
-                                title="Abandonar"
+                                title={t('gpsSessions.abandonar')}
                               >
                                 <i className="bi bi-x-lg"></i>
                               </Button>
@@ -347,7 +349,7 @@ export default function GPSSessions() {
                             <Link 
                               to={`/kb/${session.rca_generated}`} 
                               className="btn btn-sm btn-outline-success"
-                              title="Ver RCA Gerado"
+                              title={t('gpsSessions.verRcaGerado')}
                             >
                               <i className="bi bi-file-text"></i>
                             </Link>
@@ -355,7 +357,7 @@ export default function GPSSessions() {
                           <Button 
                             variant="outline-danger" 
                             onClick={() => handleDeleteSession(session._id)}
-                            title="Excluir Sessão"
+                            title={t('gpsSessions.excluirSessao')}
                           >
                             <i className="bi bi-trash"></i>
                           </Button>
@@ -417,7 +419,7 @@ export default function GPSSessions() {
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="bi bi-compass me-2"></i>
-            Detalhes da Sessão
+            {t('gpsSessions.detalhesDaSessao')}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -431,17 +433,17 @@ export default function GPSSessions() {
               <div className="mb-4">
                 <Row>
                   <Col md={6}>
-                    <p className="mb-1"><strong>Fluxo:</strong> {sessionDetails.session?.flow_name}</p>
-                    <p className="mb-1"><strong>Status:</strong> {' '}
+                    <p className="mb-1"><strong>{t('gpsSessions.fluxo2')}</strong> {sessionDetails.session?.flow_name}</p>
+                    <p className="mb-1"><strong>{t('gpsSessions.status')}</strong> {' '}
                       <Badge bg={STATUS_CONFIG[sessionDetails.session?.status]?.variant}>
                         {STATUS_CONFIG[sessionDetails.session?.status]?.label}
                       </Badge>
                     </p>
                   </Col>
                   <Col md={6}>
-                    <p className="mb-1"><strong>Iniciado:</strong> {formatDate(sessionDetails.session?.started_at)}</p>
+                    <p className="mb-1"><strong>{t('gpsSessions.iniciado')}</strong> {formatDate(sessionDetails.session?.started_at)}</p>
                     {sessionDetails.session?.completed_at && (
-                      <p className="mb-1"><strong>Finalizado:</strong> {formatDate(sessionDetails.session?.completed_at)}</p>
+                      <p className="mb-1"><strong>{t('gpsSessions.finalizado')}</strong> {formatDate(sessionDetails.session?.completed_at)}</p>
                     )}
                   </Col>
                 </Row>
@@ -450,7 +452,7 @@ export default function GPSSessions() {
               {/* Summary */}
               {sessionDetails.session?.summary && (
                 <div className="mb-4">
-                  <h6><i className="bi bi-card-text me-2"></i>Resumo</h6>
+                  <h6><i className="bi bi-card-text me-2"></i>{t('gpsSessions.resumo')}</h6>
                   <Card className="bg-light border-0">
                     <Card.Body>
                       <pre className="mb-0 white-space-pre-wrap" style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
@@ -492,7 +494,7 @@ export default function GPSSessions() {
                               <div className="mt-2">
                                 <Badge bg="info" className="me-1">
                                   <i className="bi bi-paperclip me-1"></i>
-                                  Evidência anexada
+                                  {t('gpsSessions.evidenciaAnexada')}
                                 </Badge>
                               </div>
                             )}
@@ -508,26 +510,26 @@ export default function GPSSessions() {
               {sessionDetails.session?.rca_generated && (
                 <Alert variant="success" className="mt-3">
                   <i className="bi bi-file-earmark-text me-2"></i>
-                  <strong>RCA Gerado:</strong>{' '}
+                  <strong>{t('gpsSessions.rcaGerado')}</strong>{' '}
                   <Link to={`/kb/${sessionDetails.session.rca_generated}`}>
-                    Ver documento de análise de causa raiz
+                    {t('gpsSessions.verDocumentoDeAnaliseDeCausa')}
                   </Link>
                 </Alert>
               )}
             </div>
           ) : (
-            <Alert variant="warning">Não foi possível carregar os detalhes</Alert>
+            <Alert variant="warning">{t('gpsSessions.naoFoiPossivelCarregarOsDetalhes')}</Alert>
           )}
         </Modal.Body>
         <Modal.Footer>
           {selectedSession?.status === 'active' && (
             <Button variant="primary" onClick={() => handleContinueSession(selectedSession._id)}>
               <i className="bi bi-play-fill me-2"></i>
-              Continuar Sessão
+              {t('gpsSessions.continuarSessao')}
             </Button>
           )}
           <Button variant="secondary" onClick={() => setShowDetails(false)}>
-            Fechar
+            {t('postmortem.close')}
           </Button>
         </Modal.Footer>
       </Modal>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { gpsAPI } from '../../services/api';
 import ReactMarkdown from 'react-markdown';
 
 const GPSPlayer = () => {
+  const { t } = useTranslation();
     const { flowId, sessionId: existingSessionId } = useParams();
     const navigate = useNavigate();
     const [session, setSession] = useState(null);
@@ -35,7 +37,7 @@ const GPSPlayer = () => {
             setProgress({ current: 1, total: res.data.flow_steps_count });
         } catch (error) {
             console.error('Error starting session:', error);
-            alert('Erro ao iniciar sessão. Verifique se o fluxo está ativo.');
+            alert(t('gpsPlayer.erroAoIniciarSessaoVerifiqueSe'));
             navigate('/gps');
         } finally {
             setLoading(false);
@@ -57,7 +59,7 @@ const GPSPlayer = () => {
             }
         } catch (error) {
             console.error('Error loading session:', error);
-            alert('Erro ao carregar sessão');
+            alert(t('gpsPlayer.erroAoCarregarSessao'));
             navigate('/gps');
         } finally {
             setLoading(false);
@@ -68,7 +70,7 @@ const GPSPlayer = () => {
         e.preventDefault();
         
         if (!response && currentStep.required !== false) {
-            alert('Por favor, preencha a resposta');
+            alert(t('gpsPlayer.porFavorPreenchaAResposta'));
             return;
         }
 
@@ -92,14 +94,14 @@ const GPSPlayer = () => {
             }
         } catch (error) {
             console.error('Error submitting response:', error);
-            alert('Erro ao enviar resposta');
+            alert(t('gpsPlayer.erroAoEnviarResposta'));
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleAbandon = async () => {
-        if (!confirm('Deseja abandonar este diagnóstico? O progresso será perdido.')) return;
+        if (!confirm(t('gpsPlayer.desejaAbandonarEsteDiagnosticoOPro'))) return;
         
         try {
             await gpsAPI.abandonSession(session._id, 'User abandoned');
@@ -116,7 +118,7 @@ const GPSPlayer = () => {
             setRcaContent(res.data.rca);
         } catch (error) {
             console.error('Error generating RCA:', error);
-            alert('Erro ao gerar análise');
+            alert(t('gpsPlayer.erroAoGerarAnalise'));
         } finally {
             setGeneratingRCA(false);
         }
@@ -133,7 +135,7 @@ const GPSPlayer = () => {
                     <textarea
                         className="form-control"
                         rows="4"
-                        placeholder="Digite sua resposta..."
+                        placeholder={t('gpsPlayer.digiteSuaResposta')}
                         value={response}
                         onChange={(e) => setResponse(e.target.value)}
                         disabled={submitting}
@@ -168,7 +170,7 @@ const GPSPlayer = () => {
                             disabled={submitting}
                         >
                             <i className="bi bi-check-lg me-2"></i>
-                            Sim
+                            {t('gpsPlayer.sim')}
                         </button>
                         <button
                             type="button"
@@ -177,7 +179,7 @@ const GPSPlayer = () => {
                             disabled={submitting}
                         >
                             <i className="bi bi-x-lg me-2"></i>
-                            Não
+                            {t('gpsPlayer.nao')}
                         </button>
                     </div>
                 );
@@ -220,7 +222,7 @@ const GPSPlayer = () => {
                     <input
                         type="number"
                         className="form-control form-control-lg"
-                        placeholder="Digite um número..."
+                        placeholder={t('gpsPlayer.digiteUmNumero')}
                         value={response}
                         onChange={(e) => setResponse(e.target.value)}
                         disabled={submitting}
@@ -235,14 +237,14 @@ const GPSPlayer = () => {
                         <input
                             type="text"
                             className="form-control mb-2"
-                            placeholder="Descrição ou URL do arquivo..."
+                            placeholder={t('gpsPlayer.descricaoOuUrlDoArquivo')}
                             value={response}
                             onChange={(e) => setResponse(e.target.value)}
                             disabled={submitting}
                         />
                         <div className="alert alert-info small">
                             <i className="bi bi-info-circle me-2"></i>
-                            Cole o texto, URL ou descreva o arquivo/imagem que deseja anexar como evidência.
+                            {t('gpsPlayer.coleOTextoUrlOuDescreva')}
                         </div>
                     </div>
                 );
@@ -252,7 +254,7 @@ const GPSPlayer = () => {
                     <input
                         type="text"
                         className="form-control form-control-lg"
-                        placeholder="Digite sua resposta..."
+                        placeholder={t('gpsPlayer.digiteSuaResposta')}
                         value={response}
                         onChange={(e) => setResponse(e.target.value)}
                         disabled={submitting}
@@ -266,7 +268,7 @@ const GPSPlayer = () => {
         return (
             <div className="container py-5 text-center">
                 <div className="spinner-border text-primary mb-3" />
-                <p className="text-muted">Carregando diagnóstico...</p>
+                <p className="text-muted">{t('gpsPlayer.carregandoDiagnostico')}</p>
             </div>
         );
     }
@@ -280,7 +282,7 @@ const GPSPlayer = () => {
                         <div className="mb-4">
                             <i className="bi bi-check-circle-fill text-success display-1"></i>
                         </div>
-                        <h2 className="mb-3">Diagnóstico Concluído!</h2>
+                        <h2 className="mb-3">{t('gpsPlayer.diagnosticoConcluido')}</h2>
                         <p className="text-muted mb-4">
                             Você completou todas as etapas do diagnóstico "{session.flow_name}".
                         </p>
@@ -296,12 +298,12 @@ const GPSPlayer = () => {
                                     {generatingRCA ? (
                                         <>
                                             <span className="spinner-border spinner-border-sm me-2" />
-                                            Gerando análise...
+                                            {t('gpsPlayer.gerandoAnalise')}
                                         </>
                                     ) : (
                                         <>
                                             <i className="bi bi-magic me-2"></i>
-                                            Gerar Análise / RCA
+                                            {t('gpsPlayer.gerarAnaliseRca')}
                                         </>
                                     )}
                                 </button>
@@ -312,7 +314,7 @@ const GPSPlayer = () => {
                                     <div className="card-header">
                                         <h5 className="mb-0">
                                             <i className="bi bi-file-earmark-text me-2"></i>
-                                            Análise do Diagnóstico
+                                            {t('gpsPlayer.analiseDoDiagnostico')}
                                         </h5>
                                     </div>
                                     <div className="card-body">
@@ -324,7 +326,7 @@ const GPSPlayer = () => {
 
                         {/* Summary of responses */}
                         <div className="text-start mb-4">
-                            <h5 className="mb-3">Resumo das Respostas</h5>
+                            <h5 className="mb-3">{t('gpsPlayer.resumoDasRespostas')}</h5>
                             <div className="list-group">
                                 {session.responses.map((resp, index) => (
                                     <div key={index} className="list-group-item">
@@ -346,14 +348,14 @@ const GPSPlayer = () => {
                                 onClick={() => navigate('/gps')}
                             >
                                 <i className="bi bi-arrow-left me-2"></i>
-                                Voltar aos Fluxos
+                                {t('gpsPlayer.voltarAosFluxos')}
                             </button>
                             <button
                                 className="btn btn-primary"
                                 onClick={() => navigate(`/gps/play/${flowId}`)}
                             >
                                 <i className="bi bi-arrow-repeat me-2"></i>
-                                Novo Diagnóstico
+                                {t('gpsPlayer.novoDiagnostico')}
                             </button>
                         </div>
                     </div>
@@ -415,14 +417,14 @@ const GPSPlayer = () => {
                                             onChange={(e) => setEvidence(e.target.checked ? '' : null)}
                                         />
                                         <label className="form-check-label text-muted" htmlFor="addEvidence">
-                                            Adicionar evidência/observação
+                                            {t('gpsPlayer.adicionarEvidenciaObservacao')}
                                         </label>
                                     </div>
                                     {evidence !== null && (
                                         <textarea
                                             className="form-control mt-2"
                                             rows="2"
-                                            placeholder="Cole aqui logs, prints, ou observações..."
+                                            placeholder={t('gpsPlayer.coleAquiLogsPrintsOuObservacoes')}
                                             value={evidence}
                                             onChange={(e) => setEvidence(e.target.value)}
                                         />
@@ -438,7 +440,7 @@ const GPSPlayer = () => {
                                     onClick={handleAbandon}
                                 >
                                     <i className="bi bi-x-lg me-2"></i>
-                                    Abandonar
+                                    {t('gpsPlayer.abandonar')}
                                 </button>
                                 <button
                                     type="submit"
@@ -448,11 +450,11 @@ const GPSPlayer = () => {
                                     {submitting ? (
                                         <>
                                             <span className="spinner-border spinner-border-sm me-2" />
-                                            Enviando...
+                                            {t('gpsPlayer.enviando')}
                                         </>
                                     ) : (
                                         <>
-                                            Próximo
+                                            {t('search.next')}
                                             <i className="bi bi-arrow-right ms-2"></i>
                                         </>
                                     )}

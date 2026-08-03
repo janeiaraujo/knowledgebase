@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 
 /**
@@ -6,6 +7,7 @@ import api from '../../services/api';
  * Shows total views, unique viewers, and recent viewers
  */
 export default function KBViewStats({ kbId }) {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState(null);
     const [views, setViews] = useState([]);
@@ -46,7 +48,7 @@ export default function KBViewStats({ kbId }) {
             <div className="card">
                 <div className="card-body text-center py-3">
                     <div className="spinner-border spinner-border-sm text-primary" role="status">
-                        <span className="visually-hidden">Carregando...</span>
+                        <span className="visually-hidden">{t('common.loading')}</span>
                     </div>
                 </div>
             </div>
@@ -62,7 +64,7 @@ export default function KBViewStats({ kbId }) {
             <div className="card-header d-flex justify-content-between align-items-center py-2">
                 <h6 className="mb-0">
                     <i className="bi bi-eye me-2"></i>
-                    Estatísticas de Visualização
+                    {t('kbViewStats.estatisticasDeVisualizacao')}
                 </h6>
                 <button 
                     className="btn btn-sm btn-outline-primary"
@@ -76,23 +78,23 @@ export default function KBViewStats({ kbId }) {
                 <div className="row text-center g-2">
                     <div className="col-4">
                         <div className="fs-5 fw-bold text-primary">{stats.total_views}</div>
-                        <small className="text-muted">Total Views</small>
+                        <small className="text-muted">{t('kbViewStats.totalViews')}</small>
                     </div>
                     <div className="col-4">
                         <div className="fs-5 fw-bold text-info">{stats.unique_viewers}</div>
-                        <small className="text-muted">Únicos</small>
+                        <small className="text-muted">{t('kbViewStats.unicos')}</small>
                     </div>
                     <div className="col-4">
                         <div className="fs-5 fw-bold text-success">
                             {stats.avg_duration > 0 ? formatDuration(stats.avg_duration) : '-'}
                         </div>
-                        <small className="text-muted">Tempo Médio</small>
+                        <small className="text-muted">{t('kbViewStats.tempoMedio')}</small>
                     </div>
                 </div>
 
                 {showDetails && views.length > 0 && (
                     <div className="mt-3 pt-3 border-top">
-                        <h6 className="text-muted mb-2">Visualizadores Recentes</h6>
+                        <h6 className="text-muted mb-2">{t('kbViewStats.visualizadoresRecentes')}</h6>
                         <div className="list-group list-group-flush" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                             {views.map((view) => (
                                 <div 
@@ -118,7 +120,7 @@ export default function KBViewStats({ kbId }) {
                 {showDetails && views.length === 0 && (
                     <div className="mt-3 pt-3 border-top text-center text-muted">
                         <i className="bi bi-eye-slash me-2"></i>
-                        Nenhuma visualização registrada ainda
+                        {t('kbViewStats.nenhumaVisualizacaoRegistradaAinda')}
                     </div>
                 )}
             </div>

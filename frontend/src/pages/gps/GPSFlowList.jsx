@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { gpsAPI } from '../../services/api';
 import * as bootstrap from 'bootstrap';
 
 const GPSFlowList = () => {
+  const { t } = useTranslation();
     const navigate = useNavigate();
     const [flows, setFlows] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -47,14 +49,14 @@ const GPSFlowList = () => {
             navigate(`/gps/flows/${res.data.flow._id}/edit`);
         } catch (error) {
             console.error('Error creating flow:', error);
-            alert('Erro ao criar fluxo');
+            alert(t('gpsFlowList.erroAoCriarFluxo'));
         } finally {
             setCreating(false);
         }
     };
 
     const handleDuplicate = async (flowId) => {
-        if (!confirm('Deseja duplicar este fluxo?')) return;
+        if (!confirm(t('gpsFlowList.desejaDuplicarEsteFluxo'))) return;
         try {
             const res = await gpsAPI.duplicateFlow(flowId);
             navigate(`/gps/flows/${res.data.flow._id}/edit`);
@@ -64,7 +66,7 @@ const GPSFlowList = () => {
     };
 
     const handleDelete = async (flowId) => {
-        if (!window.confirm('Tem certeza que deseja excluir este fluxo? Esta ação não pode ser desfeita.')) return;
+        if (!window.confirm(t('gpsFlowList.temCertezaQueDesejaExcluirEste'))) return;
         
         try {
             setLoading(true);
@@ -80,7 +82,7 @@ const GPSFlowList = () => {
                 <div class="d-flex">
                     <div class="toast-body">
                         <i class="bi bi-check-circle me-2"></i>
-                        Fluxo excluído com sucesso!
+                        {t('gpsFlowList.fluxoExcluidoComSucesso')}
                     </div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                 </div>
@@ -91,7 +93,7 @@ const GPSFlowList = () => {
             setTimeout(() => toastEl.remove(), 3000);
         } catch (error) {
             console.error('Error deleting flow:', error);
-            alert('Erro ao excluir fluxo: ' + (error.response?.data?.error || error.message));
+            alert(t('gpsFlowList.erroAoExcluirFluxo') + (error.response?.data?.error || error.message));
         } finally {
             setLoading(false);
         }
@@ -135,10 +137,10 @@ const GPSFlowList = () => {
                 <div>
                     <h2 className="mb-1">
                         <i className="bi bi-signpost-2 me-2 text-primary"></i>
-                        Fluxos GPS
+                        {t('gpsFlowList.fluxosGps')}
                     </h2>
                     <p className="text-muted mb-0">
-                        Guided Problem Solving - Diagnósticos guiados para atendimento
+                        {t('gpsFlowList.guidedProblemSolvingDiagnosticosGu')}
                     </p>
                 </div>
                 <button 
@@ -146,7 +148,7 @@ const GPSFlowList = () => {
                     onClick={() => setShowCreateModal(true)}
                 >
                     <i className="bi bi-plus-lg me-2"></i>
-                    Novo Fluxo
+                    {t('gpsFlowList.novoFluxo')}
                 </button>
             </div>
 
@@ -164,7 +166,7 @@ const GPSFlowList = () => {
                                     onChange={(e) => setFilter(prev => ({ ...prev, active_only: !e.target.checked }))}
                                 />
                                 <label className="form-check-label" htmlFor="activeOnly">
-                                    Mostrar inativos
+                                    {t('gpsFlowList.mostrarInativos')}
                                 </label>
                             </div>
                         </div>
@@ -174,7 +176,7 @@ const GPSFlowList = () => {
                                 value={filter.category || ''}
                                 onChange={(e) => setFilter(prev => ({ ...prev, category: e.target.value || undefined }))}
                             >
-                                <option value="">Todas categorias</option>
+                                <option value="">{t('gpsFlowList.todasCategorias')}</option>
                                 {categories.map(cat => (
                                     <option key={cat} value={cat}>
                                         {categoryLabels[cat] || cat}
@@ -194,16 +196,16 @@ const GPSFlowList = () => {
             ) : flows.length === 0 ? (
                 <div className="text-center py-5">
                     <i className="bi bi-signpost-2 display-1 text-muted mb-3 d-block"></i>
-                    <h5>Nenhum fluxo GPS criado</h5>
+                    <h5>{t('gpsFlowList.nenhumFluxoGpsCriado')}</h5>
                     <p className="text-muted mb-3">
-                        Crie fluxos de diagnóstico guiado para ajudar no atendimento de primeiro nível.
+                        {t('gpsFlowList.crieFluxosDeDiagnosticoGuiadoPara')}
                     </p>
                     <button 
                         className="btn btn-primary"
                         onClick={() => setShowCreateModal(true)}
                     >
                         <i className="bi bi-plus-lg me-2"></i>
-                        Criar Primeiro Fluxo
+                        {t('gpsFlowList.criarPrimeiroFluxo')}
                     </button>
                 </div>
             ) : (
@@ -236,7 +238,7 @@ const GPSFlowList = () => {
                                                         onClick={() => navigate(`/gps/flows/${flow._id}/edit`)}
                                                     >
                                                         <i className="bi bi-pencil me-2"></i>
-                                                        Editar
+                                                        {t('common.edit')}
                                                     </button>
                                                 </li>
                                                 <li>
@@ -246,7 +248,7 @@ const GPSFlowList = () => {
                                                         onClick={() => handleDuplicate(flow._id)}
                                                     >
                                                         <i className="bi bi-copy me-2"></i>
-                                                        Duplicar
+                                                        {t('gpsFlowList.duplicar')}
                                                     </button>
                                                 </li>
                                                 <li>
@@ -267,7 +269,7 @@ const GPSFlowList = () => {
                                                         onClick={() => handleDelete(flow._id)}
                                                     >
                                                         <i className="bi bi-trash me-2"></i>
-                                                        Excluir
+                                                        {t('common.delete')}
                                                     </button>
                                                 </li>
                                             </ul>
@@ -299,7 +301,7 @@ const GPSFlowList = () => {
                                                 onClick={() => navigate(`/gps/play/${flow._id}`)}
                                             >
                                                 <i className="bi bi-play-fill me-2"></i>
-                                                Iniciar Diagnóstico
+                                                {t('gpsFlowList.iniciarDiagnostico')}
                                             </button>
                                         ) : (
                                             <button
@@ -307,7 +309,7 @@ const GPSFlowList = () => {
                                                 onClick={() => navigate(`/gps/flows/${flow._id}/edit`)}
                                             >
                                                 <i className="bi bi-pencil me-2"></i>
-                                                Editar Fluxo
+                                                {t('gpsFlowList.editarFluxo')}
                                             </button>
                                         )}
                                     </div>
@@ -326,7 +328,7 @@ const GPSFlowList = () => {
                             <div className="modal-header">
                                 <h5 className="modal-title">
                                     <i className="bi bi-plus-circle me-2"></i>
-                                    Novo Fluxo GPS
+                                    {t('gpsFlowList.novoFluxoGps')}
                                 </h5>
                                 <button 
                                     type="button" 
@@ -337,28 +339,28 @@ const GPSFlowList = () => {
                             <form onSubmit={handleCreateFlow}>
                                 <div className="modal-body">
                                     <div className="mb-3">
-                                        <label className="form-label">Nome do Fluxo *</label>
+                                        <label className="form-label">{t('gpsFlowList.nomeDoFluxo')}</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            placeholder="Ex: Diagnóstico de Rede"
+                                            placeholder={t('gpsFlowList.exDiagnosticoDeRede')}
                                             value={newFlow.name}
                                             onChange={(e) => setNewFlow(prev => ({ ...prev, name: e.target.value }))}
                                             required
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Descrição</label>
+                                        <label className="form-label">{t('common.description')}</label>
                                         <textarea
                                             className="form-control"
                                             rows="2"
-                                            placeholder="Descreva o objetivo deste fluxo..."
+                                            placeholder={t('gpsFlowList.descrevaOObjetivoDesteFluxo')}
                                             value={newFlow.description}
                                             onChange={(e) => setNewFlow(prev => ({ ...prev, description: e.target.value }))}
                                         />
                                     </div>
                                     <div className="mb-3">
-                                        <label className="form-label">Categoria</label>
+                                        <label className="form-label">{t('search.category')}</label>
                                         <select
                                             className="form-select"
                                             value={newFlow.category}
@@ -378,7 +380,7 @@ const GPSFlowList = () => {
                                         className="btn btn-secondary"
                                         onClick={() => setShowCreateModal(false)}
                                     >
-                                        Cancelar
+                                        {t('common.cancel')}
                                     </button>
                                     <button 
                                         type="submit" 
@@ -388,12 +390,12 @@ const GPSFlowList = () => {
                                         {creating ? (
                                             <>
                                                 <span className="spinner-border spinner-border-sm me-2" />
-                                                Criando...
+                                                {t('gpsFlowList.criando')}
                                             </>
                                         ) : (
                                             <>
                                                 <i className="bi bi-check-lg me-2"></i>
-                                                Criar e Editar
+                                                {t('gpsFlowList.criarEEditar')}
                                             </>
                                         )}
                                     </button>

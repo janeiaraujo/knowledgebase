@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Table, Button, Modal, Form, Badge, Spinner, Alert, Collapse } from 'react-bootstrap';
 import api from '../../services/api';
 
 export default function CategoriesSettings() {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -194,7 +196,7 @@ export default function CategoriesSettings() {
               size="sm" 
               className="me-1"
               onClick={() => handleOpenModal(null, category._id)}
-              title="Adicionar subcategoria"
+              title={t('categoriesSettings.adicionarSubcategoria')}
             >
               <i className="bi bi-plus"></i>
             </Button>
@@ -229,7 +231,7 @@ export default function CategoriesSettings() {
     return (
       <div className="text-center py-5">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2 text-muted">Carregando categorias...</p>
+        <p className="mt-2 text-muted">{t('categoriesSettings.carregandoCategorias')}</p>
       </div>
     );
   }
@@ -255,13 +257,13 @@ export default function CategoriesSettings() {
           <div>
             <h5 className="mb-0">
               <i className="bi bi-folder me-2"></i>
-              Gerenciar Categorias
+              {t('categoriesSettings.gerenciarCategorias')}
             </h5>
-            <small className="text-muted">Organize KBs em categorias hierárquicas</small>
+            <small className="text-muted">{t('categoriesSettings.organizeKbsEmCategoriasHierarquica')}</small>
           </div>
           <Button variant="primary" onClick={() => handleOpenModal()}>
             <i className="bi bi-plus-lg me-1"></i>
-            Nova Categoria
+            {t('categoriesSettings.novaCategoria')}
           </Button>
         </Card.Header>
         
@@ -269,20 +271,20 @@ export default function CategoriesSettings() {
           {categories.length === 0 ? (
             <div className="text-center py-5">
               <i className="bi bi-folder text-muted" style={{ fontSize: '3rem' }}></i>
-              <p className="text-muted mt-3">Nenhuma categoria cadastrada</p>
+              <p className="text-muted mt-3">{t('categoriesSettings.nenhumaCategoriaCadastrada')}</p>
               <Button variant="outline-primary" onClick={() => handleOpenModal()}>
                 <i className="bi bi-plus-lg me-1"></i>
-                Criar primeira categoria
+                {t('categoriesSettings.criarPrimeiraCategoria')}
               </Button>
             </div>
           ) : (
             <Table hover responsive className="mb-0">
               <thead className="bg-light">
                 <tr>
-                  <th>Categoria</th>
-                  <th>Descrição</th>
-                  <th>KBs Vinculados</th>
-                  <th className="text-end">Ações</th>
+                  <th>{t('search.category')}</th>
+                  <th>{t('common.description')}</th>
+                  <th>{t('categoriesSettings.kbsVinculados')}</th>
+                  <th className="text-end">{t('reviews.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -303,10 +305,10 @@ export default function CategoriesSettings() {
         <Form onSubmit={handleSubmit}>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Nome da Categoria *</Form.Label>
+              <Form.Label>{t('categoriesSettings.nomeDaCategoria')}</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Ex: Tutoriais, Documentação, FAQs..."
+                placeholder={t('categoriesSettings.exTutoriaisDocumentacaoFaqs')}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
@@ -314,12 +316,12 @@ export default function CategoriesSettings() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Categoria Pai</Form.Label>
+              <Form.Label>{t('categoriesSettings.categoriaPai')}</Form.Label>
               <Form.Select
                 value={formData.parent_id}
                 onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
               >
-                <option value="">Nenhuma (categoria raiz)</option>
+                <option value="">{t('categoriesSettings.nenhumaCategoriaRaiz')}</option>
                 {getParentCategories()
                   .filter(c => c._id !== editingCategory?._id)
                   .map(category => (
@@ -329,12 +331,12 @@ export default function CategoriesSettings() {
                   ))}
               </Form.Select>
               <Form.Text className="text-muted">
-                Selecione para criar uma subcategoria
+                {t('categoriesSettings.selecioneParaCriarUmaSubcategoria')}
               </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Ícone</Form.Label>
+              <Form.Label>{t('categoriesSettings.icone')}</Form.Label>
               <div className="d-flex flex-wrap gap-2">
                 {icons.map(icon => (
                   <div
@@ -350,7 +352,7 @@ export default function CategoriesSettings() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Cor</Form.Label>
+              <Form.Label>{t('categoriesSettings.cor')}</Form.Label>
               <div className="d-flex flex-wrap gap-2">
                 {predefinedColors.map(color => (
                   <div
@@ -370,18 +372,18 @@ export default function CategoriesSettings() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Descrição</Form.Label>
+              <Form.Label>{t('common.description')}</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={2}
-                placeholder="Descrição opcional da categoria"
+                placeholder={t('categoriesSettings.descricaoOpcionalDaCategoria')}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </Form.Group>
 
             <div className="mt-3 p-3 bg-light rounded">
-              <small className="text-muted">Pré-visualização:</small>
+              <small className="text-muted">{t('categoriesSettings.preVisualizacao')}</small>
               <div className="mt-2 d-flex align-items-center">
                 <i 
                   className={`${formData.icon} me-2`} 
@@ -393,13 +395,13 @@ export default function CategoriesSettings() {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary" disabled={saving || !formData.name}>
               {saving ? (
                 <>
                   <Spinner size="sm" animation="border" className="me-1" />
-                  Salvando...
+                  {t('integrations.saving')}
                 </>
               ) : (
                 <>
@@ -415,14 +417,14 @@ export default function CategoriesSettings() {
       {/* Modal de Confirmação de Exclusão */}
       <Modal show={deleteModal} onHide={() => setDeleteModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Confirmar Exclusão</Modal.Title>
+          <Modal.Title>{t('categoriesSettings.confirmarExclusao')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Tem certeza que deseja excluir a categoria <strong>{categoryToDelete?.name}</strong>?</p>
+          <p>{t('categoriesSettings.temCertezaQueDesejaExcluirA')} <strong>{categoryToDelete?.name}</strong>?</p>
           {categoryToDelete?.children?.length > 0 && (
             <Alert variant="danger">
               <i className="bi bi-exclamation-triangle me-2"></i>
-              Esta categoria possui subcategorias que também serão excluídas!
+              {t('categoriesSettings.estaCategoriaPossuiSubcategoriasQu')}
             </Alert>
           )}
           {categoryToDelete?.usage_count > 0 && (
@@ -434,18 +436,18 @@ export default function CategoriesSettings() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setDeleteModal(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button variant="danger" onClick={handleDelete} disabled={deleting}>
             {deleting ? (
               <>
                 <Spinner size="sm" animation="border" className="me-1" />
-                Excluindo...
+                {t('categoriesSettings.excluindo')}
               </>
             ) : (
               <>
                 <i className="bi bi-trash me-1"></i>
-                Excluir
+                {t('common.delete')}
               </>
             )}
           </Button>

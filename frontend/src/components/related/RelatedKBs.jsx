@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Badge, Spinner, Alert, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 
 const RelatedKBs = ({ recordId, limit = 6 }) => {
+  const { t } = useTranslation();
   const [related, setRelated] = useState([]);
   const [breakdown, setBreakdown] = useState({});
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,7 @@ const RelatedKBs = ({ recordId, limit = 6 }) => {
     return (
       <div className="text-center py-4">
         <Spinner animation="border" size="sm" className="me-2" />
-        <span className="text-muted">Buscando KBs relacionados...</span>
+        <span className="text-muted">{t('relatedKBs.buscandoKbsRelacionados')}</span>
       </div>
     );
   }
@@ -70,7 +72,7 @@ const RelatedKBs = ({ recordId, limit = 6 }) => {
     return (
       <Alert variant="light" className="mb-0 text-center">
         <i className="bi bi-info-circle me-2"></i>
-        Nenhum KB relacionado encontrado
+        {t('relatedKBs.nenhumKbRelacionadoEncontrado')}
       </Alert>
     );
   }
@@ -80,13 +82,13 @@ const RelatedKBs = ({ recordId, limit = 6 }) => {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5 className="mb-0">
           <i className="bi bi-diagram-3 me-2"></i>
-          KBs Relacionados
+          {t('relatedKBs.kbsRelacionados')}
         </h5>
         <div className="d-flex gap-2">
           {breakdown.by_semantic > 0 && (
             <OverlayTrigger
               placement="top"
-              overlay={<Tooltip>Por similaridade semântica (IA)</Tooltip>}
+              overlay={<Tooltip>{t('relatedKBs.porSimilaridadeSemanticaIa')}</Tooltip>}
             >
               <Badge bg="primary" pill>
                 <i className="bi bi-cpu me-1"></i>{breakdown.by_semantic}
@@ -96,7 +98,7 @@ const RelatedKBs = ({ recordId, limit = 6 }) => {
           {breakdown.by_tags > 0 && (
             <OverlayTrigger
               placement="top"
-              overlay={<Tooltip>Por tags em comum</Tooltip>}
+              overlay={<Tooltip>{t('relatedKBs.porTagsEmComum')}</Tooltip>}
             >
               <Badge bg="success" pill>
                 <i className="bi bi-tags me-1"></i>{breakdown.by_tags}
@@ -106,7 +108,7 @@ const RelatedKBs = ({ recordId, limit = 6 }) => {
           {breakdown.by_category > 0 && (
             <OverlayTrigger
               placement="top"
-              overlay={<Tooltip>Pela mesma categoria</Tooltip>}
+              overlay={<Tooltip>{t('relatedKBs.pelaMesmaCategoria')}</Tooltip>}
             >
               <Badge bg="info" pill>
                 <i className="bi bi-folder me-1"></i>{breakdown.by_category}
@@ -196,7 +198,7 @@ const RelatedKBs = ({ recordId, limit = 6 }) => {
                     {kb.similarity_score && (
                       <OverlayTrigger
                         placement="top"
-                        overlay={<Tooltip>Score de similaridade</Tooltip>}
+                        overlay={<Tooltip>{t('relatedKBs.scoreDeSimilaridade')}</Tooltip>}
                       >
                         <small className="text-primary">
                           <i className="bi bi-graph-up me-1"></i>
@@ -207,7 +209,7 @@ const RelatedKBs = ({ recordId, limit = 6 }) => {
                     {kb.matching_tags_count && (
                       <OverlayTrigger
                         placement="top"
-                        overlay={<Tooltip>Tags em comum</Tooltip>}
+                        overlay={<Tooltip>{t('relatedKBs.tagsEmComum')}</Tooltip>}
                       >
                         <small className="text-success">
                           <i className="bi bi-tags me-1"></i>

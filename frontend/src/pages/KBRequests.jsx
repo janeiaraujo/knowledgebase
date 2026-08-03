@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Table, Badge, Button, Modal, Form, Tabs, Tab, Spinner, Alert, ProgressBar, OverlayTrigger, Tooltip, ListGroup } from 'react-bootstrap';
 import { FaBook, FaUser, FaClock, FaPlus, FaCheck, FaTimes, FaRobot, FaChartBar, FaFilter, FaExclamationTriangle, FaEye, FaArrowRight, FaHistory, FaLightbulb } from 'react-icons/fa';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -35,6 +36,7 @@ const statusConfig = {
 };
 
 export default function KBRequests() {
+  const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuth();
     
@@ -93,7 +95,7 @@ export default function KBRequests() {
             }));
         } catch (error) {
             console.error('Error loading requests:', error);
-            toast.error('Erro ao carregar solicitações');
+            toast.error(t('kbRequests.erroAoCarregarSolicitacoes'));
         } finally {
             setLoading(false);
         }
@@ -120,11 +122,11 @@ export default function KBRequests() {
         setActionLoading(true);
         try {
             await api.post(`/smart-search/kb-requests/${requestId}/assign`);
-            toast.success('Solicitação atribuída a você!');
+            toast.success(t('kbRequests.solicitacaoAtribuidaAVoce'));
             loadRequests();
             loadStats();
         } catch (error) {
-            toast.error('Erro ao atribuir solicitação');
+            toast.error(t('kbRequests.erroAoAtribuirSolicitacao'));
         } finally {
             setActionLoading(false);
         }
@@ -138,12 +140,12 @@ export default function KBRequests() {
                 status,
                 resolution_notes: notes
             });
-            toast.success('Status atualizado!');
+            toast.success(t('kbRequests.statusAtualizado'));
             loadRequests();
             loadStats();
             setShowDetailModal(false);
         } catch (error) {
-            toast.error('Erro ao atualizar status');
+            toast.error(t('kbRequests.erroAoAtualizarStatus'));
         } finally {
             setActionLoading(false);
         }
@@ -172,7 +174,7 @@ export default function KBRequests() {
                 tags: newKBForm.tags
             });
 
-            toast.success('KB criado com sucesso!');
+            toast.success(t('kbRequests.kbCriadoComSucesso'));
             setShowCreateKBModal(false);
             loadRequests();
             loadStats();
@@ -182,7 +184,7 @@ export default function KBRequests() {
                 navigate(`/kb/${response.data.kb_id}/edit`);
             }
         } catch (error) {
-            toast.error('Erro ao criar KB');
+            toast.error(t('kbRequests.erroAoCriarKb'));
         } finally {
             setActionLoading(false);
         }
@@ -206,10 +208,10 @@ export default function KBRequests() {
                 <Col>
                     <h2>
                         <FaBook className="me-2" />
-                        Solicitações de KB
+                        {t('kbRequests.solicitacoesDeKb')}
                     </h2>
                     <p className="text-muted">
-                        Gerencie solicitações de criação de base de conhecimento
+                        {t('kbRequests.gerencieSolicitacoesDeCriacaoDeBas')}
                     </p>
                 </Col>
             </Row>
@@ -221,7 +223,7 @@ export default function KBRequests() {
                         <Card className="text-center">
                             <Card.Body>
                                 <h3 className="text-warning">{stats.pending || 0}</h3>
-                                <small className="text-muted">Pendentes</small>
+                                <small className="text-muted">{t('kbRequests.pendentes')}</small>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -229,7 +231,7 @@ export default function KBRequests() {
                         <Card className="text-center">
                             <Card.Body>
                                 <h3 className="text-info">{stats.in_progress || 0}</h3>
-                                <small className="text-muted">Em Progresso</small>
+                                <small className="text-muted">{t('kbRequests.emProgresso')}</small>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -237,7 +239,7 @@ export default function KBRequests() {
                         <Card className="text-center">
                             <Card.Body>
                                 <h3 className="text-success">{stats.completed || 0}</h3>
-                                <small className="text-muted">Concluídos</small>
+                                <small className="text-muted">{t('kbRequests.concluidos')}</small>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -245,7 +247,7 @@ export default function KBRequests() {
                         <Card className="text-center">
                             <Card.Body>
                                 <h3>{stats.avg_resolution_hours ? `${Math.round(stats.avg_resolution_hours)}h` : '-'}</h3>
-                                <small className="text-muted">Tempo Médio</small>
+                                <small className="text-muted">{t('kbRequests.tempoMedio')}</small>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -258,12 +260,12 @@ export default function KBRequests() {
                     <Row className="align-items-end">
                         <Col md={3}>
                             <Form.Group>
-                                <Form.Label><FaFilter className="me-1" /> Status</Form.Label>
+                                <Form.Label><FaFilter className="me-1" /> {t('common.status')}</Form.Label>
                                 <Form.Select
                                     value={filters.status}
                                     onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
                                 >
-                                    <option value="">Todos</option>
+                                    <option value="">{t('kbRequests.todos')}</option>
                                     {Object.entries(statusConfig).map(([value, config]) => (
                                         <option key={value} value={value}>{config.label}</option>
                                     ))}
@@ -272,12 +274,12 @@ export default function KBRequests() {
                         </Col>
                         <Col md={3}>
                             <Form.Group>
-                                <Form.Label>Urgência</Form.Label>
+                                <Form.Label>{t('kbRequests.urgencia')}</Form.Label>
                                 <Form.Select
                                     value={filters.urgency}
                                     onChange={e => setFilters(prev => ({ ...prev, urgency: e.target.value }))}
                                 >
-                                    <option value="">Todas</option>
+                                    <option value="">{t('kbRequests.todas')}</option>
                                     {Object.entries(urgencyConfig).map(([value, config]) => (
                                         <option key={value} value={value}>{config.label}</option>
                                     ))}
@@ -288,7 +290,7 @@ export default function KBRequests() {
                             <Form.Check
                                 type="switch"
                                 id="assigned-to-me"
-                                label="Apenas minhas"
+                                label={t('kbRequests.apenasMinhas')}
                                 checked={filters.assigned_to_me}
                                 onChange={e => setFilters(prev => ({ ...prev, assigned_to_me: e.target.checked }))}
                                 className="mt-4"
@@ -296,7 +298,7 @@ export default function KBRequests() {
                         </Col>
                         <Col md={3} className="text-end">
                             <Button variant="outline-secondary" onClick={() => setFilters({ status: '', urgency: '', assigned_to_me: false })}>
-                                <FaTimes className="me-1" /> Limpar Filtros
+                                <FaTimes className="me-1" /> {t('kbRequests.limparFiltros')}
                             </Button>
                         </Col>
                     </Row>
@@ -313,19 +315,19 @@ export default function KBRequests() {
                     ) : requests.length === 0 ? (
                         <Alert variant="info" className="text-center">
                             <FaLightbulb className="me-2" />
-                            Nenhuma solicitação encontrada
+                            {t('kbRequests.nenhumaSolicitacaoEncontrada')}
                         </Alert>
                     ) : (
                         <Table responsive hover>
                             <thead>
                                 <tr>
-                                    <th>Urgência</th>
-                                    <th>Título</th>
-                                    <th>Solicitante</th>
-                                    <th>Status</th>
-                                    <th>Atribuído</th>
-                                    <th>Data</th>
-                                    <th>Ações</th>
+                                    <th>{t('kbRequests.urgencia')}</th>
+                                    <th>{t('common.title')}</th>
+                                    <th>{t('kbRequests.solicitante')}</th>
+                                    <th>{t('common.status')}</th>
+                                    <th>{t('kbRequests.atribuido')}</th>
+                                    <th>{t('kbRequests.data')}</th>
+                                    <th>{t('reviews.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -336,7 +338,7 @@ export default function KBRequests() {
                                             <div>
                                                 <strong>{request.title}</strong>
                                                 {request.enhanced_description && (
-                                                    <OverlayTrigger overlay={<Tooltip>Descrição aprimorada por IA</Tooltip>}>
+                                                    <OverlayTrigger overlay={<Tooltip>{t('kbRequests.descricaoAprimoradaPorIa')}</Tooltip>}>
                                                         <Badge bg="info" className="ms-2"><FaRobot /></Badge>
                                                     </OverlayTrigger>
                                                 )}
@@ -396,7 +398,7 @@ export default function KBRequests() {
                                 disabled={pagination.page === 1}
                                 onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
                             >
-                                Anterior
+                                {t('search.previous')}
                             </Button>
                             <span className="align-self-center">
                                 Página {pagination.page} de {pagination.pages}
@@ -406,7 +408,7 @@ export default function KBRequests() {
                                 disabled={pagination.page === pagination.pages}
                                 onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
                             >
-                                Próxima
+                                {t('search.next')}
                             </Button>
                         </div>
                     )}
@@ -426,7 +428,7 @@ export default function KBRequests() {
                         <Modal.Body>
                             <Row>
                                 <Col md={8}>
-                                    <h6>Descrição Original</h6>
+                                    <h6>{t('kbRequests.descricaoOriginal')}</h6>
                                     <Card className="mb-3">
                                         <Card.Body>{selectedRequest.description}</Card.Body>
                                     </Card>
@@ -435,7 +437,7 @@ export default function KBRequests() {
                                         <>
                                             <h6>
                                                 <FaRobot className="me-1 text-info" />
-                                                Descrição Aprimorada (IA)
+                                                {t('kbRequests.descricaoAprimoradaIa')}
                                             </h6>
                                             <Card className="mb-3 border-info">
                                                 <Card.Body>{selectedRequest.enhanced_description}</Card.Body>
@@ -445,34 +447,34 @@ export default function KBRequests() {
 
                                     {selectedRequest.related_search_query && (
                                         <Alert variant="secondary">
-                                            <strong>Busca relacionada:</strong> {selectedRequest.related_search_query}
+                                            <strong>{t('kbRequests.buscaRelacionada')}</strong> {selectedRequest.related_search_query}
                                         </Alert>
                                     )}
                                 </Col>
                                 <Col md={4}>
                                     <ListGroup variant="flush">
                                         <ListGroup.Item>
-                                            <strong>Status:</strong> {renderStatus(selectedRequest.status)}
+                                            <strong>{t('kbRequests.status')}</strong> {renderStatus(selectedRequest.status)}
                                         </ListGroup.Item>
                                         <ListGroup.Item>
-                                            <strong>Solicitante:</strong> {selectedRequest.requester?.name || 'N/A'}
+                                            <strong>{t('kbRequests.solicitante2')}</strong> {selectedRequest.requester?.name || 'N/A'}
                                         </ListGroup.Item>
                                         <ListGroup.Item>
-                                            <strong>Categoria:</strong> {selectedRequest.category || 'N/A'}
+                                            <strong>{t('kbRequests.categoria')}</strong> {selectedRequest.category || 'N/A'}
                                         </ListGroup.Item>
                                         <ListGroup.Item>
-                                            <strong>Criado em:</strong><br />
+                                            <strong>{t('kbRequests.criadoEm')}</strong><br />
                                             {format(new Date(selectedRequest.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                                         </ListGroup.Item>
                                         {selectedRequest.assigned_to && (
                                             <ListGroup.Item>
-                                                <strong>Atribuído a:</strong> {selectedRequest.assigned_to.name}
+                                                <strong>{t('kbRequests.atribuidoA')}</strong> {selectedRequest.assigned_to.name}
                                             </ListGroup.Item>
                                         )}
                                         {selectedRequest.created_kb_id && (
                                             <ListGroup.Item className="text-success">
                                                 <FaCheck className="me-1" />
-                                                <strong>KB Criado</strong>
+                                                <strong>{t('kbRequests.kbCriado')}</strong>
                                             </ListGroup.Item>
                                         )}
                                     </ListGroup>
@@ -482,21 +484,21 @@ export default function KBRequests() {
                         <Modal.Footer>
                             {selectedRequest.status === 'pending' && !selectedRequest.assigned_to && (
                                 <Button variant="success" onClick={() => assignToMe(selectedRequest._id)} disabled={actionLoading}>
-                                    <FaUser className="me-1" /> Atribuir a Mim
+                                    <FaUser className="me-1" /> {t('kbRequests.atribuirAMim')}
                                 </Button>
                             )}
                             {selectedRequest.assigned_to?._id === user?._id && selectedRequest.status === 'in_progress' && (
                                 <>
                                     <Button variant="danger" onClick={() => updateStatus(selectedRequest._id, 'rejected', 'Solicitação não procede')} disabled={actionLoading}>
-                                        <FaTimes className="me-1" /> Rejeitar
+                                        <FaTimes className="me-1" /> {t('kbRequests.rejeitar')}
                                     </Button>
                                     <Button variant="success" onClick={() => openCreateKB(selectedRequest)} disabled={actionLoading}>
-                                        <FaPlus className="me-1" /> Criar KB
+                                        <FaPlus className="me-1" /> {t('kbRequests.criarKb')}
                                     </Button>
                                 </>
                             )}
                             <Button variant="secondary" onClick={() => setShowDetailModal(false)}>
-                                Fechar
+                                {t('postmortem.close')}
                             </Button>
                         </Modal.Footer>
                     </>
@@ -508,13 +510,13 @@ export default function KBRequests() {
                 <Modal.Header closeButton>
                     <Modal.Title>
                         <FaPlus className="me-2" />
-                        Criar KB a partir da Solicitação
+                        {t('kbRequests.criarKbAPartirDaSolicitacao')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Título do KB</Form.Label>
+                            <Form.Label>{t('kbRequests.tituloDoKb')}</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={newKBForm.title}
@@ -523,7 +525,7 @@ export default function KBRequests() {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Conteúdo (Markdown)</Form.Label>
+                            <Form.Label>{t('kbRequests.conteudoMarkdown')}</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={15}
@@ -534,13 +536,13 @@ export default function KBRequests() {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Tags (separadas por vírgula)</Form.Label>
+                            <Form.Label>{t('kbRequests.tagsSeparadasPorVirgula')}</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={newKBForm.tags.join(', ')}
                                 onChange={e => setNewKBForm(prev => ({ 
                                     ...prev, 
-                                    tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                                    tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean)
                                 }))}
                             />
                         </Form.Group>
@@ -548,17 +550,17 @@ export default function KBRequests() {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowCreateKBModal(false)}>
-                        Cancelar
+                        {t('common.cancel')}
                     </Button>
                     <Button variant="primary" onClick={createKBFromRequest} disabled={actionLoading}>
                         {actionLoading ? (
                             <>
                                 <Spinner animation="border" size="sm" className="me-2" />
-                                Criando...
+                                {t('kbRequests.criando')}
                             </>
                         ) : (
                             <>
-                                <FaPlus className="me-1" /> Criar KB
+                                <FaPlus className="me-1" /> {t('kbRequests.criarKb')}
                             </>
                         )}
                     </Button>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Button, Form, Row, Col, Alert, Spinner, Badge, ListGroup, Tabs, Tab, Modal, ProgressBar } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const Import = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   
@@ -221,10 +223,10 @@ const Import = () => {
         <div>
           <h2 className="mb-1">
             <i className="bi bi-cloud-upload me-2"></i>
-            Importar Conteúdo
+            {t('import.importarConteudo')}
           </h2>
           <p className="text-muted mb-0">
-            Importe KBs de arquivos Markdown, JSON, Confluence ou Notion
+            {t('import.importeKbsDeArquivosMarkdownJson')}
           </p>
         </div>
       </div>
@@ -251,9 +253,9 @@ const Import = () => {
               <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-4">
                 
                 {/* Markdown Tab */}
-                <Tab eventKey="markdown" title={<><i className="bi bi-markdown me-2"></i>Markdown</>}>
+                <Tab eventKey="markdown" title={<><i className="bi bi-markdown me-2"></i>{t('import.markdown')}</>}>
                   <div className="mb-3">
-                    <Form.Label>Selecionar Arquivos Markdown</Form.Label>
+                    <Form.Label>{t('import.selecionarArquivosMarkdown')}</Form.Label>
                     <Form.Control
                       ref={fileInputRef}
                       type="file"
@@ -262,7 +264,7 @@ const Import = () => {
                       onChange={handleFileSelect}
                     />
                     <Form.Text className="text-muted">
-                      Selecione um ou mais arquivos .md ou .txt
+                      {t('import.selecioneUmOuMaisArquivosMd')}
                     </Form.Text>
                   </div>
 
@@ -282,7 +284,7 @@ const Import = () => {
 
                   {preview && (
                     <div className="mb-3">
-                      <Form.Label>Preview</Form.Label>
+                      <Form.Label>{t('import.preview')}</Form.Label>
                       <Card className="bg-light">
                         <Card.Body style={{ maxHeight: '200px', overflowY: 'auto' }}>
                           <pre className="mb-0" style={{ fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>
@@ -305,9 +307,9 @@ const Import = () => {
                 </Tab>
 
                 {/* JSON Tab */}
-                <Tab eventKey="json" title={<><i className="bi bi-braces me-2"></i>JSON</>}>
+                <Tab eventKey="json" title={<><i className="bi bi-braces me-2"></i>{t('import.json')}</>}>
                   <div className="mb-3">
-                    <Form.Label>Conteúdo JSON</Form.Label>
+                    <Form.Label>{t('import.conteudoJson')}</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={10}
@@ -323,7 +325,7 @@ const Import = () => {
                       style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}
                     />
                     <Form.Text className="text-muted">
-                      Array de objetos com campos: title, content, status (opcional)
+                      {t('import.arrayDeObjetosComCamposTitle')}
                     </Form.Text>
                   </div>
 
@@ -338,11 +340,11 @@ const Import = () => {
                 </Tab>
 
                 {/* Confluence Tab */}
-                <Tab eventKey="confluence" title={<><i className="bi bi-box me-2"></i>Confluence</>}>
+                <Tab eventKey="confluence" title={<><i className="bi bi-box me-2"></i>{t('import.confluence')}</>}>
                   <Row className="g-3 mb-3">
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>URL do Confluence</Form.Label>
+                        <Form.Label>{t('import.urlDoConfluence')}</Form.Label>
                         <Form.Control
                           type="url"
                           placeholder="https://sua-empresa.atlassian.net"
@@ -353,7 +355,7 @@ const Import = () => {
                     </Col>
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Email</Form.Label>
+                        <Form.Label>{t('import.email')}</Form.Label>
                         <Form.Control
                           type="email"
                           placeholder="seu@email.com"
@@ -364,26 +366,26 @@ const Import = () => {
                     </Col>
                     <Col md={12}>
                       <Form.Group>
-                        <Form.Label>API Token</Form.Label>
+                        <Form.Label>{t('import.apiToken')}</Form.Label>
                         <Form.Control
                           type="password"
-                          placeholder="Token de API do Atlassian"
+                          placeholder={t('import.tokenDeApiDoAtlassian')}
                           value={confluenceConfig.api_token}
                           onChange={(e) => setConfluenceConfig(prev => ({ ...prev, api_token: e.target.value }))}
                         />
                         <Form.Text className="text-muted">
                           <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noreferrer">
-                            Criar API Token
+                            {t('import.criarApiToken')}
                           </a>
                         </Form.Text>
                       </Form.Group>
                     </Col>
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Space Key (opcional)</Form.Label>
+                        <Form.Label>{t('import.spaceKeyOpcional')}</Form.Label>
                         <Form.Control
                           type="text"
-                          placeholder="ENG, DOC, etc."
+                          placeholder={t('import.engDocEtc')}
                           value={confluenceConfig.space_key}
                           onChange={(e) => setConfluenceConfig(prev => ({ ...prev, space_key: e.target.value }))}
                         />
@@ -391,14 +393,14 @@ const Import = () => {
                     </Col>
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>IDs das Páginas (opcional)</Form.Label>
+                        <Form.Label>{t('import.idsDasPaginasOpcional')}</Form.Label>
                         <Form.Control
                           type="text"
                           placeholder="123456, 789012"
                           value={confluenceConfig.page_ids}
                           onChange={(e) => setConfluenceConfig(prev => ({ ...prev, page_ids: e.target.value }))}
                         />
-                        <Form.Text className="text-muted">IDs separados por vírgula</Form.Text>
+                        <Form.Text className="text-muted">{t('import.idsSeparadosPorVirgula')}</Form.Text>
                       </Form.Group>
                     </Col>
                   </Row>
@@ -414,11 +416,11 @@ const Import = () => {
                 </Tab>
 
                 {/* Notion Tab */}
-                <Tab eventKey="notion" title={<><i className="bi bi-journal-text me-2"></i>Notion</>}>
+                <Tab eventKey="notion" title={<><i className="bi bi-journal-text me-2"></i>{t('import.notion')}</>}>
                   <Row className="g-3 mb-3">
                     <Col md={12}>
                       <Form.Group>
-                        <Form.Label>API Key do Notion</Form.Label>
+                        <Form.Label>{t('import.apiKeyDoNotion')}</Form.Label>
                         <Form.Control
                           type="password"
                           placeholder="secret_xxxxxxxxxxxxx"
@@ -427,14 +429,14 @@ const Import = () => {
                         />
                         <Form.Text className="text-muted">
                           <a href="https://www.notion.so/my-integrations" target="_blank" rel="noreferrer">
-                            Criar integração no Notion
+                            {t('import.criarIntegracaoNoNotion')}
                           </a>
                         </Form.Text>
                       </Form.Group>
                     </Col>
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>Database ID (opcional)</Form.Label>
+                        <Form.Label>{t('import.databaseIdOpcional')}</Form.Label>
                         <Form.Control
                           type="text"
                           placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
@@ -445,10 +447,10 @@ const Import = () => {
                     </Col>
                     <Col md={6}>
                       <Form.Group>
-                        <Form.Label>IDs das Páginas (opcional)</Form.Label>
+                        <Form.Label>{t('import.idsDasPaginasOpcional')}</Form.Label>
                         <Form.Control
                           type="text"
-                          placeholder="page-id-1, page-id-2"
+                          placeholder={t('import.pageId1PageId2')}
                           value={notionConfig.page_ids}
                           onChange={(e) => setNotionConfig(prev => ({ ...prev, page_ids: e.target.value }))}
                         />
@@ -458,7 +460,7 @@ const Import = () => {
 
                   <Alert variant="info" className="mb-3">
                     <i className="bi bi-info-circle me-2"></i>
-                    Certifique-se de que a integração tenha acesso às páginas/databases que deseja importar.
+                    {t('import.certifiqueSeDeQueAIntegracao')}
                   </Alert>
 
                   <Button 
@@ -479,16 +481,16 @@ const Import = () => {
         <Col lg={4}>
           <Card className="border-0 shadow-sm mb-4">
             <Card.Header className="bg-light">
-              <strong><i className="bi bi-gear me-2"></i>Opções de Importação</strong>
+              <strong><i className="bi bi-gear me-2"></i>{t('import.opcoesDeImportacao')}</strong>
             </Card.Header>
             <Card.Body>
               <Form.Group className="mb-3">
-                <Form.Label>Categoria</Form.Label>
+                <Form.Label>{t('search.category')}</Form.Label>
                 <Form.Select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
-                  <option value="">Sem categoria</option>
+                  <option value="">{t('import.semCategoria')}</option>
                   {categories.map(cat => (
                     <option key={cat._id} value={cat._id}>{cat.name}</option>
                   ))}
@@ -496,7 +498,7 @@ const Import = () => {
               </Form.Group>
 
               <Form.Group>
-                <Form.Label>Tags</Form.Label>
+                <Form.Label>{t('import.tags')}</Form.Label>
                 <div className="d-flex flex-wrap gap-2">
                   {tags.map(tag => (
                     <Badge
@@ -512,7 +514,7 @@ const Import = () => {
                   ))}
                 </div>
                 {tags.length === 0 && (
-                  <small className="text-muted">Nenhuma tag disponível</small>
+                  <small className="text-muted">{t('import.nenhumaTagDisponivel')}</small>
                 )}
               </Form.Group>
             </Card.Body>
@@ -520,14 +522,14 @@ const Import = () => {
 
           <Card className="border-0 shadow-sm">
             <Card.Header className="bg-light">
-              <strong><i className="bi bi-lightbulb me-2"></i>Dicas</strong>
+              <strong><i className="bi bi-lightbulb me-2"></i>{t('import.dicas')}</strong>
             </Card.Header>
             <Card.Body>
               <ul className="mb-0 ps-3">
-                <li className="mb-2">Arquivos Markdown devem usar UTF-8</li>
-                <li className="mb-2">O título será extraído do primeiro heading #</li>
-                <li className="mb-2">KBs importados ficam como "Rascunho"</li>
-                <li className="mb-2">Para Confluence/Notion, crie API tokens dedicados</li>
+                <li className="mb-2">{t('import.arquivosMarkdownDevemUsarUtf8')}</li>
+                <li className="mb-2">{t('import.oTituloSeraExtraidoDoPrimeiro')}</li>
+                <li className="mb-2">{t('import.kbsImportadosFicamComoRascunho')}</li>
+                <li className="mb-2">{t('import.paraConfluenceNotionCrieApiTokens')}</li>
               </ul>
             </Card.Body>
           </Card>
@@ -539,7 +541,7 @@ const Import = () => {
         <Modal.Header closeButton className="bg-light">
           <Modal.Title>
             <i className="bi bi-check-circle text-success me-2"></i>
-            Importação Concluída
+            {t('import.importacaoConcluida')}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -548,17 +550,17 @@ const Import = () => {
               <div className="d-flex gap-4 mb-4">
                 <div className="text-center">
                   <h3 className="text-success mb-0">{importResult.imported}</h3>
-                  <small className="text-muted">Importados</small>
+                  <small className="text-muted">{t('import.importados')}</small>
                 </div>
                 <div className="text-center">
                   <h3 className="text-danger mb-0">{importResult.failed}</h3>
-                  <small className="text-muted">Erros</small>
+                  <small className="text-muted">{t('import.erros')}</small>
                 </div>
               </div>
 
               {importResult.records?.length > 0 && (
                 <div className="mb-3">
-                  <h6>KBs Importados:</h6>
+                  <h6>{t('import.kbsImportados')}</h6>
                   <ListGroup style={{ maxHeight: '200px', overflowY: 'auto' }}>
                     {importResult.records.map((record, idx) => (
                       <ListGroup.Item key={idx} className="d-flex justify-content-between align-items-center">
@@ -571,7 +573,7 @@ const Import = () => {
                             navigate(`/kb/${record.id}/edit`);
                           }}
                         >
-                          Editar
+                          {t('common.edit')}
                         </Button>
                       </ListGroup.Item>
                     ))}
@@ -581,7 +583,7 @@ const Import = () => {
 
               {importResult.errors?.length > 0 && (
                 <div>
-                  <h6 className="text-danger">Erros:</h6>
+                  <h6 className="text-danger">{t('import.erros2')}</h6>
                   <ListGroup>
                     {importResult.errors.map((err, idx) => (
                       <ListGroup.Item key={idx} variant="danger">
@@ -596,13 +598,13 @@ const Import = () => {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowResultModal(false)}>
-            Fechar
+            {t('postmortem.close')}
           </Button>
           <Button variant="primary" onClick={() => {
             setShowResultModal(false);
             navigate('/kb');
           }}>
-            Ver KBs
+            {t('import.verKbs')}
           </Button>
         </Modal.Footer>
       </Modal>

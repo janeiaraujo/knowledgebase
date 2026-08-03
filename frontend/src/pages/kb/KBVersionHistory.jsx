@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, Button, Badge, ListGroup, Modal, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { recordAPI } from '../../services/api';
@@ -52,6 +53,7 @@ function computeDiff(oldText, newText) {
 }
 
 export default function KBVersionHistory() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [versions, setVersions] = useState([]);
@@ -85,7 +87,7 @@ export default function KBVersionHistory() {
   
   const handleCompare = async () => {
     if (!selectedVersions.from || !selectedVersions.to) {
-      alert('Selecione duas versões para comparar');
+      alert(t('kbVersionHistory.selecioneDuasVersoesParaComparar'));
       return;
     }
     
@@ -95,7 +97,7 @@ export default function KBVersionHistory() {
       setCompareData(data);
       setShowCompare(true);
     } catch (error) {
-      alert('Falha ao comparar versões');
+      alert(t('kbVersionHistory.falhaAoCompararVersoes'));
     } finally {
       setActionLoading(false);
     }
@@ -107,9 +109,9 @@ export default function KBVersionHistory() {
       await recordAPI.restoreVersion(id, restoreVersion.version);
       setShowRestore(false);
       fetchData();
-      alert('Versão restaurada com sucesso!');
+      alert(t('kbVersionHistory.versaoRestauradaComSucesso'));
     } catch (error) {
-      alert('Falha ao restaurar versão: ' + (error.response?.data?.error || 'Erro desconhecido'));
+      alert(t('kbVersionHistory.falhaAoRestaurarVersao') + (error.response?.data?.error || 'Erro desconhecido'));
     } finally {
       setActionLoading(false);
     }
@@ -154,13 +156,13 @@ export default function KBVersionHistory() {
     <>
       <div className="mb-4">
         <Link to={`/kb/${id}`} className="btn btn-link ps-0">
-          <i className="bi bi-arrow-left me-2"></i>Voltar para KB
+          <i className="bi bi-arrow-left me-2"></i>{t('kbVersionHistory.voltarParaKb')}
         </Link>
       </div>
       
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="mb-1">Histórico de Versões</h2>
+          <h2 className="mb-1">{t('kbVersionHistory.historicoDeVersoes')}</h2>
           <p className="text-muted mb-0">{record?.title}</p>
         </div>
         
@@ -170,7 +172,7 @@ export default function KBVersionHistory() {
           disabled={!selectedVersions.from || !selectedVersions.to || actionLoading}
         >
           <i className="bi bi-arrow-left-right me-2"></i>
-          Comparar Selecionadas
+          {t('kbVersionHistory.compararSelecionadas')}
         </Button>
       </div>
       
@@ -184,13 +186,13 @@ export default function KBVersionHistory() {
             className="p-0 ms-2"
             onClick={() => setSelectedVersions({ from: null, to: null })}
           >
-            Limpar
+            {t('kbVersionHistory.limpar')}
           </Button>
         </Alert>
       ) : (
         <Alert variant="secondary" className="mb-3">
           <i className="bi bi-hand-index me-2"></i>
-          Clique em duas versões para selecionar e comparar
+          {t('kbVersionHistory.cliqueEmDuasVersoesParaSelecionar')}
         </Alert>
       )}
       
@@ -225,7 +227,7 @@ export default function KBVersionHistory() {
                           v{version.version}
                         </Badge>
                         {index === 0 && (
-                          <Badge bg="info">Atual</Badge>
+                          <Badge bg="info">{t('kbVersionHistory.atual')}</Badge>
                         )}
                         {version.restored_from && (
                           <Badge bg="warning" text="dark">
@@ -252,7 +254,7 @@ export default function KBVersionHistory() {
                         handleCompare();
                       }}
                       disabled={index === 0}
-                      title="Comparar com versão atual"
+                      title={t('kbVersionHistory.compararComVersaoAtual')}
                     >
                       <i className="bi bi-arrow-left-right"></i>
                     </Button>
@@ -265,7 +267,7 @@ export default function KBVersionHistory() {
                           setRestoreVersion(version);
                           setShowRestore(true);
                         }}
-                        title="Restaurar esta versão"
+                        title={t('kbVersionHistory.restaurarEstaVersao')}
                       >
                         <i className="bi bi-arrow-counterclockwise"></i>
                       </Button>
@@ -277,7 +279,7 @@ export default function KBVersionHistory() {
           ) : (
             <div className="text-center py-5 text-muted">
               <i className="bi bi-clock-history fs-1 d-block mb-3"></i>
-              <p className="mb-0">Nenhuma versão anterior encontrada</p>
+              <p className="mb-0">{t('kbVersionHistory.nenhumaVersaoAnteriorEncontrada')}</p>
             </div>
           )}
         </Card.Body>
@@ -296,7 +298,7 @@ export default function KBVersionHistory() {
               {/* Title comparison */}
               {compareData.from.title !== compareData.to.title && (
                 <Alert variant="warning" className="m-3 mb-0">
-                  <strong>Título alterado:</strong><br />
+                  <strong>{t('kbVersionHistory.tituloAlterado')}</strong><br />
                   <del className="text-danger">{compareData.from.title}</del>
                   <span className="mx-2">→</span>
                   <ins className="text-success">{compareData.to.title}</ins>
@@ -347,7 +349,7 @@ export default function KBVersionHistory() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowCompare(false)}>
-            Fechar
+            {t('postmortem.close')}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -355,11 +357,11 @@ export default function KBVersionHistory() {
       {/* Restore Modal */}
       <Modal show={showRestore} onHide={() => setShowRestore(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Restaurar Versão</Modal.Title>
+          <Modal.Title>{t('kbVersionHistory.restaurarVersao')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>
-            Tem certeza que deseja restaurar a <strong>versão {restoreVersion?.version}</strong>?
+            {t('kbVersionHistory.temCertezaQueDesejaRestaurarA')} <strong>versão {restoreVersion?.version}</strong>?
           </p>
           <Alert variant="info">
             <i className="bi bi-info-circle me-2"></i>
@@ -369,7 +371,7 @@ export default function KBVersionHistory() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowRestore(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button 
             variant="primary" 

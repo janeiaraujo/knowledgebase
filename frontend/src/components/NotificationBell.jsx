@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge, Dropdown, ListGroup, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { notificationAPI } from '../services/api';
@@ -13,6 +14,7 @@ const NOTIFICATION_TYPES = {
 };
 
 export default function NotificationBell() {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -130,7 +132,7 @@ export default function NotificationBell() {
         style={{ width: '360px', maxHeight: '480px', overflowY: 'auto' }}
       >
         <div className="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
-          <h6 className="mb-0">Notificações</h6>
+          <h6 className="mb-0">{t('notificationBell.notificacoes')}</h6>
           {unreadCount > 0 && (
             <Button 
               variant="link" 
@@ -138,7 +140,7 @@ export default function NotificationBell() {
               className="p-0 text-primary"
               onClick={handleMarkAllAsRead}
             >
-              Marcar todas como lidas
+              {t('notificationBell.marcarTodasComoLidas')}
             </Button>
           )}
         </div>
@@ -175,7 +177,7 @@ export default function NotificationBell() {
                             size="sm"
                             className="p-0 text-muted"
                             onClick={(e) => handleMarkAsRead(notification._id, e)}
-                            title="Marcar como lida"
+                            title={t('notificationBell.marcarComoLida')}
                           >
                             <i className="bi bi-check2"></i>
                           </Button>
@@ -196,14 +198,14 @@ export default function NotificationBell() {
         ) : (
           <div className="text-center py-4 text-muted">
             <i className="bi bi-bell-slash fs-1 d-block mb-2"></i>
-            <small>Nenhuma notificação</small>
+            <small>{t('notificationBell.nenhumaNotificacao')}</small>
           </div>
         )}
         
         {notifications.length > 0 && (
           <div className="border-top p-2 text-center">
             <Link to="/notifications" className="small text-primary">
-              Ver todas as notificações
+              {t('notificationBell.verTodasAsNotificacoes')}
             </Link>
           </div>
         )}

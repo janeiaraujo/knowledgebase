@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -35,6 +36,7 @@ turndown.addRule('images', {
 
 // Toolbar component
 function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
+  const { t } = useTranslation();
   if (!editor) return null;
 
   const addLink = useCallback(() => {
@@ -58,7 +60,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}
-          title="Título 1"
+          title={t('richTextEditor.titulo1')}
         >
           H1
         </button>
@@ -66,7 +68,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
-          title="Título 2"
+          title={t('richTextEditor.titulo2')}
         >
           H2
         </button>
@@ -74,7 +76,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
           className={editor.isActive('heading', { level: 3 }) ? 'is-active' : ''}
-          title="Título 3"
+          title={t('richTextEditor.titulo3')}
         >
           H3
         </button>
@@ -85,7 +87,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={editor.isActive('bold') ? 'is-active' : ''}
-          title="Negrito (Ctrl+B)"
+          title={t('richTextEditor.negritoCtrlB')}
         >
           <i className="bi bi-type-bold"></i>
         </button>
@@ -93,7 +95,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
           className={editor.isActive('italic') ? 'is-active' : ''}
-          title="Itálico (Ctrl+I)"
+          title={t('richTextEditor.italicoCtrlI')}
         >
           <i className="bi bi-type-italic"></i>
         </button>
@@ -101,7 +103,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleStrike().run()}
           className={editor.isActive('strike') ? 'is-active' : ''}
-          title="Riscado"
+          title={t('richTextEditor.riscado')}
         >
           <i className="bi bi-type-strikethrough"></i>
         </button>
@@ -109,7 +111,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleCode().run()}
           className={editor.isActive('code') ? 'is-active' : ''}
-          title="Código inline"
+          title={t('richTextEditor.codigoInline')}
         >
           <i className="bi bi-code"></i>
         </button>
@@ -120,7 +122,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={editor.isActive('bulletList') ? 'is-active' : ''}
-          title="Lista com marcadores"
+          title={t('richTextEditor.listaComMarcadores')}
         >
           <i className="bi bi-list-ul"></i>
         </button>
@@ -128,7 +130,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={editor.isActive('orderedList') ? 'is-active' : ''}
-          title="Lista numerada"
+          title={t('richTextEditor.listaNumerada')}
         >
           <i className="bi bi-list-ol"></i>
         </button>
@@ -136,7 +138,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={editor.isActive('blockquote') ? 'is-active' : ''}
-          title="Citação"
+          title={t('richTextEditor.citacao')}
         >
           <i className="bi bi-quote"></i>
         </button>
@@ -144,7 +146,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           className={editor.isActive('codeBlock') ? 'is-active' : ''}
-          title="Bloco de código"
+          title={t('richTextEditor.blocoDeCodigo')}
         >
           <i className="bi bi-file-code"></i>
         </button>
@@ -155,14 +157,14 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={addLink}
           className={editor.isActive('link') ? 'is-active' : ''}
-          title="Adicionar link"
+          title={t('richTextEditor.adicionarLink')}
         >
           <i className="bi bi-link-45deg"></i>
         </button>
         <button
           type="button"
           onClick={onImageUpload}
-          title="Inserir imagem"
+          title={t('richTextEditor.inserirImagem')}
         >
           <i className="bi bi-image"></i>
         </button>
@@ -172,7 +174,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
         <button
           type="button"
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
-          title="Linha horizontal"
+          title={t('richTextEditor.linhaHorizontal')}
         >
           <i className="bi bi-dash-lg"></i>
         </button>
@@ -180,7 +182,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().chain().focus().undo().run()}
-          title="Desfazer (Ctrl+Z)"
+          title={t('richTextEditor.desfazerCtrlZ')}
         >
           <i className="bi bi-arrow-counterclockwise"></i>
         </button>
@@ -188,7 +190,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
           type="button"
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().chain().focus().redo().run()}
-          title="Refazer (Ctrl+Y)"
+          title={t('richTextEditor.refazerCtrlY')}
         >
           <i className="bi bi-arrow-clockwise"></i>
         </button>
@@ -208,6 +210,7 @@ function MenuBar({ editor, onImageUpload, onToggleFullscreen, isFullscreen }) {
 }
 
 export default function RichTextEditor({ value, onChange, placeholder = 'Digite aqui...', height = '300px' }) {
+  const { t } = useTranslation();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [editorHeight, setEditorHeight] = useState(parseInt(height));
   const [isResizing, setIsResizing] = useState(false);
@@ -429,7 +432,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Digite 
         <div 
           className="resize-handle"
           onMouseDown={handleMouseDown}
-          title="Arraste para redimensionar"
+          title={t('richTextEditor.arrasteParaRedimensionar')}
         >
           <i className="bi bi-grip-horizontal"></i>
         </div>

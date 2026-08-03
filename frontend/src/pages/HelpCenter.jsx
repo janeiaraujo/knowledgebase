@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Container, Row, Col, Card, Form, InputGroup, Button, Accordion, Badge, Spinner, Tab, Tabs, ListGroup, Alert } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
@@ -31,6 +32,7 @@ const CATEGORY_NAMES = {
 };
 
 export default function HelpCenter() {
+  const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState(null);
@@ -62,7 +64,7 @@ export default function HelpCenter() {
             setTours(toursRes.data.tours || []);
         } catch (error) {
             console.error('Error loading help data:', error);
-            toast.error('Erro ao carregar central de ajuda');
+            toast.error(t('helpCenter.erroAoCarregarCentralDeAjuda'));
         } finally {
             setLoading(false);
         }
@@ -87,7 +89,7 @@ export default function HelpCenter() {
             setSelectedArticle(response.data.article);
         } catch (error) {
             console.error('Error loading article:', error);
-            toast.error('Erro ao carregar artigo');
+            toast.error(t('helpCenter.erroAoCarregarArtigo'));
         } finally {
             setLoadingArticle(false);
         }
@@ -104,7 +106,7 @@ export default function HelpCenter() {
                 article_id: articleId,
                 helpful
             });
-            toast.success('Obrigado pelo feedback!');
+            toast.success(t('helpCenter.obrigadoPeloFeedback'));
         } catch (error) {
             console.error('Error submitting feedback:', error);
         }
@@ -114,7 +116,7 @@ export default function HelpCenter() {
         return (
             <div className="text-center py-5">
                 <Spinner animation="border" />
-                <p className="mt-2">Carregando Central de Ajuda...</p>
+                <p className="mt-2">{t('helpCenter.carregandoCentralDeAjuda')}</p>
             </div>
         );
     }
@@ -127,16 +129,16 @@ export default function HelpCenter() {
                     <div className="text-center py-4 bg-primary bg-opacity-10 rounded-3 mb-4">
                         <h2 className="mb-2">
                             <i className="bi bi-question-circle me-2"></i>
-                            Central de Ajuda
+                            {t('helpCenter.centralDeAjuda')}
                         </h2>
-                        <p className="text-muted mb-4">Como podemos ajudar você hoje?</p>
+                        <p className="text-muted mb-4">{t('helpCenter.comoPodemosAjudarVoceHoje')}</p>
 
                         {/* Search */}
                         <Form onSubmit={handleSearch} className="mx-auto" style={{ maxWidth: 600 }}>
                             <InputGroup size="lg">
                                 <Form.Control
                                     type="text"
-                                    placeholder="Buscar na documentação..."
+                                    placeholder={t('helpCenter.buscarNaDocumentacao')}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
@@ -163,7 +165,7 @@ export default function HelpCenter() {
                                     size="sm"
                                     onClick={() => setSearchResults(null)}
                                 >
-                                    Limpar
+                                    {t('helpCenter.limpar')}
                                 </Button>
                             </Card.Header>
                             <Card.Body>
@@ -189,13 +191,13 @@ export default function HelpCenter() {
                                     </Row>
                                 ) : (
                                     <Alert variant="info" className="mb-0">
-                                        Nenhum resultado encontrado. Tente termos diferentes.
+                                        {t('helpCenter.nenhumResultadoEncontradoTenteTerm')}
                                     </Alert>
                                 )}
 
                                 {searchResults.faq?.length > 0 && (
                                     <div className="mt-4">
-                                        <h6>Perguntas Frequentes Relacionadas</h6>
+                                        <h6>{t('helpCenter.perguntasFrequentesRelacionadas')}</h6>
                                         {searchResults.faq.map((item, idx) => (
                                             <div key={idx} className="border-bottom py-2">
                                                 <strong>{item.question}</strong>
@@ -222,7 +224,7 @@ export default function HelpCenter() {
                                     onClick={() => setSelectedArticle(null)}
                                 >
                                     <i className="bi bi-arrow-left me-2"></i>
-                                    Voltar
+                                    {t('common.back')}
                                 </Button>
                             </Card.Header>
                             <Card.Body className="p-4">
@@ -249,21 +251,21 @@ export default function HelpCenter() {
                                         <hr className="my-4" />
 
                                         <div className="text-center">
-                                            <p className="text-muted mb-3">Este artigo foi útil?</p>
+                                            <p className="text-muted mb-3">{t('helpCenter.esteArtigoFoiUtil')}</p>
                                             <Button 
                                                 variant="outline-success" 
                                                 className="me-2"
                                                 onClick={() => submitFeedback(selectedArticle.id, true)}
                                             >
                                                 <i className="bi bi-hand-thumbs-up me-1"></i>
-                                                Sim
+                                                {t('helpCenter.sim')}
                                             </Button>
                                             <Button 
                                                 variant="outline-danger"
                                                 onClick={() => submitFeedback(selectedArticle.id, false)}
                                             >
                                                 <i className="bi bi-hand-thumbs-down me-1"></i>
-                                                Não
+                                                {t('helpCenter.nao')}
                                             </Button>
                                         </div>
                                     </>
@@ -278,7 +280,7 @@ export default function HelpCenter() {
             {!selectedArticle && !searchResults && (
                 <Tabs activeKey={activeTab} onSelect={setActiveTab} className="mb-4">
                     {/* Browse Tab */}
-                    <Tab eventKey="browse" title={<span><i className="bi bi-grid me-2"></i>Navegar</span>}>
+                    <Tab eventKey="browse" title={<span><i className="bi bi-grid me-2"></i>{t('helpCenter.navegar')}</span>}>
                         {/* Categories */}
                         <Row xs={2} md={3} lg={5} className="g-3 mb-4">
                             {categories.map(category => (
@@ -333,10 +335,10 @@ export default function HelpCenter() {
                     </Tab>
 
                     {/* FAQ Tab */}
-                    <Tab eventKey="faq" title={<span><i className="bi bi-chat-dots me-2"></i>FAQ</span>}>
+                    <Tab eventKey="faq" title={<span><i className="bi bi-chat-dots me-2"></i>{t('helpCenter.faq')}</span>}>
                         <Card className="border-0 shadow-sm">
                             <Card.Header className="bg-white">
-                                <h5 className="mb-0">Perguntas Frequentes</h5>
+                                <h5 className="mb-0">{t('helpCenter.perguntasFrequentes')}</h5>
                             </Card.Header>
                             <Card.Body>
                                 <Accordion flush>
@@ -354,7 +356,7 @@ export default function HelpCenter() {
                     </Tab>
 
                     {/* Tours Tab */}
-                    <Tab eventKey="tours" title={<span><i className="bi bi-signpost me-2"></i>Tours</span>}>
+                    <Tab eventKey="tours" title={<span><i className="bi bi-signpost me-2"></i>{t('helpCenter.tours')}</span>}>
                         <Row xs={1} md={2} className="g-4">
                             {tours.map(tour => (
                                 <Col key={tour.id}>
@@ -370,7 +372,7 @@ export default function HelpCenter() {
                                                     {tour.completed && (
                                                         <Badge bg="success">
                                                             <i className="bi bi-check me-1"></i>
-                                                            Concluído
+                                                            {t('helpCenter.concluido')}
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -390,49 +392,49 @@ export default function HelpCenter() {
                     </Tab>
 
                     {/* Shortcuts Tab */}
-                    <Tab eventKey="shortcuts" title={<span><i className="bi bi-keyboard me-2"></i>Atalhos</span>}>
+                    <Tab eventKey="shortcuts" title={<span><i className="bi bi-keyboard me-2"></i>{t('helpCenter.atalhos')}</span>}>
                         <Card className="border-0 shadow-sm">
                             <Card.Body>
                                 <Row>
                                     <Col md={6}>
-                                        <h6 className="mb-3">Navegação Global</h6>
+                                        <h6 className="mb-3">{t('helpCenter.navegacaoGlobal')}</h6>
                                         <ListGroup variant="flush">
                                             <ListGroup.Item className="d-flex justify-content-between">
-                                                <span>Busca rápida</span>
-                                                <kbd>Ctrl + K</kbd>
+                                                <span>{t('helpCenter.buscaRapida')}</span>
+                                                <kbd>{t('helpCenter.ctrlK')}</kbd>
                                             </ListGroup.Item>
                                             <ListGroup.Item className="d-flex justify-content-between">
-                                                <span>Novo KB</span>
-                                                <kbd>Ctrl + N</kbd>
+                                                <span>{t('helpCenter.novoKb')}</span>
+                                                <kbd>{t('helpCenter.ctrlN')}</kbd>
                                             </ListGroup.Item>
                                             <ListGroup.Item className="d-flex justify-content-between">
-                                                <span>Atalhos de teclado</span>
-                                                <kbd>Ctrl + /</kbd>
+                                                <span>{t('helpCenter.atalhosDeTeclado')}</span>
+                                                <kbd>{t('helpCenter.ctrl')}</kbd>
                                             </ListGroup.Item>
                                             <ListGroup.Item className="d-flex justify-content-between">
-                                                <span>Fechar modal</span>
-                                                <kbd>Esc</kbd>
+                                                <span>{t('helpCenter.fecharModal')}</span>
+                                                <kbd>{t('helpCenter.esc')}</kbd>
                                             </ListGroup.Item>
                                         </ListGroup>
                                     </Col>
                                     <Col md={6}>
-                                        <h6 className="mb-3">Editor de KB</h6>
+                                        <h6 className="mb-3">{t('helpCenter.editorDeKb')}</h6>
                                         <ListGroup variant="flush">
                                             <ListGroup.Item className="d-flex justify-content-between">
-                                                <span>Salvar</span>
-                                                <kbd>Ctrl + S</kbd>
+                                                <span>{t('gpsEditor.save')}</span>
+                                                <kbd>{t('helpCenter.ctrlS')}</kbd>
                                             </ListGroup.Item>
                                             <ListGroup.Item className="d-flex justify-content-between">
-                                                <span>Negrito</span>
-                                                <kbd>Ctrl + B</kbd>
+                                                <span>{t('helpCenter.negrito')}</span>
+                                                <kbd>{t('helpCenter.ctrlB')}</kbd>
                                             </ListGroup.Item>
                                             <ListGroup.Item className="d-flex justify-content-between">
-                                                <span>Itálico</span>
-                                                <kbd>Ctrl + I</kbd>
+                                                <span>{t('helpCenter.italico')}</span>
+                                                <kbd>{t('helpCenter.ctrlI')}</kbd>
                                             </ListGroup.Item>
                                             <ListGroup.Item className="d-flex justify-content-between">
-                                                <span>Inserir link</span>
-                                                <kbd>Ctrl + K</kbd>
+                                                <span>{t('helpCenter.inserirLink')}</span>
+                                                <kbd>{t('helpCenter.ctrlK')}</kbd>
                                             </ListGroup.Item>
                                         </ListGroup>
                                     </Col>
@@ -449,7 +451,7 @@ export default function HelpCenter() {
                     <Alert variant="info" className="d-flex align-items-center">
                         <i className="bi bi-info-circle fs-4 me-3"></i>
                         <div>
-                            <strong>Precisa de mais ajuda?</strong>
+                            <strong>{t('helpCenter.precisaDeMaisAjuda')}</strong>
                             <p className="mb-0 small">
                                 Entre em contato com o suporte pelo email support@incidentkb.com ou
                                 use o chat no canto inferior direito da tela.
