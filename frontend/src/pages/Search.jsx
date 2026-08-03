@@ -167,7 +167,7 @@ export default function Search() {
     }
     if (filters.tags.length > 0) {
       filteredResults = filteredResults.filter(r => 
-        r.tags?.some(t => filters.tags.includes(t.toString()))
+        r.tags?.some(tag => filters.tags.includes(tag.toString()))
       );
     }
     
@@ -183,7 +183,7 @@ export default function Search() {
     setFilters(prev => ({
       ...prev,
       tags: prev.tags.includes(tagId)
-        ? prev.tags.filter(t => t !== tagId)
+        ? prev.tags.filter(id => id !== tagId)
         : [...prev.tags, tagId]
     }));
   };

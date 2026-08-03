@@ -190,7 +190,7 @@ export default function InboundEventSources() {
       ) : (
         <Row xs={1} md={2} lg={3} className="g-4">
           {SOURCES.map(source => {
-            const sourceTokens = tokens.filter(t => t.source === source.type);
+            const sourceTokens = tokens.filter(token => token.source === source.type);
             const configured = sourceTokens.length > 0;
 
             return (
@@ -227,17 +227,17 @@ export default function InboundEventSources() {
 
                     {sourceTokens.length > 0 && (
                       <div className="border-top pt-2 mt-2">
-                        {sourceTokens.map(t => (
-                          <div key={t._id} className="d-flex align-items-center justify-content-between small mb-1">
+                        {sourceTokens.map(token => (
+                          <div key={token._id} className="d-flex align-items-center justify-content-between small mb-1">
                             <div className="text-truncate me-2">
-                              <span className="fw-medium">{t.label}</span>{' '}
-                              <code className="text-muted">{t.token_preview}</code>
-                              {t.auto_create_incident && (
-                                <Badge bg="success" className="ms-1">auto ≥ {t.auto_create_severity_threshold}</Badge>
+                              <span className="fw-medium">{token.label}</span>{' '}
+                              <code className="text-muted">{token.token_preview}</code>
+                              {token.auto_create_incident && (
+                                <Badge bg="success" className="ms-1">auto ≥ {token.auto_create_severity_threshold}</Badge>
                               )}
                             </div>
                             <OverlayTrigger overlay={<Tooltip>{t('inbound.revoke')}</Tooltip>}>
-                              <Button size="sm" variant="outline-danger" onClick={() => handleRevoke(t._id)}>
+                              <Button size="sm" variant="outline-danger" onClick={() => handleRevoke(token._id)}>
                                 <i className="bi bi-trash"></i>
                               </Button>
                             </OverlayTrigger>

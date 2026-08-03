@@ -149,6 +149,26 @@ describe('i18n', () => {
         assert.deepEqual(quebradas, [], 'Chave inexistente faz a tela mostrar o caminho literal.');
     });
 
+    test('nenhum callback usa `t` como parametro num arquivo que traduz', () => {
+        // Ja aconteceu: `sourceTokens.map(t => ...)` num componente com
+        // useTranslation. Dentro do callback, `t` e o item da lista, entao
+        // t('chave') estoura "t is not a function" no render. O build passa
+        // - so quebra na tela, e so quando a lista tem itens.
+        const sombras = [];
+        for (const { file, code } of SOURCES) {
+            if (!code.includes('useTranslation')) continue;
+            for (const pattern of [/\(\s*t\s*\)\s*=>/g, /(?<![\w.$])\bt\s*=>/g]) {
+                pattern.lastIndex = 0;
+                let match;
+                while ((match = pattern.exec(code)) !== null) {
+                    const linha = code.slice(0, match.index).split('\n').length;
+                    sombras.push(`${file}:${linha} -> ${match[0].trim()}`);
+                }
+            }
+        }
+        assert.deepEqual(sombras, [], 'Renomeie o parametro: `t` esta reservado para a funcao de traducao.');
+    });
+
     test('nao sobra texto em portugues cru nas telas ja traduzidas', () => {
         // Lista fechada: telas que ja passaram pela traducao nao podem
         // regredir. Telas ainda nao traduzidas ficam de fora ate a vez delas.
