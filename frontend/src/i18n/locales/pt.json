@@ -454,7 +454,10 @@
     "saveSettingsError": "Erro ao salvar configurações",
     "scheduleError": "Erro ao agendar revisão",
     "completeError": "Erro ao completar revisão",
-    "bulkScheduleError": "Erro ao agendar revisões em lote"
+    "bulkScheduleError": "Erro ao agendar revisões em lote",
+    "daysOverdue_zero": "{{count}} dias atrasado",
+    "inDays_zero": "Em {{count}} dias",
+    "updatedAgo_zero": "Atualizado há {{count}} dias"
   },
   "integrations": {
     "title": "Integrações",
@@ -600,7 +603,8 @@
         ],
         "name": "Customizado"
       }
-    }
+    },
+    "activeTokens_zero": "{{count}} tokens ativos"
   },
   "search": {
     "title": "Busca Avançada",
@@ -652,7 +656,9 @@
     "startTitle": "Inicie sua busca",
     "startHelp": "Digite uma consulta acima para pesquisar na base de conhecimento",
     "textCardHelp": "Busca rápida por palavras-chave em títulos e conteúdo",
-    "semanticCardHelp": "Busca com IA que entende significado e contexto"
+    "semanticCardHelp": "Busca com IA que entende significado e contexto",
+    "resultsFound_zero": "<b>0</b> resultados encontrados",
+    "views_zero": "{{count}} visualizações"
   },
   "smartSearch": {
     "title": "Busca Inteligente",
@@ -852,7 +858,9 @@
     "onlineToday": "Online hoje",
     "activeThisWeek": "Ativo esta semana",
     "inactive": "Inativo",
-    "loadError": "Erro ao carregar dados de atividade"
+    "loadError": "Erro ao carregar dados de atividade",
+    "usersCount_zero": "{{count}} usuários",
+    "actions_zero": "{{count}} ações"
   },
   "gpsEditor": {
     "title": "Editar Fluxo GPS",
@@ -923,5 +931,122 @@
     "titleRequired": "Título é obrigatório",
     "cannotRemoveEnds": "Não é possível remover etapas de início/fim",
     "confirmRemoveStep": "Deseja remover esta etapa?"
+  },
+  "postmortem": {
+    "notFound": "Post-mortem não encontrado",
+    "createKb": "Criar KB",
+    "longDateFormat": "dd 'de' MMMM 'de' yyyy",
+    "shortDateFormat": "dd/MM/yyyy",
+    "executiveSummary": "Resumo Executivo",
+    "generateWithAi": "Gerar com IA",
+    "summaryPlaceholder": "Descreva o incidente, impacto e resolução...",
+    "sectionPlaceholder": "Conteúdo para {{section}}...",
+    "impact": "Impacto",
+    "durationMinutes": "Duração (minutos)",
+    "usersAffected": "Usuários Afetados",
+    "slaBreached": "SLA Violado",
+    "impactDescription": "Descrição do Impacto",
+    "affectedServices": "Serviços Afetados",
+    "servicesPlaceholder": "Serviços separados por vírgula",
+    "participants": "Participantes",
+    "namesPlaceholder": "Nomes separados por vírgula",
+    "tabTimeline": "Timeline ({{count}})",
+    "incidentTimeline": "Linha do Tempo do Incidente",
+    "addEntry": "Adicionar Entrada",
+    "emptyTimeline": "Nenhuma entrada na timeline. Adicione eventos para documentar o incidente.",
+    "addTimelineEntry": "Adicionar Entrada na Timeline",
+    "dateTime": "Data/Hora",
+    "actor": "Responsável",
+    "actorPlaceholder": "Nome do responsável",
+    "tabRca": "Análise de Causa Raiz",
+    "rcaTitle": "Análise de Causa Raiz (RCA)",
+    "fiveWhys": "5 Porquês",
+    "ishikawa": "Ishikawa",
+    "fishboneDiagram": "Diagrama de Ishikawa",
+    "fiveWhysAnalysis": "Análise 5 Porquês",
+    "method": "Método",
+    "nthWhy": "{{n}}º Por quê?",
+    "rootCauses": "Causas Raiz Identificadas:",
+    "pickMethod": "Selecione um método de análise: <b>5 Porquês</b> ou <b>Ishikawa (Fishbone)</b>",
+    "fiveWhysHelp": "<b>5 Porquês:</b> Técnica iterativa para identificar a causa raiz perguntando \"Por quê?\" repetidamente até chegar à origem do problema.",
+    "fishboneHelp": "<b>Diagrama de Ishikawa:</b> Também conhecido como \"espinha de peixe\", categoriza as possíveis causas em Pessoas, Processo, Tecnologia, Ambiente, Medição e Materiais.",
+    "describeProblemLabel": "Descreva o problema",
+    "problemPlaceholder": "Ex: O sistema de pagamentos ficou indisponível por 30 minutos...",
+    "aiWillAnalyze": "A IA irá analisar o problema e gerar a análise automaticamente.",
+    "analyzing": "Analisando...",
+    "generateAnalysis": "Gerar Análise",
+    "lessonsLearned": "Lições Aprendidas",
+    "lessonsPlaceholder": "Uma lição por linha...",
+    "tabActions": "Ações ({{count}})",
+    "actionItems": "Itens de Ação",
+    "suggestActions": "Sugerir Ações (IA)",
+    "newAction": "Nova Ação",
+    "priority": "Prioridade",
+    "action": "Ação",
+    "dueDate": "Prazo",
+    "details": "Detalhes",
+    "actionTitlePlaceholder": "Descrição da ação",
+    "emptyActions": "Nenhum item de ação. Adicione ações para prevenir recorrências.",
+    "aiGeneratedContent": "Conteúdo Gerado pela IA",
+    "aiSuggestedActions": "A IA sugeriu as seguintes ações baseadas na análise:",
+    "recommendations": "Recomendações",
+    "close": "Fechar",
+    "severities": {
+      "critical": "Crítico",
+      "high": "Alto",
+      "medium": "Médio",
+      "low": "Baixo"
+    },
+    "priorities": {
+      "critical": "Crítica",
+      "high": "Alta",
+      "medium": "Média",
+      "low": "Baixa"
+    },
+    "actionCategories": {
+      "preventive": "Preventiva",
+      "detective": "Detectiva",
+      "corrective": "Corretiva"
+    },
+    "timelineTypes": {
+      "detection": "Detecção",
+      "investigation": "Investigação",
+      "mitigation": "Mitigação",
+      "resolution": "Resolução",
+      "event": "Evento"
+    },
+    "statuses": {
+      "open": "Aberto",
+      "in_progress": "Em Progresso",
+      "completed": "Concluído",
+      "cancelled": "Cancelado"
+    },
+    "loadError": "Erro ao carregar post-mortem",
+    "saved": "Salvo com sucesso!",
+    "saveError": "Erro ao salvar",
+    "fillTimestampDesc": "Preencha data/hora e descrição",
+    "entryAdded": "Entrada adicionada!",
+    "addEntryError": "Erro ao adicionar entrada",
+    "confirmRemoveEntry": "Remover esta entrada?",
+    "removeError": "Erro ao remover",
+    "fillActionTitle": "Informe o título da ação",
+    "actionAdded": "Ação adicionada!",
+    "addActionError": "Erro ao adicionar ação",
+    "addError": "Erro ao adicionar",
+    "updateError": "Erro ao atualizar",
+    "describeInitialProblem": "Descreva o problema inicial",
+    "fiveWhysGenerated": "Análise 5 Porquês gerada!",
+    "analysisError": "Erro na análise",
+    "describeProblem": "Descreva o problema",
+    "fishboneGenerated": "Diagrama de Ishikawa gerado!",
+    "contentGenerated": "Conteúdo gerado!",
+    "generateError": "Erro ao gerar conteúdo",
+    "confirmPublish": "Publicar este post-mortem?",
+    "published": "Publicado!",
+    "publishError": "Erro ao publicar",
+    "exportError": "Erro ao exportar",
+    "confirmCreateKb": "Criar KB a partir deste post-mortem?",
+    "kbCreated": "KB criado!",
+    "createKbError": "Erro ao criar KB"
   }
 }

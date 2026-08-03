@@ -454,7 +454,10 @@
     "saveSettingsError": "Failed to save settings",
     "scheduleError": "Failed to schedule review",
     "completeError": "Failed to complete review",
-    "bulkScheduleError": "Failed to bulk-schedule reviews"
+    "bulkScheduleError": "Failed to bulk-schedule reviews",
+    "daysOverdue_zero": "{{count}} days overdue",
+    "inDays_zero": "In {{count}} days",
+    "updatedAgo_zero": "Updated {{count}} days ago"
   },
   "integrations": {
     "title": "Integrations",
@@ -600,7 +603,8 @@
         ],
         "name": "Custom"
       }
-    }
+    },
+    "activeTokens_zero": "{{count}} active tokens"
   },
   "search": {
     "title": "Advanced Search",
@@ -652,7 +656,9 @@
     "startTitle": "Start your search",
     "startHelp": "Type a query above to search the knowledge base",
     "textCardHelp": "Fast keyword search across titles and content",
-    "semanticCardHelp": "AI search that understands meaning and context"
+    "semanticCardHelp": "AI search that understands meaning and context",
+    "resultsFound_zero": "<b>0</b> results found",
+    "views_zero": "{{count}} views"
   },
   "smartSearch": {
     "title": "Smart Search",
@@ -852,7 +858,9 @@
     "onlineToday": "Online today",
     "activeThisWeek": "Active this week",
     "inactive": "Inactive",
-    "loadError": "Failed to load activity data"
+    "loadError": "Failed to load activity data",
+    "usersCount_zero": "{{count}} users",
+    "actions_zero": "{{count}} actions"
   },
   "gpsEditor": {
     "title": "Edit GPS Flow",
@@ -923,5 +931,122 @@
     "titleRequired": "Title is required",
     "cannotRemoveEnds": "Start/end steps cannot be removed",
     "confirmRemoveStep": "Remove this step?"
+  },
+  "postmortem": {
+    "notFound": "Post-mortem not found",
+    "createKb": "Create KB",
+    "longDateFormat": "MMMM d, yyyy",
+    "shortDateFormat": "MM/dd/yyyy",
+    "executiveSummary": "Executive Summary",
+    "generateWithAi": "Generate with AI",
+    "summaryPlaceholder": "Describe the incident, impact and resolution...",
+    "sectionPlaceholder": "Content for {{section}}...",
+    "impact": "Impact",
+    "durationMinutes": "Duration (minutes)",
+    "usersAffected": "Users Affected",
+    "slaBreached": "SLA Breached",
+    "impactDescription": "Impact Description",
+    "affectedServices": "Affected Services",
+    "servicesPlaceholder": "Comma-separated services",
+    "participants": "Participants",
+    "namesPlaceholder": "Comma-separated names",
+    "tabTimeline": "Timeline ({{count}})",
+    "incidentTimeline": "Incident Timeline",
+    "addEntry": "Add Entry",
+    "emptyTimeline": "No timeline entries yet. Add events to document the incident.",
+    "addTimelineEntry": "Add Timeline Entry",
+    "dateTime": "Date/Time",
+    "actor": "Owner",
+    "actorPlaceholder": "Owner's name",
+    "tabRca": "Root Cause Analysis",
+    "rcaTitle": "Root Cause Analysis (RCA)",
+    "fiveWhys": "5 Whys",
+    "ishikawa": "Ishikawa",
+    "fishboneDiagram": "Fishbone Diagram",
+    "fiveWhysAnalysis": "5 Whys Analysis",
+    "method": "Method",
+    "nthWhy": "Why #{{n}}?",
+    "rootCauses": "Root Causes Identified:",
+    "pickMethod": "Pick an analysis method: <b>5 Whys</b> or <b>Ishikawa (Fishbone)</b>",
+    "fiveWhysHelp": "<b>5 Whys:</b> An iterative technique to find the root cause by asking \"Why?\" repeatedly until you reach the origin of the problem.",
+    "fishboneHelp": "<b>Fishbone Diagram:</b> Also known as Ishikawa, it groups possible causes into People, Process, Technology, Environment, Measurement and Materials.",
+    "describeProblemLabel": "Describe the problem",
+    "problemPlaceholder": "e.g. The payment system was unavailable for 30 minutes...",
+    "aiWillAnalyze": "The AI will analyze the problem and generate the analysis automatically.",
+    "analyzing": "Analyzing...",
+    "generateAnalysis": "Generate Analysis",
+    "lessonsLearned": "Lessons Learned",
+    "lessonsPlaceholder": "One lesson per line...",
+    "tabActions": "Actions ({{count}})",
+    "actionItems": "Action Items",
+    "suggestActions": "Suggest Actions (AI)",
+    "newAction": "New Action",
+    "priority": "Priority",
+    "action": "Action",
+    "dueDate": "Due Date",
+    "details": "Details",
+    "actionTitlePlaceholder": "Action description",
+    "emptyActions": "No action items. Add actions to prevent recurrences.",
+    "aiGeneratedContent": "AI-Generated Content",
+    "aiSuggestedActions": "The AI suggested the following actions based on the analysis:",
+    "recommendations": "Recommendations",
+    "close": "Close",
+    "severities": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "priorities": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "actionCategories": {
+      "preventive": "Preventive",
+      "detective": "Detective",
+      "corrective": "Corrective"
+    },
+    "timelineTypes": {
+      "detection": "Detection",
+      "investigation": "Investigation",
+      "mitigation": "Mitigation",
+      "resolution": "Resolution",
+      "event": "Event"
+    },
+    "statuses": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "loadError": "Failed to load post-mortem",
+    "saved": "Saved successfully!",
+    "saveError": "Failed to save",
+    "fillTimestampDesc": "Fill in the date/time and description",
+    "entryAdded": "Entry added!",
+    "addEntryError": "Failed to add entry",
+    "confirmRemoveEntry": "Remove this entry?",
+    "removeError": "Failed to remove",
+    "fillActionTitle": "Enter the action title",
+    "actionAdded": "Action added!",
+    "addActionError": "Failed to add action",
+    "addError": "Failed to add",
+    "updateError": "Failed to update",
+    "describeInitialProblem": "Describe the initial problem",
+    "fiveWhysGenerated": "5 Whys analysis generated!",
+    "analysisError": "Analysis failed",
+    "describeProblem": "Describe the problem",
+    "fishboneGenerated": "Fishbone diagram generated!",
+    "contentGenerated": "Content generated!",
+    "generateError": "Failed to generate content",
+    "confirmPublish": "Publish this post-mortem?",
+    "published": "Published!",
+    "publishError": "Failed to publish",
+    "exportError": "Failed to export",
+    "confirmCreateKb": "Create a KB from this post-mortem?",
+    "kbCreated": "KB created!",
+    "createKbError": "Failed to create KB"
   }
 }

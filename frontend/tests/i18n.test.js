@@ -176,6 +176,8 @@ describe('i18n', () => {
             'pages/Settings.jsx', 'pages/Reviews.jsx', 'pages/Favorites.jsx',
             'pages/Notifications.jsx', 'pages/Search.jsx', 'pages/SmartSearch.jsx',
             'pages/Integrations.jsx', 'pages/kb/KBView.jsx',
+            'pages/Reports.jsx', 'pages/UserActivity.jsx',
+            'pages/gps/GPSFlowEditor.jsx', 'pages/postmortem/PostMortemEditor.jsx',
             'components/integrations/InboundEventSources.jsx'
         ];
         const atributoLiteral = /(?:placeholder|title|label)\s*=\s*"([^"]*)"/gi;
