@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
+import { debug } from '../utils/debug';
 
 // Sem VITE_WS_URL, deriva do host atual: mantem o protocolo correto (wss em HTTPS)
 // e funciona atras de tuneis, passando pelo proxy do Vite.
@@ -35,7 +36,7 @@ export function useRealTimeNotifications() {
             wsRef.current = ws;
 
             ws.onopen = () => {
-                console.log('WebSocket connected');
+                debug('WebSocket connected');
                 setConnected(true);
                 reconnectAttempts.current = 0;
             };
@@ -50,7 +51,7 @@ export function useRealTimeNotifications() {
             };
 
             ws.onclose = (event) => {
-                console.log('WebSocket closed:', event.code, event.reason);
+                debug('WebSocket closed:', event.code, event.reason);
                 setConnected(false);
                 wsRef.current = null;
 
@@ -75,7 +76,7 @@ export function useRealTimeNotifications() {
     const handleMessage = useCallback((data) => {
         switch (data.type) {
             case 'connected':
-                console.log('Real-time notifications enabled');
+                debug('Real-time notifications enabled');
                 break;
 
             case 'unread_count':
@@ -169,7 +170,7 @@ export function useRealTimeNotifications() {
                 break;
 
             default:
-                console.log('Unknown message type:', data.type);
+                debug('Unknown message type:', data.type);
         }
     }, []);
 

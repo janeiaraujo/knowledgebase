@@ -159,7 +159,7 @@ export default async function gamificationRoutes(fastify) {
             { user_id: 1, tenant_id: 1 },
             { unique: true, background: true }
         );
-        console.log('✅ Unique index created on user_gamification');
+        fastify.log.info('Indice unico criado em user_gamification');
     } catch (err) {
         if (err.code !== 85) { // 85 = IndexOptionsConflict (index already exists)
             console.error('Error creating index:', err.message);
@@ -513,7 +513,7 @@ async function cleanupDuplicateProfiles(db) {
                 await db.collection('user_gamification').deleteMany({
                     _id: { $in: toDelete }
                 });
-                console.log(`🧹 Removed ${toDelete.length} duplicate profile(s) for user ${dup._id.user_id}`);
+                fastify.log.info(`Removidos ${toDelete.length} perfil(is) duplicado(s) do usuario ${dup._id.user_id}`);
             }
         }
     } catch (error) {

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
+import { debug } from '../utils/debug';
 
 const NotificationContext = createContext(null);
 
@@ -39,7 +40,7 @@ export const NotificationProvider = ({ children }) => {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('🔌 WebSocket connected');
+        debug('🔌 WebSocket connected');
         setConnected(true);
         reconnectAttempts.current = 0;
       };
@@ -54,7 +55,7 @@ export const NotificationProvider = ({ children }) => {
       };
 
       ws.onclose = (event) => {
-        console.log('WebSocket closed:', event.code, event.reason);
+        debug('WebSocket closed:', event.code, event.reason);
         setConnected(false);
         wsRef.current = null;
 
@@ -62,7 +63,7 @@ export const NotificationProvider = ({ children }) => {
         if (event.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) {
           const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
           reconnectAttempts.current++;
-          console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current})`);
+          debug(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current})`);
           reconnectTimeoutRef.current = setTimeout(connect, delay);
         }
       };
@@ -80,7 +81,7 @@ export const NotificationProvider = ({ children }) => {
   const handleMessage = useCallback((data) => {
     switch (data.type) {
       case 'connected':
-        console.log('✅ Real-time notifications enabled');
+        debug('✅ Real-time notifications enabled');
         break;
 
       case 'unread_count':
@@ -101,7 +102,7 @@ export const NotificationProvider = ({ children }) => {
         break;
 
       default:
-        console.log('Unknown WebSocket message:', data);
+        debug('Unknown WebSocket message:', data);
     }
   }, []);
 
