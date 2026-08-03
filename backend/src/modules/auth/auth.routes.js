@@ -115,12 +115,18 @@ export default async function authRoutes(fastify, options) {
           email: user.email,
           name: user.name,
           role: user.role,
-          tenant_id: user.tenant_id
+          tenant_id: user.tenant_id,
+          // Permite ao frontend aplicar o idioma/tema do perfil ja no login,
+          // sem esperar um novo GET /me.
+          preferences: {
+            language: user.preferences?.language || 'pt',
+            theme: user.preferences?.theme || 'system'
+          }
         },
         accessToken,
         refreshToken
       };
-      
+
     } catch (error) {
       fastify.log.error(error);
       return reply.status(401).send({ 
@@ -225,12 +231,18 @@ export default async function authRoutes(fastify, options) {
           email: user.email,
           name: user.name,
           role: user.role,
-          tenant_id: user.tenant_id
+          tenant_id: user.tenant_id,
+          // Permite ao frontend aplicar o idioma/tema do perfil ja no login,
+          // sem esperar um novo GET /me.
+          preferences: {
+            language: user.preferences?.language || 'pt',
+            theme: user.preferences?.theme || 'system'
+          }
         },
         accessToken,
         refreshToken
       };
-      
+
     } catch (error) {
       fastify.log.error(error);
       return reply.status(401).send({ 
@@ -281,7 +293,12 @@ export default async function authRoutes(fastify, options) {
         tenant_id: user.tenant_id,
         email_verified: user.email_verified,
         created_at: user.created_at,
-        last_login: user.last_login
+        last_login: user.last_login,
+        // Usado pelo frontend para aplicar idioma/tema salvos no perfil
+        preferences: {
+          language: user.preferences?.language || 'pt',
+          theme: user.preferences?.theme || 'system'
+        }
       }
     };
   });

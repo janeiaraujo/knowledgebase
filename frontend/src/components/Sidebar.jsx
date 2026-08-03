@@ -226,7 +226,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* User Profile */}
         <div className="sidebar-footer">
-          <Link to="/settings" className="sidebar-user" onClick={onClose}>
+          <Link to="/profile" className="sidebar-user" onClick={onClose}>
             <div className="sidebar-user-avatar">
               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>

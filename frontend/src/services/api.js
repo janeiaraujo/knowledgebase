@@ -236,7 +236,12 @@ export const userAPI = {
     list: () => api.get('/users'),
     invite: (data) => api.post('/users/invite', data),
     update: (id, data) => api.patch(`/users/${id}`, data),
-    delete: (id) => api.delete(`/users/${id}`)
+    delete: (id) => api.delete(`/users/${id}`),
+    // Perfil do próprio usuário (auto-serviço, sem precisar ser admin)
+    getMe: () => api.get('/users/me'),
+    updateMe: (data) => api.patch('/users/me', data),
+    changePassword: (currentPassword, newPassword) =>
+        api.post('/users/me/password', { currentPassword, newPassword })
 };
 
 // Billing API

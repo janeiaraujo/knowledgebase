@@ -73,6 +73,7 @@ export default function Layout() {
       '/webhooks': t('nav.items.webhooks'),
       '/user-activity': t('navbar.userActivity'),
       '/settings': t('navbar.settings'),
+      '/profile': t('profile.title'),
     };
 
     // Check exact match first
