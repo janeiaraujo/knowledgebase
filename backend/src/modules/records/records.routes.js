@@ -712,20 +712,38 @@ export default async function recordRoutes(fastify, options) {
             return reply.status(400).send({ error: 'Invalid record ID' });
         }
 
-        await db.collection('records').deleteOne({
-            _id: objectId,
-            tenant_id: request.tenantId
-        });
+        try {
+            const deleteResult = await db.collection('records').deleteOne({
+                _id: objectId,
+                tenant_id: request.tenantId
+            });
 
-        // Delete versions
-        await db.collection('record_versions').deleteMany({
-            record_id: objectId,
-            tenant_id: request.tenantId
-        });
+            if (deleteResult.deletedCount === 0) {
+                return reply.status(404).send({ error: 'KB não encontrado' });
+            }
 
-        // Update subscription usage
-        await db.collection('subscriptions').updateOne({ tenant_id: request.tenantId }, { $inc: { 'usage.records': -1 } });
+            // Delete versions
+            await db.collection('record_versions').deleteMany({
+                record_id: objectId,
+                tenant_id: request.tenantId
+            });
 
-        return { success: true };
+            // Update subscription usage
+            await db.collection('subscriptions').updateOne({ tenant_id: request.tenantId }, { $inc: { 'usage.records': -1 } });
+
+            await db.collection('audit_logs').insertOne({
+                tenant_id: request.tenantId,
+                user_id: request.currentUser._id,
+                action: 'kb.deleted',
+                resource: 'record',
+                resource_id: objectId,
+                timestamp: new Date()
+            });
+
+            return { success: true };
+        } catch (error) {
+            fastify.log.error({ err: error }, 'Falha ao excluir KB');
+            return reply.status(500).send({ error: 'Falha ao excluir KB', details: error.message });
+        }
     });
 }
