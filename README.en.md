@@ -281,7 +281,7 @@ If this project helped you, consider leaving a ⭐ — it's what grows its reach
 
 Follows [SemVer](https://semver.org/). The version lives in two places that must always match: `backend/package.json` and `frontend/package.json` — CI fails the build if they diverge.
 
-Tagging and [releases](https://github.com/janeiaraujo/knowledgebase/releases) are automatic: merging a PR that bumps the version triggers `.github/workflows/release.yml`, which creates the `vX.Y.Z` tag and publishes a release with notes generated from the PRs merged since the last one — nothing to do by hand. The "version" badge at the top reads `backend/package.json` live; the "release" badge reads the latest published tag.
+Tagging and [releases](https://github.com/janeiaraujo/knowledgebase/releases) are automatic: merging a PR that bumps the version triggers `.github/workflows/release.yml`, which creates the `vX.Y.Z` tag and publishes a release using the matching section of [CHANGELOG.md](CHANGELOG.md) as the body — nothing to do by hand. If the CHANGELOG has no section for that version yet, the workflow warns and falls back to notes generated from the commits. The "version" badge at the top reads `backend/package.json` live; the "release" badge reads the latest published tag.
 
 To ship a new version: bump both `package.json` files in the same PR, following the type of change (`patch` for a fix, `minor` for a backward-compatible feature, `major` for a breaking change), and merge — the rest is automatic.
 
