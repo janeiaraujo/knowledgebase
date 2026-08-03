@@ -4,22 +4,26 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'react-toastify';
+import { useTranslation, Trans } from 'react-i18next';
 import { incidentAPI } from '../../services/api';
 
+// `labelKey` em vez de texto: o rotulo e resolvido no render, para
+// acompanhar a troca de idioma sem recarregar a pagina.
 const SEVERITY_CONFIG = {
-  low: { label: 'Baixa', color: 'success' },
-  medium: { label: 'Média', color: 'warning' },
-  high: { label: 'Alta', color: 'danger' },
-  critical: { label: 'Crítica', color: 'dark' }
+  low: { labelKey: 'incidents.severityLevels.low', color: 'success' },
+  medium: { labelKey: 'incidents.severityLevels.medium', color: 'warning' },
+  high: { labelKey: 'incidents.severityLevels.high', color: 'danger' },
+  critical: { labelKey: 'incidents.severityLevels.critical', color: 'dark' }
 };
 
 const STATUS_CONFIG = {
-  open: { label: 'Aberto', color: 'danger', icon: 'bi-broadcast' },
-  acknowledged: { label: 'Reconhecido', color: 'warning', icon: 'bi-pause-circle' },
-  resolved: { label: 'Resolvido', color: 'success', icon: 'bi-check-circle' }
+  open: { labelKey: 'incidents.statuses.open', color: 'danger', icon: 'bi-broadcast' },
+  acknowledged: { labelKey: 'incidents.statuses.acknowledged', color: 'warning', icon: 'bi-pause-circle' },
+  resolved: { labelKey: 'incidents.statuses.resolved', color: 'success', icon: 'bi-check-circle' }
 };
 
 export default function IncidentList() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +46,7 @@ export default function IncidentList() {
       setIncidents(data.incidents || []);
     } catch (err) {
       console.error('Failed to load incidents:', err);
-      toast.error('Erro ao carregar incidentes');
+      toast.error(t('incidents.loadError'));
     } finally {
       setLoading(false);
     }
@@ -63,12 +67,12 @@ export default function IncidentList() {
           ? form.affected_services.split(',').map(s => s.trim()).filter(Boolean)
           : []
       });
-      toast.success('Incidente criado');
+      toast.success(t('incidents.created'));
       setShowCreate(false);
       setForm({ title: '', description: '', severity: 'medium', affected_services: '' });
       navigate(`/incidents/${data.incidentId}`);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao criar incidente');
+      toast.error(err.response?.data?.error || t('incidents.createError'));
     } finally {
       setCreating(false);
     }
@@ -77,9 +81,9 @@ export default function IncidentList() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2 className="mb-0">Incidentes</h2>
+        <h2 className="mb-0">{t('nav.items.incidents')}</h2>
         <Button variant="primary" onClick={() => setShowCreate(true)}>
-          <i className="bi bi-plus-circle me-2"></i>Novo Incidente
+          <i className="bi bi-plus-circle me-2"></i>{t('incidents.new')}
         </Button>
       </div>
 
@@ -90,7 +94,7 @@ export default function IncidentList() {
             variant={statusFilter === '' ? 'primary' : 'outline-secondary'}
             onClick={() => setStatusFilter('')}
           >
-            Todos
+            {t('common.all')}
           </Button>
           {Object.entries(STATUS_CONFIG).map(([value, config]) => (
             <Button
@@ -99,7 +103,7 @@ export default function IncidentList() {
               variant={statusFilter === value ? config.color : 'outline-secondary'}
               onClick={() => setStatusFilter(value)}
             >
-              {config.label}
+              {t(config.labelKey)}
             </Button>
           ))}
         </ButtonGroup>
@@ -113,21 +117,23 @@ export default function IncidentList() {
         ) : incidents.length === 0 ? (
           <Card.Body className="text-center py-5">
             <i className="bi bi-inbox fs-1 text-muted"></i>
-            <p className="text-muted mt-3 mb-0">Nenhum incidente encontrado</p>
+            <p className="text-muted mt-3 mb-0">{t('incidents.empty')}</p>
             <p className="text-muted small">
-              Incidentes também podem ser abertos automaticamente a partir de eventos monitorados.
-              Veja <a href="/events">Eventos</a> para configurar as fontes.
+              <Trans i18nKey="incidents.emptyHelp">
+                Incidentes também podem ser abertos automaticamente a partir de eventos monitorados.
+                Veja <a href="/events">Eventos</a> para configurar as fontes.
+              </Trans>
             </p>
           </Card.Body>
         ) : (
           <Table hover responsive className="mb-0 align-middle">
             <thead>
               <tr>
-                <th>Título</th>
-                <th>Severidade</th>
-                <th>Status</th>
-                <th>Origem</th>
-                <th>Aberto</th>
+                <th>{t('common.title')}</th>
+                <th>{t('incidents.severity')}</th>
+                <th>{t('common.status')}</th>
+                <th>{t('incidents.origin')}</th>
+                <th>{t('incidents.openedAt')}</th>
               </tr>
             </thead>
             <tbody>
@@ -141,18 +147,18 @@ export default function IncidentList() {
                     onClick={() => navigate(`/incidents/${incident._id}`)}
                   >
                     <td className="fw-medium">{incident.title}</td>
-                    <td><Badge bg={sev.color}>{sev.label}</Badge></td>
+                    <td><Badge bg={sev.color}>{t(sev.labelKey)}</Badge></td>
                     <td>
                       <Badge bg={status.color}>
                         <i className={`bi ${status.icon} me-1`}></i>
-                        {status.label}
+                        {t(status.labelKey)}
                       </Badge>
                     </td>
                     <td className="text-muted small">
                       {incident.created_via === 'auto_ingest' ? (
-                        <span><i className="bi bi-robot me-1"></i>Automático</span>
+                        <span><i className="bi bi-robot me-1"></i>{t('incidents.automatic')}</span>
                       ) : (
-                        <span><i className="bi bi-person me-1"></i>Manual</span>
+                        <span><i className="bi bi-person me-1"></i>{t('incidents.manual')}</span>
                       )}
                     </td>
                     <td className="text-muted small">
@@ -171,21 +177,21 @@ export default function IncidentList() {
       <Modal show={showCreate} onHide={() => setShowCreate(false)}>
         <Form onSubmit={handleCreate}>
           <Modal.Header closeButton>
-            <Modal.Title>Novo Incidente</Modal.Title>
+            <Modal.Title>{t('incidents.new')}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Título</Form.Label>
+              <Form.Label>{t('common.title')}</Form.Label>
               <Form.Control
                 autoFocus
                 required
                 value={form.title}
                 onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Ex: API de pagamentos fora do ar"
+                placeholder={t('incidents.titlePlaceholder')}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Descrição</Form.Label>
+              <Form.Label>{t('common.description')}</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
@@ -194,29 +200,29 @@ export default function IncidentList() {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Severidade</Form.Label>
+              <Form.Label>{t('incidents.severity')}</Form.Label>
               <Form.Select
                 value={form.severity}
                 onChange={(e) => setForm(prev => ({ ...prev, severity: e.target.value }))}
               >
                 {Object.entries(SEVERITY_CONFIG).map(([value, config]) => (
-                  <option key={value} value={value}>{config.label}</option>
+                  <option key={value} value={value}>{t(config.labelKey)}</option>
                 ))}
               </Form.Select>
             </Form.Group>
             <Form.Group>
-              <Form.Label>Serviços afetados</Form.Label>
+              <Form.Label>{t('incidents.affectedServices')}</Form.Label>
               <Form.Control
                 value={form.affected_services}
                 onChange={(e) => setForm(prev => ({ ...prev, affected_services: e.target.value }))}
-                placeholder="Separe por vírgula: API, VPN, SAP..."
+                placeholder={t('incidents.servicesPlaceholder')}
               />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="outline-secondary" onClick={() => setShowCreate(false)}>Cancelar</Button>
+            <Button variant="outline-secondary" onClick={() => setShowCreate(false)}>{t('common.cancel')}</Button>
             <Button variant="primary" type="submit" disabled={creating || !form.title.trim()}>
-              {creating ? <Spinner size="sm" animation="border" /> : 'Criar Incidente'}
+              {creating ? <Spinner size="sm" animation="border" /> : t('incidents.create')}
             </Button>
           </Modal.Footer>
         </Form>

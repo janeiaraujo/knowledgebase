@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { incidentAPI } from '../../services/api';
 import { TagSelector, CategorySelector } from '../../components/tags/TagSelector';
 import VoiceRecorderButton from '../../components/VoiceRecorderButton';
 import ImageAttachments from '../../components/ImageAttachments';
 
 const QuickCapture = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [loading, setLoading] = useState(false);
@@ -45,7 +47,7 @@ const QuickCapture = () => {
             affected_services: prefill.affected_services || prev.affected_services,
             incident_id: prefill.incident_id || null
         }));
-        setLinkedIncidentTitle(prefill.incident_id ? 'Este KB será vinculado ao incidente de origem.' : null);
+        setLinkedIncidentTitle(prefill.incident_id ? t('quickCapture.linkedToIncident') : null);
 
         navigate(location.pathname, { replace: true, state: {} });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,7 +96,7 @@ const QuickCapture = () => {
             const capturesRes = await incidentAPI.listQuickCaptures({ limit: 5 });
             setRecentCaptures(capturesRes.data.records || []);
         } catch (err) {
-            setError(err.response?.data?.error || 'Erro ao gerar KB');
+            setError(err.response?.data?.error || t('quickCapture.generateError'));
         } finally {
             setLoading(false);
         }
@@ -108,10 +110,10 @@ const QuickCapture = () => {
     };
 
     const severityConfig = {
-        low: { label: 'Baixa', color: 'success', icon: 'bi-info-circle' },
-        medium: { label: 'Média', color: 'warning', icon: 'bi-exclamation-triangle' },
-        high: { label: 'Alta', color: 'danger', icon: 'bi-exclamation-octagon' },
-        critical: { label: 'Crítica', color: 'dark', icon: 'bi-x-octagon' }
+        low: { labelKey: 'incidents.severityLevels.low', color: 'success', icon: 'bi-info-circle' },
+        medium: { labelKey: 'incidents.severityLevels.medium', color: 'warning', icon: 'bi-exclamation-triangle' },
+        high: { labelKey: 'incidents.severityLevels.high', color: 'danger', icon: 'bi-exclamation-octagon' },
+        critical: { labelKey: 'incidents.severityLevels.critical', color: 'dark', icon: 'bi-x-octagon' }
     };
 
     return (
@@ -124,9 +126,9 @@ const QuickCapture = () => {
                             <div className="d-flex align-items-center">
                                 <i className="bi bi-lightning-charge-fill me-2 fs-4"></i>
                                 <div>
-                                    <h5 className="mb-0">Captura Rápida</h5>
+                                    <h5 className="mb-0">{t('nav.items.quickCapture')}</h5>
                                     <small className="opacity-75">
-                                        Texto, voz, logs e imagens - a IA aproveita tudo para gerar o artigo KB
+                                        {t('quickCapture.subtitle')}
                                     </small>
                                 </div>
                             </div>
@@ -145,7 +147,7 @@ const QuickCapture = () => {
                                     <i className="bi bi-check-circle-fill me-3 fs-4"></i>
                                     <div className="flex-grow-1">
                                         <h6 className="alert-heading mb-1">
-                                            {result.ai_generated ? '✨ KB gerado com IA!' : 'KB criado com sucesso!'}
+                                            {result.ai_generated ? t('quickCapture.generatedWithAi') : t('quickCapture.generated')}
                                         </h6>
                                         <p className="mb-2">{result.message}</p>
                                         <div className="d-flex gap-2">
@@ -154,14 +156,14 @@ const QuickCapture = () => {
                                                 onClick={() => navigate(`/kb/${result.record._id}/edit`)}
                                             >
                                                 <i className="bi bi-pencil me-1"></i>
-                                                Editar KB
+                                                {t('quickCapture.editKb')}
                                             </button>
                                             <button
                                                 className="btn btn-outline-success btn-sm"
                                                 onClick={() => navigate(`/kb/${result.record._id}`)}
                                             >
                                                 <i className="bi bi-eye me-1"></i>
-                                                Visualizar
+                                                {t('common.view')}
                                             </button>
                                         </div>
                                     </div>
@@ -192,23 +194,23 @@ const QuickCapture = () => {
                                     <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                         <label className="form-label fw-semibold mb-0">
                                             <i className="bi bi-bug text-danger me-2"></i>
-                                            Qual era o problema?
+                                            {t('quickCapture.problemLabel')}
                                         </label>
                                         <VoiceRecorderButton
-                                            label="Ditar problema"
+                                            label={t('quickCapture.dictateProblem')}
                                             onTranscript={appendTranscript('problem')}
                                         />
                                     </div>
                                     <textarea
                                         className="form-control mt-2"
                                         rows="4"
-                                        placeholder="Descreva o problema encontrado, cole logs/mensagens de erro, ou use o microfone. Ex: Usuário não conseguia acessar o sistema, recebia erro 403..."
+                                        placeholder={t('quickCapture.problemPlaceholder')}
                                         value={formData.problem}
                                         onChange={(e) => setFormData(prev => ({ ...prev, problem: e.target.value }))}
                                         required
                                     />
                                     <div className="form-text">
-                                        Inclua mensagens de erro, sintomas observados, contexto do problema.
+                                        {t('quickCapture.problemHelp')}
                                     </div>
                                 </div>
 
@@ -217,23 +219,23 @@ const QuickCapture = () => {
                                     <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                         <label className="form-label fw-semibold mb-0">
                                             <i className="bi bi-check-circle text-success me-2"></i>
-                                            Qual foi a solução?
+                                            {t('quickCapture.solutionLabel')}
                                         </label>
                                         <VoiceRecorderButton
-                                            label="Ditar solução"
+                                            label={t('quickCapture.dictateSolution')}
                                             onTranscript={appendTranscript('solution')}
                                         />
                                     </div>
                                     <textarea
                                         className="form-control mt-2"
                                         rows="4"
-                                        placeholder="Descreva os passos da solução, ou use o microfone. Ex: 1. Verificar permissões do usuário no AD. 2. Adicionar ao grupo X..."
+                                        placeholder={t('quickCapture.solutionPlaceholder')}
                                         value={formData.solution}
                                         onChange={(e) => setFormData(prev => ({ ...prev, solution: e.target.value }))}
                                         required
                                     />
                                     <div className="form-text">
-                                        Detalhe os passos realizados para resolver o problema.
+                                        {t('quickCapture.solutionHelp')}
                                     </div>
                                 </div>
 
@@ -241,18 +243,18 @@ const QuickCapture = () => {
                                 <div className="mb-4">
                                     <label className="form-label fw-semibold">
                                         <i className="bi bi-terminal text-secondary me-2"></i>
-                                        Logs / mensagens de erro
+                                        {t('quickCapture.logsLabel')}
                                     </label>
                                     <textarea
                                         className="form-control font-monospace"
                                         style={{ fontSize: '0.85rem' }}
                                         rows="5"
-                                        placeholder="Cole aqui trechos de log, stack trace ou a saída de erro (Ctrl+V)..."
+                                        placeholder={t('quickCapture.logsPlaceholder')}
                                         value={formData.logs}
                                         onChange={(e) => setFormData(prev => ({ ...prev, logs: e.target.value }))}
                                     />
                                     <div className="form-text">
-                                        Opcional. Trechos relevantes do log ajudam a IA a identificar sintomas e causa raiz com mais precisão.
+                                        {t('quickCapture.logsHelp')}
                                     </div>
                                 </div>
 
@@ -260,7 +262,7 @@ const QuickCapture = () => {
                                 <div className="mb-4">
                                     <label className="form-label fw-semibold">
                                         <i className="bi bi-camera text-primary me-2"></i>
-                                        Capturas de tela do erro
+                                        {t('quickCapture.imagesLabel')}
                                     </label>
                                     <ImageAttachments
                                         key={attachmentsKey}
@@ -268,7 +270,7 @@ const QuickCapture = () => {
                                         onChange={setImages}
                                     />
                                     <div className="form-text">
-                                        Opcional. Cada imagem é descrita automaticamente pela IA (quando configurada) e entra como evidência no KB gerado.
+                                        {t('quickCapture.imagesHelp')}
                                     </div>
                                 </div>
 
@@ -277,7 +279,7 @@ const QuickCapture = () => {
                                     <div className="col-md-6 mb-4">
                                         <label className="form-label fw-semibold">
                                             <i className="bi bi-speedometer2 me-2"></i>
-                                            Severidade
+                                            {t('incidents.severity')}
                                         </label>
                                         <div className="d-flex flex-wrap gap-2">
                                             {Object.entries(severityConfig).map(([value, config]) => (
@@ -290,7 +292,7 @@ const QuickCapture = () => {
                                                     onClick={() => setFormData(prev => ({ ...prev, severity: value }))}
                                                 >
                                                     <i className={`bi ${config.icon} me-1`}></i>
-                                                    {config.label}
+                                                    {t(config.labelKey)}
                                                 </button>
                                             ))}
                                         </div>
@@ -300,7 +302,7 @@ const QuickCapture = () => {
                                     <div className="col-md-6 mb-4">
                                         <label className="form-label fw-semibold">
                                             <i className="bi bi-folder me-2"></i>
-                                            Categoria
+                                            {t('kb.category')}
                                         </label>
                                         <CategorySelector
                                             selectedCategory={formData.category_id}
@@ -313,12 +315,12 @@ const QuickCapture = () => {
                                 <div className="mb-4">
                                     <label className="form-label fw-semibold">
                                         <i className="bi bi-hdd-network me-2"></i>
-                                        Serviços Afetados
+                                        {t('incidents.affectedServices')}
                                     </label>
                                     <input
                                         type="text"
                                         className="form-control"
-                                        placeholder="Ex: Active Directory, VPN, Office 365, SAP..."
+                                        placeholder={t('quickCapture.servicesPlaceholder')}
                                         value={formData.affected_services}
                                         onChange={(e) => setFormData(prev => ({ ...prev, affected_services: e.target.value }))}
                                     />
@@ -328,7 +330,7 @@ const QuickCapture = () => {
                                 <div className="mb-4">
                                     <label className="form-label fw-semibold">
                                         <i className="bi bi-tags me-2"></i>
-                                        Tags
+                                        {t('nav.items.tags')}
                                     </label>
                                     <TagSelector
                                         selectedTags={formData.tags}
@@ -346,12 +348,12 @@ const QuickCapture = () => {
                                         {loading ? (
                                             <>
                                                 <span className="spinner-border spinner-border-sm me-2" />
-                                                Gerando KB com IA...
+                                                {t('quickCapture.generating')}
                                             </>
                                         ) : (
                                             <>
                                                 <i className="bi bi-magic me-2"></i>
-                                                Gerar KB
+                                                {t('quickCapture.generate')}
                                             </>
                                         )}
                                     </button>
@@ -368,7 +370,7 @@ const QuickCapture = () => {
                         <div className="card-header">
                             <h6 className="mb-0">
                                 <i className="bi bi-question-circle me-2"></i>
-                                Como funciona?
+                                {t('quickCapture.howItWorks')}
                             </h6>
                         </div>
                         <div className="card-body">
@@ -377,7 +379,7 @@ const QuickCapture = () => {
                                     <span className="badge bg-primary rounded-circle p-2">1</span>
                                 </div>
                                 <div className="ms-3">
-                                    <strong>Problema e solução</strong>
+                                    <strong>{t('quickCapture.step1')}</strong>
                                     <p className="mb-0 text-muted small">
                                         Digite, dite por voz (<i className="bi bi-mic"></i>), ou cole logs e prints do erro.
                                     </p>
@@ -388,7 +390,7 @@ const QuickCapture = () => {
                                     <span className="badge bg-primary rounded-circle p-2">2</span>
                                 </div>
                                 <div className="ms-3">
-                                    <strong>Evidências</strong>
+                                    <strong>{t('quickCapture.step2')}</strong>
                                     <p className="mb-0 text-muted small">
                                         Cada captura de tela ganha uma descrição automática da IA.
                                     </p>
@@ -399,7 +401,7 @@ const QuickCapture = () => {
                                     <span className="badge bg-success rounded-circle p-2">3</span>
                                 </div>
                                 <div className="ms-3">
-                                    <strong>IA gera o artigo</strong>
+                                    <strong>{t('quickCapture.step3')}</strong>
                                     <p className="mb-0 text-muted small">
                                         Um KB completo em modo rascunho para revisão, com logs e imagens já anexados.
                                     </p>
@@ -413,13 +415,13 @@ const QuickCapture = () => {
                         <div className="card-header d-flex justify-content-between align-items-center">
                             <h6 className="mb-0">
                                 <i className="bi bi-clock-history me-2"></i>
-                                Capturas Recentes
+                                {t('quickCapture.recent')}
                             </h6>
                             <button
                                 className="btn btn-link btn-sm p-0"
                                 onClick={() => navigate('/kb?source=quick_capture')}
                             >
-                                Ver todas
+                                {t('common.viewAll')}
                             </button>
                         </div>
                         <div className="card-body p-0">
@@ -430,7 +432,7 @@ const QuickCapture = () => {
                             ) : recentCaptures.length === 0 ? (
                                 <div className="text-center py-4 text-muted">
                                     <i className="bi bi-inbox fs-3 d-block mb-2"></i>
-                                    Nenhuma captura ainda
+                                    {t('quickCapture.noCaptures')}
                                 </div>
                             ) : (
                                 <ul className="list-group list-group-flush">
@@ -453,8 +455,8 @@ const QuickCapture = () => {
                                                     capture.status === 'published' ? 'success' :
                                                     capture.status === 'review' ? 'warning' : 'secondary'
                                                 }`}>
-                                                    {capture.status === 'published' ? 'Publicado' :
-                                                     capture.status === 'review' ? 'Em Revisão' : 'Rascunho'}
+                                                    {capture.status === 'published' ? t('kb.status.published') :
+                                                     capture.status === 'review' ? t('kb.status.in_review') : t('kb.status.draft')}
                                                 </span>
                                             </div>
                                         </li>
