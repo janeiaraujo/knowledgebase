@@ -128,3 +128,13 @@ Inclua na issue:
 ## Licença
 
 Ao contribuir, você concorda que sua contribuição será licenciada sob a [AGPL-3.0](LICENSE).
+
+## Código de conduta
+
+Este projeto adota o [Contributor Covenant](CODE_OF_CONDUCT.md). Ao participar,
+você concorda com ele.
+
+## Encontrou uma falha de segurança?
+
+Não abra issue pública — veja [SECURITY.md](SECURITY.md) para os canais
+privados de reporte.
