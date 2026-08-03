@@ -285,6 +285,16 @@ Tagging and [releases](https://github.com/janeiaraujo/knowledgebase/releases) ar
 
 To ship a new version: bump both `package.json` files in the same PR, following the type of change (`patch` for a fix, `minor` for a backward-compatible feature, `major` for a breaking change), and merge — the rest is automatic.
 
+### `main` branch protection
+
+Direct pushes to `main` are blocked. Every change goes through a pull request requiring: 1 approval, all 3 CI checks green, the branch up to date with `main`, and conversations resolved. Force pushes and branch deletion are blocked.
+
+### Known technical debt: React Router
+
+The [GHSA-qwww-vcr4-c8h2](https://github.com/advisories/GHSA-qwww-vcr4-c8h2) advisory (CSRF in RSC mode) shows up for `react-router` 7.x and is only fixed in 8.3.0. **It does not apply to this project**: the advisory states it only affects applications using the unstable RSC APIs, and this app is a client-side SPA that uses none of them.
+
+Applying it isn't a dependency bump — `react-router@8` requires React >= 19.2.7, and this project is on React 18. It would be a full framework migration. Revisit when we move to React 19; until then the alert is dismissed in Dependabot as "vulnerable code is not used".
+
 ## Contributors
 
 Thanks to everyone who has contributed to this project:

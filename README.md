@@ -285,6 +285,16 @@ Tag e [release](https://github.com/janeiaraujo/knowledgebase/releases) são auto
 
 Para lançar uma nova versão: bump os dois `package.json` no mesmo PR, seguindo o tipo de mudança (`patch` para correção, `minor` para funcionalidade nova compatível, `major` para quebra de compatibilidade), e mergeie — o resto é automático.
 
+### Proteção da branch `main`
+
+Não é possível dar push direto na `main`. Toda mudança passa por pull request com: 1 aprovação, os 3 checks do CI verdes, branch atualizado com a `main` e conversas resolvidas. Force push e exclusão da branch estão bloqueados.
+
+### Dívida técnica conhecida: React Router
+
+O alerta [GHSA-qwww-vcr4-c8h2](https://github.com/advisories/GHSA-qwww-vcr4-c8h2) (CSRF em RSC mode) aparece para o `react-router` 7.x e só tem correção na 8.3.0. **Não se aplica a este projeto**: a advisory afirma que afeta apenas quem usa as APIs instáveis de RSC, e este app é uma SPA client-side que não usa nenhuma delas.
+
+Aplicá-lo não é atualizar uma dependência — `react-router@8` exige React >= 19.2.7, e o projeto está no React 18. Seria uma migração de framework completa. Reavaliar quando migrarmos para o React 19; até lá o alerta está dispensado no Dependabot como "código vulnerável não é usado".
+
 ## Contribuidores
 
 Obrigado a todas as pessoas que já contribuíram com este projeto:
