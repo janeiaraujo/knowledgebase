@@ -7,6 +7,22 @@ on:
     branches: [main]
 
 jobs:
+  version-sync:
+    name: Versao sincronizada (backend/frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Conferir que backend e frontend estao na mesma versao
+        run: |
+          BACKEND_VERSION=$(node -p "require('./backend/package.json').version")
+          FRONTEND_VERSION=$(node -p "require('./frontend/package.json').version")
+          echo "backend: $BACKEND_VERSION | frontend: $FRONTEND_VERSION"
+          if [ "$BACKEND_VERSION" != "$FRONTEND_VERSION" ]; then
+            echo "::error::backend ($BACKEND_VERSION) e frontend ($FRONTEND_VERSION) estao com versoes diferentes - a release so tagueia quando estiverem sincronizadas"
+            exit 1
+          fi
+
   backend:
     name: Backend (install + smoke test)
     runs-on: ubuntu-latest
