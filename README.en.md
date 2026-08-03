@@ -65,7 +65,7 @@
 
 ### Prerequisites
 
-- **Node.js 18+** ([nodejs.org](https://nodejs.org))
+- **Node.js 22+** ([nodejs.org](https://nodejs.org)) — the backend runs on 18+, but the frontend's Vite 8 requires `^20.19.0` or `>=22.12.0`
 - **Docker** ([docs.docker.com](https://docs.docker.com/get-docker/)) — for local MongoDB
 - **Git**
 
