@@ -9,7 +9,7 @@ const GPSPlayer = () => {
     const { flowId, sessionId: existingSessionId } = useParams();
     const navigate = useNavigate();
     const [session, setSession] = useState(null);
-    const [flow, setFlow] = useState(null);
+    const [, setFlow] = useState(null);
     const [currentStep, setCurrentStep] = useState(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);

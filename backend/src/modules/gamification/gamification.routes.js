@@ -630,37 +630,42 @@ async function checkAndAwardBadges(db, userId, tenantId) {
         const criteria = badge.criteria;
 
         switch (criteria.type) {
-            case 'kb_count':
+            case 'kb_count': {
                 const kbCount = await db.collection('records')
                     .countDocuments({ tenant_id: tenantId, created_by: userObjId });
                 earned = kbCount >= criteria.value;
                 break;
+            }
 
-            case 'comments_count':
+            case 'comments_count': {
                 const commentsCount = await db.collection('comments')
                     .countDocuments({ tenant_id: tenantId, created_by: userObjId });
                 earned = commentsCount >= criteria.value;
                 break;
+            }
 
-            case 'streak_days':
+            case 'streak_days': {
                 const profile = await db.collection('user_gamification')
                     .findOne({ user_id: userObjId });
                 earned = (profile?.longest_streak || 0) >= criteria.value;
                 break;
+            }
 
-            case 'postmortem_count':
+            case 'postmortem_count': {
                 const pmCount = await db.collection('postmortems')
                     .countDocuments({ tenant_id: tenantId, created_by: userObjId });
                 earned = pmCount >= criteria.value;
                 break;
+            }
 
-            case 'gps_flows_count':
+            case 'gps_flows_count': {
                 const gpsCount = await db.collection('gps_flows')
                     .countDocuments({ tenant_id: tenantId, created_by: userObjId });
                 earned = gpsCount >= criteria.value;
                 break;
+            }
 
-            case 'favorites_received':
+            case 'favorites_received': {
                 const favCount = await db.collection('favorites').countDocuments({
                     tenant_id: tenantId,
                     record_id: {
@@ -672,6 +677,7 @@ async function checkAndAwardBadges(db, userId, tenantId) {
                 });
                 earned = favCount >= criteria.value;
                 break;
+            }
         }
 
         if (earned) {

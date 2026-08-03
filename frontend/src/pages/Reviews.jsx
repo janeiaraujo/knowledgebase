@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Button, Form, Row, Col, Alert, Spinner, Badge, ListGroup, Tabs, Tab, Modal, Table, ProgressBar } from 'react-bootstrap';
+import { Card, Button, Form, Row, Col, Alert, Spinner, Badge, ListGroup, Tabs, Tab, Modal, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 
 const Reviews = () => {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState('pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

@@ -126,10 +126,6 @@ export default function GroupsTab() {
     }
   };
 
-  const getDepartmentName = (deptId) => {
-    const dept = departments.find(d => d._id === deptId);
-    return dept ? dept.name : 'N/A';
-  };
 
   const groupsByDepartment = departments.map(dept => ({
     department: dept,

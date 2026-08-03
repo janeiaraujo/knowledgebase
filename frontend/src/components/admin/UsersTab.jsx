@@ -12,7 +12,7 @@ const ROLES = [
 export default function UsersTab() {
   const { t } = useTranslation();
   const [users, setUsers] = useState([]);
-  const [groups, setGroups] = useState([]);
+  const [, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -92,10 +92,6 @@ export default function UsersTab() {
     return ROLES.find(r => r.value === role) || ROLES[3];
   };
 
-  const getUserGroups = async (userId) => {
-    // Esta funcionalidade pode ser implementada depois
-    return [];
-  };
 
   const filteredUsers = filterRole
     ? users.filter(u => u.role === filterRole)

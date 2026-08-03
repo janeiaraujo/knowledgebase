@@ -5,12 +5,11 @@ import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission } from '../../middlewares/rbac.middleware.js';
 import crypto from 'crypto';
-import { pipeline } from 'stream/promises';
 import fs from 'fs';
 import path from 'path';
 // Helpers de R2/disco centralizados em utils/storage.js - antes viviam
 // duplicados aqui e no modulo de usuarios.
-import { hasR2Config, getR2Client, getUploadsDir } from '../../utils/storage.js';
+import { getR2Client, getUploadsDir } from '../../utils/storage.js';
 
 export default async function fileRoutes(fastify, options) {
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { Form, Button, Spinner, Alert } from 'react-bootstrap';
 import { commentAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 

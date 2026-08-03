@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, Form, Button, Row, Col } from 'react-bootstrap';
-import { recordAPI, databaseAPI } from '../../services/api';
+import { recordAPI } from '../../services/api';
 import api from '../../services/api';
 import CustomPropertyFields from '../../components/properties/CustomPropertyFields';
 import RichTextEditor from '../../components/RichTextEditor';

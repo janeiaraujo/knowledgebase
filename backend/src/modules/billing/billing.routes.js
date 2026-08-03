@@ -1,13 +1,16 @@
 import { authMiddleware } from '../../middlewares/auth.middleware.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requireOwner } from '../../middlewares/rbac.middleware.js';
-import Joi from 'joi';
 import axios from 'axios';
 
 const ASAAS_API_URL = process.env.ASAAS_ENVIRONMENT === 'production' 
   ? 'https://www.asaas.com/api/v3'
   : 'https://sandbox.asaas.com/api/v3';
 
+// Integracao com o Asaas ainda nao ligada: a chamada real esta comentada
+// mais abaixo. Mantido como andaime, e nao removido, para quem for
+// concluir nao precisar reescrever do zero.
+// eslint-disable-next-line no-unused-vars
 const asaasClient = axios.create({
   baseURL: ASAAS_API_URL,
   headers: {
@@ -228,6 +231,7 @@ export default async function billingRoutes(fastify, options) {
         const tenant = await db.collection('tenants').findOne({ _id: request.tenantId });
         const user = request.currentUser;
         
+        // eslint-disable-next-line no-unused-vars
         const customerData = {
           name: tenant.name,
           email: user.email,

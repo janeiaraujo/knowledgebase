@@ -3,8 +3,6 @@ import { toObjectId } from '../../utils/mongodb.js';
 import { tenantMiddleware } from '../../middlewares/tenant.middleware.js';
 import { requirePermission } from '../../middlewares/rbac.middleware.js';
 import { requireRole } from '../../middlewares/rbac.middleware.js';
-import Joi from 'joi';
-import { hashPassword } from '../auth/auth.service.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import {
@@ -348,7 +346,8 @@ export default async function userRoutes(fastify, options) {
     const updateUserHandler = async(request, reply) => {
         const db = fastify.db();
         const { userId } = request.params;
-        const { name, email, password, role } = request.body;
+        // email fica de fora de proposito: trocar o e-mail exige outro fluxo
+        const { name, email: _email, password, role } = request.body;
 
         const objectId = toObjectId(userId);
         if (!objectId) {

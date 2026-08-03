@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Table, Button, Modal, Form, Badge, Spinner, Alert, Collapse } from 'react-bootstrap';
+import { Card, Table, Button, Modal, Form, Badge, Spinner, Alert } from 'react-bootstrap';
 import api from '../../services/api';
 
 export default function CategoriesSettings() {

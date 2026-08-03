@@ -70,6 +70,21 @@ await db.collection('records').find({ tenant_id: request.tenantId, status: 'publ
 await db.collection('records').find({ status: 'published' });
 ```
 
+### Lint
+
+`npm run lint` nos dois pacotes (`npm run lint:fix` corrige o que dá para
+corrigir sozinho). O CI roda antes dos testes, porque falha em segundos e não
+precisa de banco.
+
+As regras ligadas apontam **bug**, não estilo — aspas e ponto e vírgula não
+entram no caminho de quem está contribuindo pela primeira vez. O que ela pega é
+variável fora de escopo, hook chamado condicionalmente, `catch` vazio,
+declaração vazando entre `case`. Ao ser introduzida, essa configuração
+encontrou cinco bugs que já estavam em produção.
+
+`react-hooks/exhaustive-deps` fica como **aviso**: as 46 ocorrências atuais
+precisam de análise caso a caso, e transformá-las em erro travaria qualquer PR.
+
 ### Testes
 
 `npm test` roda os testes de unidade (`backend/tests/*.test.js`), que não precisam de banco: matriz de permissões, bloqueio de login, recuperação de senha, armazenamento de arquivos e a varredura de isolamento multi-tenant.

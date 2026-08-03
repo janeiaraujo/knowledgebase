@@ -1,4 +1,3 @@
-import Joi from 'joi';
 import * as authService from './auth.service.js';
 import { sendWelcomeEmail } from './email.service.js';
 

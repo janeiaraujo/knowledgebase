@@ -9,10 +9,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Container, Nav, Navbar, Button, Dropdown } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import QuickSearch from './QuickSearch';
@@ -22,10 +21,8 @@ import Sidebar from './Sidebar';
 import './Sidebar.css';
 
 export default function Layout() {
-  const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
@@ -43,10 +40,6 @@ export default function Layout() {
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
   
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
   
   // Get page title based on current route
   const getPageTitle = () => {

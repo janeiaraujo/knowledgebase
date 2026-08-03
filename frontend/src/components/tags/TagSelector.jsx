@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Badge, Form, Dropdown, Button, InputGroup } from 'react-bootstrap';
+import { Badge, Form, Button, InputGroup } from 'react-bootstrap';
 import { tagAPI, categoryAPI } from '../../services/api';
 
 // Paleta usada para colorir tags/categorias criadas rapidamente pelo

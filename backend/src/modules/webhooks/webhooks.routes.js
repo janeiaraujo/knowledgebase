@@ -463,8 +463,11 @@ export default async function webhooksRoutes(fastify, options) {
             }
         }
 
+        // O tenant sai do proprio webhook: esta funcao roda fora do ciclo da
+        // requisicao (entrega assincrona, com retry agendado por setTimeout),
+        // entao `request` nao existe aqui.
         await db.collection('webhooks').updateOne(
-            { _id: webhook._id, tenant_id: request.tenantId },
+            { _id: webhook._id, tenant_id: webhook.tenant_id },
             { $inc: statsUpdate }
         );
     }

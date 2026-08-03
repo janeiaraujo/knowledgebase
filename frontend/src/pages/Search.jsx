@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Container, Row, Col, Card, Form, Button, Badge, Spinner, Alert, Tab, Tabs, ListGroup, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Badge, Spinner, Alert, ListGroup, ProgressBar } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { kbAPI, aiAPI, tagAPI, categoryAPI } from '../services/api';
 
@@ -13,7 +13,6 @@ const IconTag = () => <i className="bi bi-tag"></i>;
 const IconFolder = () => <i className="bi bi-folder"></i>;
 const IconCalendar = () => <i className="bi bi-calendar"></i>;
 const IconUser = () => <i className="bi bi-person"></i>;
-const IconStar = () => <i className="bi bi-star-fill"></i>;
 const IconEye = () => <i className="bi bi-eye"></i>;
 const IconRobot = () => <i className="bi bi-robot"></i>;
 
