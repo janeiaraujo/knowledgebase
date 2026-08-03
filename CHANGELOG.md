@@ -8,6 +8,46 @@ e o versionamento segue [SemVer](https://semver.org/lang/pt-BR/).
 A seção de cada versão vira o corpo da GitHub Release automaticamente —
 veja [Versionamento](README.md#versionamento).
 
+## [2.5.0] - 2026-08-03
+
+### Segurança
+
+- `fast-uri` 3.1.4/4.1.1 → 3.1.5/4.1.2 (GHSA-7p8r-x3mc-p8w7, severidade alta):
+  confusão de host quando a autoridade da URL vem introduzida por barra
+  invertida. Chega transitivamente pelo Fastify — roteador e serializador — e a
+  correção é só de lock, sem mudança de `package.json` (#35).
+
+### Adicionado
+
+- A API passou a responder as mensagens de erro no idioma do usuário. Das 255
+  mensagens, 182 estavam em inglês e 73 em português, sem critério: quem usava
+  a plataforma em inglês recebia "Notificação não encontrada". A tradução
+  acontece na borda, num hook de serialização, e o idioma sai da preferência
+  salva no Perfil ou do `Accept-Language` (#36).
+- Interface completa nos dois idiomas: as 43 telas restantes traduzidas. São
+  73 arquivos traduzindo e nenhum com texto fixo em português (#37).
+- Testes de integração contra um MongoDB de verdade: duas organizações criadas
+  pelo endpoint de registro, verificando que uma não enxerga nem altera nada da
+  outra — leitura por id, listagem, `PATCH` e `DELETE` cruzados (conferindo
+  depois que o dado sobreviveu), comentários, incidentes e contadores. A
+  varredura estática que já existia prova que o filtro está *escrito*; isto
+  prova que ele funciona (#39).
+
+### Desempenho
+
+- Bundle dividido por rota. O frontend saía num chunk único de 2,0 MB: quem
+  abria a tela de login baixava a aplicação inteira — editor, gráficos, telas
+  de admin — para ver um formulário com dois campos. Carga inicial passou de
+  2400 kB para 969 kB (649 kB → 256 kB gzip). Login e Register ficam estáticos
+  de propósito, para não trocar o bundle grande por um flash de spinner na
+  abertura (#38, trazido para a `main` pelo #47).
+
+### Corrigido
+
+- O CI não rodava em PR cujo destino não fosse a `main`, então um PR empilhado
+  sobre outra branch não recebia check nenhum — a proteção da `main` cobria só
+  o PR de baixo da pilha (#47).
+
 ## [2.4.0] - 2026-08-03
 
 ### Segurança
@@ -124,6 +164,7 @@ Primeira versão pública.
 - Eliminadas as vulnerabilidades críticas do inventário de dependências e
   atualizada a stack (#9).
 
+[2.5.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.5.0
 [2.4.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.4.0
 [2.3.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.3.0
 [2.2.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.2.0
