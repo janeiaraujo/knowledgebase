@@ -75,7 +75,10 @@ const api = async (caminho, { token, method = 'GET', body } = {}) => {
     const res = await fetch(`${BASE}/api${caminho}`, {
         method,
         headers: {
-            'content-type': 'application/json',
+            // Só declara JSON quando existe corpo: o Fastify responde 400
+            // (FST_ERR_CTP_EMPTY_JSON_BODY) a um DELETE que anuncia JSON e
+            // manda corpo vazio - e o 400 se disfarçaria de recusa da rota.
+            ...(body ? { 'content-type': 'application/json' } : {}),
             ...(token ? { authorization: `Bearer ${token}` } : {})
         },
         ...(body ? { body: JSON.stringify(body) } : {})
@@ -158,10 +161,11 @@ describe('isolamento entre organizacoes (com banco real)', () => {
         });
 
         test('a B nao consegue editar o KB da A', async () => {
-            const { status } = await api(`/records/${recordA._id}`, {
+            const { status, body } = await api(`/records/${recordA._id}`, {
                 token: orgB.token, method: 'PATCH', body: { title: 'invadido' }
             });
-            assert.ok([403, 404].includes(status), `PATCH cruzado devolveu ${status}`);
+            assert.ok([403, 404].includes(status),
+                `PATCH cruzado devolveu ${status}: ${JSON.stringify(body)}`);
 
             // e o titulo original precisa continuar intacto
             const depois = await api(`/records/${recordA._id}`, { token: orgA.token });
@@ -169,8 +173,9 @@ describe('isolamento entre organizacoes (com banco real)', () => {
         });
 
         test('a B nao consegue excluir o KB da A', async () => {
-            const { status } = await api(`/records/${recordA._id}`, { token: orgB.token, method: 'DELETE' });
-            assert.ok([403, 404].includes(status), `DELETE cruzado devolveu ${status}`);
+            const { status, body } = await api(`/records/${recordA._id}`, { token: orgB.token, method: 'DELETE' });
+            assert.ok([403, 404].includes(status),
+                `DELETE cruzado devolveu ${status}: ${JSON.stringify(body)}`);
 
             const depois = await api(`/records/${recordA._id}`, { token: orgA.token });
             assert.equal(depois.status, 200, 'o KB da A sumiu depois de um DELETE da B');
