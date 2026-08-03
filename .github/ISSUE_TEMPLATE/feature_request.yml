@@ -1,0 +1,40 @@
+name: 💡 Sugerir funcionalidade
+description: Propor um recurso novo ou uma melhoria
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Boas ideias começam por um problema real. Conte o problema antes da solução —
+        às vezes existe um caminho melhor que o imaginado.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Que problema isso resolve?
+      description: A situação concreta que te levou até aqui.
+      placeholder: |
+        Durante um incidente eu preciso registrar rápido, mas digitar no meio da
+        emergência é inviável — acabo não documentando nada.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: O que você imagina como solução?
+      description: Se não tiver certeza, tudo bem deixar em aberto.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Já tentou alguma alternativa?
+      description: Contornos que você usa hoje, ou como outra ferramenta resolve isso.
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribuição
+      options:
+        - label: Tenho interesse em implementar isso (com orientação, se necessário)
