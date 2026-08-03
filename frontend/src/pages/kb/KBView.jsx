@@ -226,7 +226,7 @@ export default function KBView() {
   }
   
   if (!record) {
-    return <div className="alert alert-danger">KB não encontrado</div>;
+    return <div className="alert alert-danger">{t('kbView.notFound')}</div>;
   }
   
   return (
@@ -241,9 +241,9 @@ export default function KBView() {
       {record.status === 'rejected' && record.rejection_reason && (
         <Alert variant="danger" className="mb-3">
           <Alert.Heading className="h6">
-            <i className="bi bi-x-circle me-2"></i>KB Rejeitado
+            <i className="bi bi-x-circle me-2"></i>{t('kbView.rejected')}
           </Alert.Heading>
-          <p className="mb-0"><strong>Motivo:</strong> {record.rejection_reason}</p>
+          <p className="mb-0"><strong>{t('kbView.reason')}</strong> {record.rejection_reason}</p>
         </Alert>
       )}
       
@@ -303,7 +303,7 @@ export default function KBView() {
               
               {record.status === 'in_review' && isCreator && (
                 <Badge bg="warning" text="dark" className="d-flex align-items-center">
-                  <i className="bi bi-hourglass-split me-1"></i>Aguardando Aprovação
+                  <i className="bi bi-hourglass-split me-1"></i>{t('kbView.awaitingApproval')}
                 </Badge>
               )}
               
@@ -357,7 +357,7 @@ export default function KBView() {
                     <i className="bi bi-file-text me-2"></i>Markdown (.md)
                   </Dropdown.Item>
                   <Dropdown.Item onClick={handleExportPDF}>
-                    <i className="bi bi-file-pdf me-2"></i>PDF / Imprimir
+                    <i className="bi bi-file-pdf me-2"></i>{t('kbView.pdfPrint')}
                   </Dropdown.Item>
                   <Dropdown.Item onClick={handleExportWord}>
                     <i className="bi bi-file-word me-2"></i>Word (.doc)
@@ -540,7 +540,7 @@ export default function KBView() {
               title={
                 <span>
                   <i className="bi bi-diagram-3 me-2"></i>
-                  KBs Relacionados
+                  {t('kbView.relatedKbs')}
                 </span>
               }
             >

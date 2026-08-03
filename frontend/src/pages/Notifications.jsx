@@ -117,20 +117,20 @@ export default function Notifications() {
               className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
               onClick={() => setFilter('all')}
             >
-              Todas
+              {t('notifications.all')}
             </button>
             <button
               className={`btn btn-sm ${filter === 'unread' ? 'btn-primary' : 'btn-outline-primary'}`}
               onClick={() => setFilter('unread')}
             >
-              Não Lidas
+              {t('notifications.unread')}
             </button>
           </div>
           
           {unreadCount > 0 && (
             <Button variant="outline-secondary" size="sm" onClick={handleMarkAllAsRead}>
               <i className="bi bi-check2-all me-1"></i>
-              Marcar Todas como Lidas
+              {t('notifications.markAllRead')}
             </Button>
           )}
         </div>
@@ -197,7 +197,7 @@ export default function Notifications() {
                             }}
                           >
                             <i className="bi bi-check2 me-1"></i>
-                            Marcar como lida
+                            {t('notifications.markRead')}
                           </Button>
                         )}
                         <Button 
@@ -210,7 +210,7 @@ export default function Notifications() {
                           }}
                         >
                           <i className="bi bi-trash me-1"></i>
-                          Excluir
+                          {t('common.delete')}
                         </Button>
                       </div>
                     </div>
@@ -242,7 +242,7 @@ export default function Notifications() {
                     onClick={() => fetchNotifications(pagination.page - 1)}
                     disabled={pagination.page === 1}
                   >
-                    Anterior
+                    {t('search.previous')}
                   </button>
                 </li>
                 
@@ -263,7 +263,7 @@ export default function Notifications() {
                     onClick={() => fetchNotifications(pagination.page + 1)}
                     disabled={pagination.page === pagination.pages}
                   >
-                    Próxima
+                    {t('search.next')}
                   </button>
                 </li>
               </ul>

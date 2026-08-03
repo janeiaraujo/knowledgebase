@@ -361,7 +361,12 @@
     "rejectError": "Failed to reject",
     "publishError": "Failed to publish",
     "deleteError": "Failed to delete",
-    "exportError": "Failed to export"
+    "exportError": "Failed to export",
+    "rejected": "KB Rejected",
+    "reason": "Reason:",
+    "awaitingApproval": "Awaiting Approval",
+    "pdfPrint": "PDF / Print",
+    "relatedKbs": "Related KBs"
   },
   "favorites": {
     "loadError": "Failed to load favorites",
@@ -374,7 +379,11 @@
     "title": "Notifications",
     "loadError": "Failed to load notifications",
     "empty": "You have no notifications yet",
-    "emptyUnread": "You have no unread notifications"
+    "emptyUnread": "You have no unread notifications",
+    "all": "All",
+    "unread": "Unread",
+    "markAllRead": "Mark All as Read",
+    "markRead": "Mark as read"
   },
   "settings": {
     "title": "Settings",
@@ -515,7 +524,9 @@
       "review_needed": "Review needed",
       "daily_digest": "Daily digest",
       "weekly_digest": "Weekly digest"
-    }
+    },
+    "howToWebhook": "How to create a webhook",
+    "createApiToken": "Create API Token"
   },
   "inbound": {
     "adminOnly": "Only owners/admins can manage event sources.",

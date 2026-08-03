@@ -182,7 +182,7 @@ export default function Integrations() {
                             />
                             <Form.Text className="text-muted">
                                 <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener noreferrer">
-                                    Como criar um webhook <FaExternalLinkAlt size={10} />
+                                    {t('integrations.howToWebhook')} <FaExternalLinkAlt size={10} />
                                 </a>
                             </Form.Text>
                         </Form.Group>
@@ -210,7 +210,7 @@ export default function Integrations() {
                         />
                         <Form.Text className="text-muted">
                             <a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook" target="_blank" rel="noopener noreferrer">
-                                Como criar um webhook <FaExternalLinkAlt size={10} />
+                                {t('integrations.howToWebhook')} <FaExternalLinkAlt size={10} />
                             </a>
                         </Form.Text>
                     </Form.Group>
@@ -299,7 +299,7 @@ export default function Integrations() {
                             />
                             <Form.Text className="text-muted">
                                 <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener noreferrer">
-                                    Criar API Token <FaExternalLinkAlt size={10} />
+                                    {t('integrations.createApiToken')} <FaExternalLinkAlt size={10} />
                                 </a>
                             </Form.Text>
                         </Form.Group>

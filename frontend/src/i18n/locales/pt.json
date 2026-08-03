@@ -361,7 +361,12 @@
     "rejectError": "Falha ao rejeitar",
     "publishError": "Falha ao publicar",
     "deleteError": "Falha ao excluir",
-    "exportError": "Falha ao exportar"
+    "exportError": "Falha ao exportar",
+    "rejected": "KB Rejeitado",
+    "reason": "Motivo:",
+    "awaitingApproval": "Aguardando Aprovação",
+    "pdfPrint": "PDF / Imprimir",
+    "relatedKbs": "KBs Relacionados"
   },
   "favorites": {
     "loadError": "Falha ao carregar favoritos",
@@ -374,7 +379,11 @@
     "title": "Notificações",
     "loadError": "Falha ao carregar notificações",
     "empty": "Você ainda não tem notificações",
-    "emptyUnread": "Você não tem notificações não lidas"
+    "emptyUnread": "Você não tem notificações não lidas",
+    "all": "Todas",
+    "unread": "Não Lidas",
+    "markAllRead": "Marcar Todas como Lidas",
+    "markRead": "Marcar como lida"
   },
   "settings": {
     "title": "Configurações",
@@ -515,7 +524,9 @@
       "review_needed": "Revisão necessária",
       "daily_digest": "Resumo diário",
       "weekly_digest": "Resumo semanal"
-    }
+    },
+    "howToWebhook": "Como criar um webhook",
+    "createApiToken": "Criar API Token"
   },
   "inbound": {
     "adminOnly": "Apenas owners/admins podem gerenciar fontes de eventos.",

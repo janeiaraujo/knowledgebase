@@ -182,23 +182,34 @@ describe('i18n', () => {
         ];
         const atributoLiteral = /(?:placeholder|title|label)\s*=\s*"([^"]*)"/gi;
 
-        // Valor tecnico e igual em qualquer idioma: URL, e-mail, host,
-        // ou qualquer coisa sem espaco (nao e frase).
-        const ehTecnico = (valor) =>
-            !/\s/.test(valor) || /^https?:\/\//.test(valor) || /@/.test(valor);
+        // Tokens tecnicos (URL, host, e-mail, caminho) sao iguais em
+        // qualquer idioma - e "datadoghq.com" contem "com", que casaria
+        // com a palavra portuguesa. Some com eles antes de avaliar.
+        const semTecnico = (valor) => valor.replace(/\S*[./@]\S*/g, ' ');
 
-        const parecePortugues = (valor) =>
-            /[áàâãéêíóôõúüç]/i.test(valor) ||
-            /\b(?:de|da|do|das|dos|para|com|não|você|uma|seu|sua|este|esta)\b/i.test(valor);
+        const ehTecnico = (valor) => !/\s/.test(valor) || !/[A-Za-zÀ-ÿ]{3}/.test(semTecnico(valor));
+
+        const parecePortugues = (valor) => {
+            const texto = semTecnico(valor);
+            return /[áàâãéêíóôõúüç]/i.test(texto) ||
+                /\b(?:de|da|do|das|dos|para|com|não|você|uma|seu|sua|este|esta)\b/i.test(texto);
+        };
+
+        // Texto solto entre tags JSX (>Aprovar<). Sem isso a varredura so
+        // olhava atributos, e frases no corpo da tela passavam batido.
+        const textoJsx = /(?<=>)([^<>{}\n]{4,80})(?=<)/g;
 
         const achados = [];
         for (const { file, code } of SOURCES) {
             if (!TRADUZIDAS.includes(file)) continue;
-            atributoLiteral.lastIndex = 0;
-            let match;
-            while ((match = atributoLiteral.exec(code)) !== null) {
-                const valor = match[1];
-                if (!ehTecnico(valor) && parecePortugues(valor)) achados.push(`${file}: ${match[0]}`);
+
+            for (const pattern of [atributoLiteral, textoJsx]) {
+                pattern.lastIndex = 0;
+                let match;
+                while ((match = pattern.exec(code)) !== null) {
+                    const valor = match[1].trim();
+                    if (!ehTecnico(valor) && parecePortugues(valor)) achados.push(`${file}: ${valor}`);
+                }
             }
         }
         assert.deepEqual(achados, [], 'Texto em portugues fixo numa tela ja traduzida - nao muda com o idioma.');
