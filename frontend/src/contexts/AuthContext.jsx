@@ -1,7 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import i18n from '../i18n';
 
 const AuthContext = createContext(null);
+
+// Aplica o idioma salvo no perfil do usuario (Perfil > Preferencias). Sem
+// isso, o i18next usaria so o localStorage local - a preferencia nao
+// acompanharia a conta em outro navegador/maquina.
+const applyUserLanguage = (user) => {
+  const language = user?.preferences?.language;
+  if (language && language !== i18n.language) {
+    i18n.changeLanguage(language);
+  }
+};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -29,6 +40,7 @@ export const AuthProvider = ({ children }) => {
         // Tenta validar o token atual
         const { data } = await authAPI.getMe();
         setUser(data.user);
+        applyUserLanguage(data.user);
         setIsAuthenticated(true);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -54,8 +66,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(data.user));
       
       setUser(data.user);
+      applyUserLanguage(data.user);
       setIsAuthenticated(true);
-      
+
       return data;
     } catch (error) {
       // Garante que não há dados corrompidos em caso de erro
@@ -73,15 +86,16 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(data.user));
       
       setUser(data.user);
+      applyUserLanguage(data.user);
       setIsAuthenticated(true);
-      
+
       return data;
     } catch (error) {
       logout();
       throw error;
     }
   };
-  
+
   const loginWithMagicLink = async (token) => {
     try {
       const { data } = await authAPI.verifyMagicLink({ token });
@@ -91,15 +105,16 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(data.user));
       
       setUser(data.user);
+      applyUserLanguage(data.user);
       setIsAuthenticated(true);
-      
+
       return data;
     } catch (error) {
       logout();
       throw error;
     }
   };
-  
+
   const logout = () => {
     // Limpa TODOS os dados de autenticação
     localStorage.removeItem('accessToken');
@@ -112,6 +127,9 @@ export const AuthProvider = ({ children }) => {
   
   const value = {
     user,
+    // Exposto para a tela de Perfil refletir nome/preferencias na hora,
+    // sem precisar recarregar a pagina.
+    setUser,
     loading,
     isAuthenticated,
     login,

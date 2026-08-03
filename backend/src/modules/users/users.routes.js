@@ -7,7 +7,131 @@ import Joi from 'joi';
 import { hashPassword } from '../auth/auth.service.js';
 import bcrypt from 'bcrypt';
 
+const SUPPORTED_LANGUAGES = ['pt', 'en'];
+const SUPPORTED_THEMES = ['light', 'dark', 'system'];
+
+const publicProfile = (user) => ({
+    _id: user._id,
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    active: user.active,
+    email_verified: user.email_verified,
+    created_at: user.created_at,
+    last_login: user.last_login,
+    preferences: {
+        language: user.preferences?.language || 'pt',
+        theme: user.preferences?.theme || 'system'
+    }
+});
+
 export default async function userRoutes(fastify, options) {
+
+    // ==================== PERFIL DO PROPRIO USUARIO ====================
+    // Auto-servico: qualquer usuario autenticado gerencia o proprio perfil.
+    // As rotas de /:userId abaixo exigem admin/owner e servem para gerenciar
+    // OUTROS usuarios - sem estas, um membro comum nao conseguia nem trocar
+    // a propria senha.
+    // Rotas estaticas ficam antes das parametricas para nao colidir com /:userId.
+
+    fastify.get('/me', {
+        preHandler: [authMiddleware, tenantMiddleware]
+    }, async(request, reply) => {
+        return { user: publicProfile(request.currentUser) };
+    });
+
+    fastify.patch('/me', {
+        preHandler: [authMiddleware, tenantMiddleware]
+    }, async(request, reply) => {
+        const db = fastify.db();
+        const { name, preferences } = request.body || {};
+
+        const updates = { updated_at: new Date() };
+
+        if (name !== undefined) {
+            const trimmed = String(name).trim();
+            if (!trimmed) {
+                return reply.status(400).send({ error: 'Nome não pode ficar vazio' });
+            }
+            updates.name = trimmed;
+        }
+
+        if (preferences) {
+            if (preferences.language !== undefined) {
+                if (!SUPPORTED_LANGUAGES.includes(preferences.language)) {
+                    return reply.status(400).send({
+                        error: `Idioma inválido. Use: ${SUPPORTED_LANGUAGES.join(', ')}`
+                    });
+                }
+                updates['preferences.language'] = preferences.language;
+            }
+            if (preferences.theme !== undefined) {
+                if (!SUPPORTED_THEMES.includes(preferences.theme)) {
+                    return reply.status(400).send({
+                        error: `Tema inválido. Use: ${SUPPORTED_THEMES.join(', ')}`
+                    });
+                }
+                updates['preferences.theme'] = preferences.theme;
+            }
+        }
+
+        await db.collection('users').updateOne(
+            { _id: request.currentUser._id, tenant_id: request.tenantId },
+            { $set: updates }
+        );
+
+        const updated = await db.collection('users').findOne({ _id: request.currentUser._id });
+        return { success: true, user: publicProfile(updated) };
+    });
+
+    // Troca da propria senha - exige a senha atual, diferente do PATCH
+    // /:userId (admin), que redefine sem conferir a anterior.
+    fastify.post('/me/password', {
+        preHandler: [authMiddleware, tenantMiddleware]
+    }, async(request, reply) => {
+        const db = fastify.db();
+        const { currentPassword, newPassword } = request.body || {};
+
+        if (!currentPassword || !newPassword) {
+            return reply.status(400).send({ error: 'Senha atual e nova senha são obrigatórias' });
+        }
+
+        if (String(newPassword).length < 8) {
+            return reply.status(400).send({ error: 'A nova senha deve ter no mínimo 8 caracteres' });
+        }
+
+        const user = await db.collection('users').findOne({ _id: request.currentUser._id });
+
+        if (!user?.password) {
+            return reply.status(400).send({
+                error: 'Esta conta não usa senha (login por magic link). Defina uma senha com o administrador.'
+            });
+        }
+
+        const matches = await bcrypt.compare(currentPassword, user.password);
+        if (!matches) {
+            return reply.status(400).send({ error: 'Senha atual incorreta' });
+        }
+
+        await db.collection('users').updateOne(
+            { _id: user._id },
+            { $set: { password: await bcrypt.hash(newPassword, 10), updated_at: new Date() } }
+        );
+
+        await db.collection('audit_logs').insertOne({
+            tenant_id: request.tenantId,
+            user_id: user._id,
+            action: 'user.password_changed',
+            resource: 'user',
+            resource_id: user._id,
+            timestamp: new Date()
+        });
+
+        return { success: true };
+    });
+
+    // ==================== GESTAO DE USUARIOS (admin/owner) ====================
 
     // List users in organization
     fastify.get('/', {

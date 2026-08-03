@@ -21,6 +21,7 @@ import IncidentList from './pages/incidents/IncidentList';
 import IncidentView from './pages/incidents/IncidentView';
 import EventList from './pages/events/EventList';
 import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import PropertyManager from './components/properties/PropertyManager';
 import Admin from './pages/Admin';
 import Notifications from './pages/Notifications';
@@ -148,6 +149,7 @@ function AppRoutes() {
         <Route path="gamification" element={<Gamification />} />
         <Route path="help" element={<HelpCenter />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
     </Routes>
   );

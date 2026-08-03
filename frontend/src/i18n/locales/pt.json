@@ -98,6 +98,36 @@
     "verificationFailed": "Falha na verificação",
     "backToLogin": "Voltar ao login"
   },
+  "profile": {
+    "title": "Meu Perfil",
+    "personalData": "Dados Pessoais",
+    "emailReadOnly": "O e-mail não pode ser alterado por aqui.",
+    "saveChanges": "Salvar alterações",
+    "saved": "Alterações salvas",
+    "saveError": "Não foi possível salvar. Tente novamente.",
+    "loadError": "Falha ao carregar o perfil",
+    "memberSince": "Membro desde",
+    "lastLogin": "Último acesso",
+    "preferences": "Preferências",
+    "language": "Idioma",
+    "languageHelp": "Define o idioma da interface. Fica salvo na sua conta e acompanha você em qualquer navegador.",
+    "theme": "Tema",
+    "themeHelp": "Escolha entre claro, escuro ou seguir a preferência do sistema.",
+    "security": "Segurança",
+    "currentPassword": "Senha atual",
+    "newPassword": "Nova senha",
+    "changePassword": "Alterar senha",
+    "passwordChanged": "Senha alterada com sucesso",
+    "languages": {
+      "pt": "Português",
+      "en": "Inglês"
+    },
+    "themes": {
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    }
+  },
   "dashboard": {
     "totalKbs": "Total de KBs",
     "pending": "Pendentes",
