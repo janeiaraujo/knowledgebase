@@ -341,7 +341,7 @@ export async function requestPasswordReset(db, { email }) {
     { $set: { used: true, invalidated_at: new Date() } }
   );
 
-  await db.collection('password_reset_tokens').insertOne({
+  const { insertedId } = await db.collection('password_reset_tokens').insertOne({
     user_id: user._id,
     tenant_id: user.tenant_id,
     token_hash: tokenHash,
@@ -349,6 +349,13 @@ export async function requestPasswordReset(db, { email }) {
     used: false,
     created_at: new Date()
   });
+
+  // Se houver concorrencia (dois pedidos quase ao mesmo tempo), garante que
+  // apenas o token mais recente fique valido.
+  await db.collection('password_reset_tokens').updateMany(
+    { user_id: user._id, used: false, _id: { $ne: insertedId } },
+    { $set: { used: true, invalidated_at: new Date() } }
+  );
 
   const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   await sendPasswordResetEmail(user.email, user.name, resetLink, PASSWORD_RESET_EXPIRES_MINUTES);
