@@ -309,6 +309,11 @@ export default async function userRoutes(fastify, options) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Idioma padrao da organizacao (Configuracoes > Geral). Quem entra
+        // ja encontra a interface no idioma do time, sem precisar trocar.
+        const org = await db.collection('organizations').findOne({ tenant_id: request.tenantId });
+        const defaultLanguage = org?.settings?.default_language || 'pt';
+
         // Create user
         const user = {
             tenant_id: request.tenantId,
@@ -318,6 +323,7 @@ export default async function userRoutes(fastify, options) {
             role,
             active: true,
             email_verified: true,
+            preferences: { language: defaultLanguage, theme: 'system' },
             created_by: request.currentUser._id,
             created_at: new Date(),
             updated_at: new Date()
