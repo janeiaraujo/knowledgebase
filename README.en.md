@@ -21,8 +21,58 @@
 
 ---
 
+## Screenshots
+
+<table>
+<tr>
+<td width="50%">
+
+**Quick Capture** — text, voice, logs and images; AI generates the article
+<img src="docs/screenshots/quick-capture.png" alt="Quick Capture screen, with problem, solution, logs and image upload fields">
+
+</td>
+<td width="50%">
+
+**Incidents** — full lifecycle: open → acknowledged → resolved
+<img src="docs/screenshots/incidents.png" alt="Incident list with severity, status and origin (manual or automatic)">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Knowledge Base** — article library with review workflow
+<img src="docs/screenshots/kb-list.png" alt="KB list with draft, in-review and published status">
+
+</td>
+<td width="50%">
+
+**KB article** — generated from an incident, ready for review
+<img src="docs/screenshots/kb-view.png" alt="A KB article in review">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Smart Search** — combines full-text, semantic search (AI) and problem analysis
+<img src="docs/screenshots/smart-search.png" alt="Smart search screen">
+
+</td>
+<td width="50%">
+
+**Post-mortem** — Google SRE, Netflix and AWS Well-Architected templates
+<img src="docs/screenshots/postmortem.png" alt="Post-mortem creation modal with templates">
+
+</td>
+</tr>
+</table>
+
+---
+
 ## Table of contents
 
+- [Screenshots](#screenshots)
 - [Key features](#key-features)
 - [Stack](#stack)
 - [Getting started](#getting-started)
