@@ -18,10 +18,13 @@ export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Detecta se veio de sessão expirada
+  // Detecta se veio de sessão expirada ou de uma redefinição de senha
   useEffect(() => {
     if (searchParams.get('session') === 'expired') {
       setError(t('auth.sessionExpired'));
+    }
+    if (searchParams.get('reset') === 'success') {
+      setSuccess(t('auth.reset.success'));
     }
   }, [searchParams, t]);
 
@@ -133,6 +136,14 @@ export default function Login() {
                     {useMagicLink ? t('auth.usePasswordInstead') : t('auth.useMagicLinkInstead')}
                   </Button>
                 </div>
+
+                {!useMagicLink && (
+                  <div className="text-center">
+                    <Link to="/forgot-password" className="text-decoration-none small text-muted">
+                      {t('auth.forgot.link')}
+                    </Link>
+                  </div>
+                )}
               </Form>
 
               <hr />

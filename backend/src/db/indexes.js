@@ -67,6 +67,15 @@ export async function createIndexes(db) {
     await db.collection('record_relations').createIndex({ tenant_id: 1, target_id: 1 });
     await db.collection('record_relations').createIndex({ tenant_id: 1, source_id: 1, target_id: 1, relation_type: 1 });
 
+    // Recuperacao de senha: busca pelo hash do token, e TTL para o Mongo
+    // limpar sozinho os tokens vencidos (nao ha rotina de expurgo no app).
+    await db.collection('password_reset_tokens').createIndex({ token_hash: 1 });
+    await db.collection('password_reset_tokens').createIndex({ user_id: 1, used: 1 });
+    await db.collection('password_reset_tokens').createIndex(
+        { expires_at: 1 },
+        { expireAfterSeconds: 0 }
+    );
+
     // Text search indexes
     await ensureRecordsTextIndex(db);
 }

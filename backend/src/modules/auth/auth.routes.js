@@ -187,6 +187,78 @@ export default async function authRoutes(fastify, options) {
     }
   });
   
+  // ==================== RECUPERACAO DE SENHA ====================
+
+  // Solicitar link de redefinicao.
+  // Responde sempre igual, exista o e-mail ou nao, para nao virar um
+  // verificador de contas cadastradas.
+  fastify.post('/forgot-password', authRateLimit(5, '15 minutes'), async (request, reply) => {
+    const genericResponse = {
+      success: true,
+      message: 'Se existir uma conta com esse e-mail, enviamos um link de redefinição.'
+    };
+
+    try {
+      const { email } = request.body || {};
+
+      if (!email) {
+        return reply.status(400).send({ error: 'E-mail é obrigatório' });
+      }
+
+      await authService.requestPasswordReset(fastify.db(), { email });
+      return genericResponse;
+
+    } catch (error) {
+      fastify.log.error(error);
+
+      // SMTP indisponivel precisa ser explicito: sem isso a pessoa fica
+      // esperando um e-mail que nunca vai chegar.
+      if (error.message === 'SMTP_NOT_CONFIGURED') {
+        return reply.status(503).send({
+          error: 'Serviço de e-mail não configurado. Peça ao administrador para redefinir sua senha.',
+          code: 'SMTP_NOT_CONFIGURED'
+        });
+      }
+
+      if (['ETIMEDOUT', 'ECONNREFUSED', 'ENOTFOUND'].includes(error.code)) {
+        return reply.status(503).send({
+          error: 'Falha ao conectar com o servidor de e-mail. Tente novamente mais tarde.',
+          code: 'SMTP_CONNECTION_ERROR'
+        });
+      }
+
+      // Qualquer outro erro nao pode vazar se a conta existe
+      return genericResponse;
+    }
+  });
+
+  // Concluir a redefinicao com o token recebido por e-mail
+  fastify.post('/reset-password', authRateLimit(10, '15 minutes'), async (request, reply) => {
+    try {
+      const { token, password } = request.body || {};
+
+      const user = await authService.resetPassword(fastify.db(), { token, password });
+
+      await fastify.db().collection('audit_logs').insertOne({
+        tenant_id: user.tenant_id,
+        user_id: user._id,
+        action: 'user.password_reset',
+        resource: 'user',
+        resource_id: user._id,
+        timestamp: new Date()
+      });
+
+      return {
+        success: true,
+        message: 'Senha redefinida com sucesso. Faça login com a nova senha.'
+      };
+
+    } catch (error) {
+      fastify.log.error(error);
+      return reply.status(400).send({ error: error.message || 'Falha ao redefinir a senha' });
+    }
+  });
+
   // Verify magic link token
   fastify.post('/magic-verify', authRateLimit(10, '15 minutes'), async (request, reply) => {
     try {

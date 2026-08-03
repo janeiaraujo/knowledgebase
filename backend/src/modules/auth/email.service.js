@@ -87,6 +87,58 @@ export async function sendMagicLinkEmail(to, name, magicLink) {
 }
 
 /**
+ * Send password reset email
+ */
+export async function sendPasswordResetEmail(to, name, resetLink, expiresInMinutes) {
+  const transporter = getTransporter();
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .button {
+          display: inline-block;
+          padding: 12px 24px;
+          background-color: #0066cc;
+          color: #ffffff;
+          text-decoration: none;
+          border-radius: 4px;
+          margin: 20px 0;
+        }
+        .footer { margin-top: 40px; font-size: 12px; color: #666; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h2>🔑 Redefinir sua senha</h2>
+        <p>Olá${name ? ' ' + name : ''},</p>
+        <p>Recebemos um pedido para redefinir a senha da sua conta no Incident KB. Clique no botão abaixo para escolher uma nova senha:</p>
+        <a href="${resetLink}" class="button">Redefinir senha</a>
+        <p>Ou copie e cole este link no navegador:</p>
+        <p style="word-break: break-all; color: #666;">${resetLink}</p>
+        <p><strong>Este link expira em ${expiresInMinutes} minutos e só pode ser usado uma vez.</strong></p>
+        <p>Se você não pediu isso, ignore este e-mail — sua senha atual continua valendo.</p>
+        <div class="footer">
+          <p>Incident Intelligence Platform<br>
+          Knowledge Base SaaS</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM,
+    to,
+    subject: '🔑 Redefinir sua senha - Incident KB',
+    html
+  });
+}
+
+/**
  * Send welcome email
  */
 export async function sendWelcomeEmail(to, name) {
