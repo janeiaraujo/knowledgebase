@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { incidentAPI } from '../../services/api';
 import { TagSelector, CategorySelector } from '../../components/tags/TagSelector';
 import VoiceRecorderButton from '../../components/VoiceRecorderButton';
@@ -7,11 +7,13 @@ import ImageAttachments from '../../components/ImageAttachments';
 
 const QuickCapture = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [loading, setLoading] = useState(false);
     const [recentCaptures, setRecentCaptures] = useState([]);
     const [loadingRecent, setLoadingRecent] = useState(true);
     const [attachmentsKey, setAttachmentsKey] = useState(0);
     const [images, setImages] = useState([]);
+    const [linkedIncidentTitle, setLinkedIncidentTitle] = useState(null);
 
     const [formData, setFormData] = useState({
         problem: '',
@@ -20,7 +22,8 @@ const QuickCapture = () => {
         severity: 'medium',
         affected_services: '',
         category_id: '',
-        tags: []
+        tags: [],
+        incident_id: null
     });
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
@@ -28,6 +31,25 @@ const QuickCapture = () => {
     useEffect(() => {
         loadRecentCaptures();
     }, []);
+
+    // Chegando a partir de "Criar KB a partir deste incidente" (ver
+    // IncidentView) - pre-preenche o problema/severidade/serviços.
+    useEffect(() => {
+        const prefill = location.state?.prefill;
+        if (!prefill) return;
+
+        setFormData(prev => ({
+            ...prev,
+            problem: prefill.problem || prev.problem,
+            severity: prefill.severity || prev.severity,
+            affected_services: prefill.affected_services || prev.affected_services,
+            incident_id: prefill.incident_id || null
+        }));
+        setLinkedIncidentTitle(prefill.incident_id ? 'Este KB será vinculado ao incidente de origem.' : null);
+
+        navigate(location.pathname, { replace: true, state: {} });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.state]);
 
     const loadRecentCaptures = async () => {
         try {
@@ -61,8 +83,10 @@ const QuickCapture = () => {
                 severity: 'medium',
                 affected_services: '',
                 category_id: '',
-                tags: []
+                tags: [],
+                incident_id: null
             });
+            setLinkedIncidentTitle(null);
             setImages([]);
             setAttachmentsKey(prev => prev + 1); // forca remount do ImageAttachments (limpa estado interno)
 
@@ -109,6 +133,12 @@ const QuickCapture = () => {
                         </div>
                         
                         <div className="card-body">
+                            {linkedIncidentTitle && (
+                                <div className="alert alert-info d-flex align-items-center mb-4">
+                                    <i className="bi bi-link-45deg me-2"></i>
+                                    <div className="flex-grow-1 small">{linkedIncidentTitle}</div>
+                                </div>
+                            )}
                             {/* Success Result */}
                             {result && (
                                 <div className="alert alert-success d-flex align-items-start mb-4">

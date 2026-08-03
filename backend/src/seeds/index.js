@@ -293,10 +293,14 @@ async function processImage(buffer) {
     await db.collection('api_tokens').insertOne({
       tenant_id: tenantId,
       token: apiToken,
-      name: 'Event Ingestion Token',
+      label: 'Token de demonstração',
+      source: 'custom',
       active: true,
+      auto_create_incident: false,
+      auto_create_severity_threshold: 'high',
       created_by: userResult.insertedId,
-      created_at: new Date()
+      created_at: new Date(),
+      last_used_at: null
     });
     console.log('✅ API token created:', apiToken);
     console.log('   Use this token for event ingestion (header: x-api-token)');

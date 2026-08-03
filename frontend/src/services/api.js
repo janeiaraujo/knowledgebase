@@ -165,6 +165,7 @@ export const incidentAPI = {
     create: (data) => api.post('/incidents', data),
     get: (id) => api.get(`/incidents/${id}`),
     update: (id, data) => api.patch(`/incidents/${id}`, data),
+    updateStatus: (id, status, note) => api.patch(`/incidents/${id}/status`, { status, note }),
     addNote: (id, note) => api.post(`/incidents/${id}/notes`, { note }),
     // Quick Capture
     quickCapture: (data) => api.post('/incidents/quick-capture', data),
@@ -174,7 +175,11 @@ export const incidentAPI = {
 // Events API
 export const eventAPI = {
     list: (params) => api.get('/events', { params }),
-    convertToIncident: (id) => api.post(`/events/${id}/convert-to-incident`)
+    convertToIncident: (id) => api.post(`/events/${id}/convert-to-incident`),
+    // Fontes de eventos (tokens de ingestão - Zabbix, Grafana, Datadog, Sentry...)
+    listTokens: () => api.get('/events/tokens'),
+    createToken: (data) => api.post('/events/tokens', data),
+    revokeToken: (id) => api.delete(`/events/tokens/${id}`)
 };
 
 // Files API

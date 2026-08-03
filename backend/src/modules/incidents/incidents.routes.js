@@ -22,7 +22,7 @@ export default async function incidentRoutes(fastify, options) {
         preHandler: [authMiddleware, tenantMiddleware, requirePermission('kb:create')]
     }, async (request, reply) => {
         const db = fastify.db();
-        const { problem, solution, severity, affected_services, tags, category_id, logs, images } = request.body;
+        const { problem, solution, severity, affected_services, tags, category_id, logs, images, incident_id } = request.body;
 
         if (!problem || !solution) {
             return reply.status(400).send({
@@ -37,6 +37,9 @@ export default async function incidentRoutes(fastify, options) {
         const cleanImages = Array.isArray(images)
             ? images.filter(img => img && typeof img.url === 'string').slice(0, 10)
             : [];
+        // Quando a Captura Rapida e aberta a partir de um incidente resolvido
+        // (ver PATCH /incidents/:id/status), liga o KB gerado de volta a ele.
+        const linkedIncidentId = incident_id ? toObjectId(incident_id) : null;
 
         try {
             // Check if OpenAI is configured
@@ -192,6 +195,7 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
                 updated_at: new Date(),
                 deleted_at: null,
                 category_id: category_id ? new ObjectId(category_id) : null,
+                incident_id: linkedIncidentId,
                 properties: {
                     summary: generatedSummary,
                     severity: severity || 'medium',
@@ -210,6 +214,24 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
 
             const result = await db.collection('records').insertOne(newRecord);
             newRecord._id = result.insertedId;
+
+            if (linkedIncidentId) {
+                await db.collection('incidents').updateOne(
+                    { _id: linkedIncidentId, tenant_id: request.tenantId },
+                    {
+                        $push: {
+                            related_kb_ids: result.insertedId,
+                            timeline: {
+                                action: 'kb_created',
+                                user_id: request.currentUser._id,
+                                timestamp: new Date(),
+                                note: 'KB gerado a partir deste incidente via Captura Rápida'
+                            }
+                        },
+                        $set: { updated_at: new Date() }
+                    }
+                );
+            }
 
             // Log the capture
             await db.collection('audit_logs').insertOne({
@@ -309,27 +331,36 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
     const db = fastify.db();
     const { title, description, severity, affected_services } = request.body;
     
+    if (!title) {
+      return reply.status(400).send({ error: 'Título é obrigatório' });
+    }
+
     const incident = {
       tenant_id: request.tenantId,
       title,
-      description,
+      description: description || '',
       severity: severity || 'medium',
       affected_services: affected_services || [],
       status: 'open',
       created_by: request.currentUser._id,
+      created_via: 'manual',
       created_at: new Date(),
       updated_at: new Date(),
+      acknowledged_at: null,
+      acknowledged_by: null,
       resolved_at: null,
+      related_kb_ids: [],
       timeline: [{
         action: 'created',
         user_id: request.currentUser._id,
         timestamp: new Date(),
-        note: 'Incident created'
+        note: 'Incidente criado'
       }]
     };
-    
+
     const result = await db.collection('incidents').insertOne(incident);
-    
+    incident._id = result.insertedId;
+
     // Audit log
     await db.collection('audit_logs').insertOne({
       tenant_id: request.tenantId,
@@ -339,8 +370,8 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
       resource_id: result.insertedId,
       timestamp: new Date()
     });
-    
-    return { success: true, incidentId: result.insertedId };
+
+    return reply.status(201).send({ success: true, incidentId: result.insertedId, incident });
   });
   
   // Get incident
@@ -375,19 +406,21 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
     return { incident, relatedKBs };
   });
   
-  // Update incident
+  // Update incident (campos gerais - titulo, descricao, servicos afetados...)
+  // Mudanca de status NAO passa por aqui: usa PATCH /:incidentId/status, que
+  // valida a transicao. `status` no corpo desta rota e ignorado de proposito.
   fastify.patch('/:incidentId', {
     preHandler: [authMiddleware, tenantMiddleware, requirePermission('incident:edit')]
   }, async (request, reply) => {
     const db = fastify.db();
     const { incidentId } = request.params;
     const objectId = toObjectId(incidentId);
-    const { note, ...updates } = request.body;
-    
+    const { note, status, ...updates } = request.body;
+
     if (!objectId) {
       return reply.status(400).send({ error: 'Invalid incident ID' });
     }
-    
+
     const timelineEntry = {
       action: 'updated',
       user_id: request.currentUser._id,
@@ -395,22 +428,121 @@ ${affected_services ? `## Serviços Afetados\n${affected_services}\n` : ''}
       note: note || 'Incident updated',
       changes: updates
     };
-    
+
     await db.collection('incidents').updateOne(
       { _id: objectId, tenant_id: request.tenantId },
-      { 
-        $set: { 
-          ...updates, 
-          updated_at: new Date(),
-          ...(updates.status === 'resolved' && { resolved_at: new Date() })
+      {
+        $set: {
+          ...updates,
+          updated_at: new Date()
         },
         $push: { timeline: timelineEntry }
       }
     );
-    
+
     return { success: true };
   });
-  
+
+  // Transicoes de status do incidente, seguindo o modelo de lifecycle mais
+  // comum em ferramentas de on-call (PagerDuty/Opsgenie): aberto (triggered)
+  // -> reconhecido (acknowledged, "pausa" a notificacao enquanto alguem
+  // trabalha nele) -> resolvido. Reabertura e permitida a partir de
+  // reconhecido ou resolvido.
+  const INCIDENT_TRANSITIONS = {
+    open: ['acknowledged', 'resolved'],
+    acknowledged: ['open', 'resolved'],
+    resolved: ['open']
+  };
+
+  const STATUS_NOTES = {
+    open: 'Incidente reaberto',
+    acknowledged: 'Incidente reconhecido - notificações pausadas enquanto está em tratamento',
+    resolved: 'Incidente resolvido'
+  };
+
+  fastify.patch('/:incidentId/status', {
+    preHandler: [authMiddleware, tenantMiddleware, requirePermission('incident:edit')]
+  }, async (request, reply) => {
+    const db = fastify.db();
+    const objectId = toObjectId(request.params.incidentId);
+    if (!objectId) {
+      return reply.status(400).send({ error: 'Invalid incident ID' });
+    }
+
+    const { status: nextStatus, note } = request.body || {};
+    if (!nextStatus || !(nextStatus in INCIDENT_TRANSITIONS)) {
+      return reply.status(400).send({ error: 'status deve ser "open", "acknowledged" ou "resolved"' });
+    }
+
+    const incident = await db.collection('incidents').findOne({
+      _id: objectId,
+      tenant_id: request.tenantId
+    });
+
+    if (!incident) {
+      return reply.status(404).send({ error: 'Incident not found' });
+    }
+
+    const allowedNext = INCIDENT_TRANSITIONS[incident.status] || [];
+    if (incident.status === nextStatus) {
+      return reply.status(400).send({ error: `Incidente já está em "${nextStatus}"` });
+    }
+    if (!allowedNext.includes(nextStatus)) {
+      return reply.status(400).send({
+        error: `Transição inválida de "${incident.status}" para "${nextStatus}"`,
+        allowed: allowedNext
+      });
+    }
+
+    const update = { status: nextStatus, updated_at: new Date() };
+
+    if (nextStatus === 'acknowledged') {
+      update.acknowledged_at = new Date();
+      update.acknowledged_by = request.currentUser._id;
+    }
+    if (nextStatus === 'resolved') {
+      update.resolved_at = new Date();
+    }
+    if (nextStatus === 'open') {
+      // Reabertura: limpa marcas de reconhecimento/resolucao anteriores
+      update.acknowledged_at = null;
+      update.acknowledged_by = null;
+      update.resolved_at = null;
+    }
+
+    const timelineEntry = {
+      action: `status_${nextStatus}`,
+      user_id: request.currentUser._id,
+      timestamp: new Date(),
+      note: note || STATUS_NOTES[nextStatus]
+    };
+
+    await db.collection('incidents').updateOne(
+      { _id: objectId, tenant_id: request.tenantId },
+      { $set: update, $push: { timeline: timelineEntry } }
+    );
+
+    await db.collection('audit_logs').insertOne({
+      tenant_id: request.tenantId,
+      user_id: request.currentUser._id,
+      action: `incident.${nextStatus}`,
+      resource: 'incident',
+      resource_id: objectId,
+      timestamp: new Date()
+    });
+
+    // "Prompt, nao force": ao resolver, sugere criar KB sempre, e sugere
+    // postmortem quando a severidade justifica - a pessoa decide se cria.
+    return {
+      success: true,
+      status: nextStatus,
+      suggestions: nextStatus === 'resolved' ? {
+        kb: true,
+        postmortem: ['critical', 'high'].includes(incident.severity)
+      } : null
+    };
+  });
+
   // Add note to incident
   fastify.post('/:incidentId/notes', {
     preHandler: [authMiddleware, tenantMiddleware]
