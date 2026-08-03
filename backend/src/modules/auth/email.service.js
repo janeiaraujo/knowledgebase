@@ -114,7 +114,7 @@ export async function sendPasswordResetEmail(to, name, resetLink, expiresInMinut
     <body>
       <div class="container">
         <h2>🔑 Redefinir sua senha</h2>
-        <p>Olá ${name || ''},</p>
+        <p>Olá${name ? ' ' + name : ''},</p>
         <p>Recebemos um pedido para redefinir a senha da sua conta no Incident KB. Clique no botão abaixo para escolher uma nova senha:</p>
         <a href="${resetLink}" class="button">Redefinir senha</a>
         <p>Ou copie e cole este link no navegador:</p>
