@@ -378,6 +378,15 @@ export async function resetPassword(db, { token, password }) {
     throw new Error('Link inválido ou expirado. Solicite um novo.');
   }
 
+  const claim = await db.collection('password_reset_tokens').updateOne(
+    { _id: record._id, used: false },
+    { $set: { used: true, used_at: new Date() } }
+  );
+
+  if (claim.modifiedCount !== 1) {
+    throw new Error('Link inválido ou expirado. Solicite um novo.');
+  }
+
   const user = await db.collection('users').findOne({ _id: record.user_id });
   if (!user || !user.active) {
     throw new Error('Link inválido ou expirado. Solicite um novo.');
@@ -391,11 +400,6 @@ export async function resetPassword(db, { token, password }) {
       // ate bloquear nao pode ficar preso esperando o tempo passar.
       $unset: { failed_login_attempts: '', locked_until: '' }
     }
-  );
-
-  await db.collection('password_reset_tokens').updateOne(
-    { _id: record._id },
-    { $set: { used: true, used_at: new Date() } }
   );
 
   return user;
