@@ -178,7 +178,7 @@ export default function Sidebar({ isOpen, onClose }) {
           {!isCollapsed && (
             <div className="sidebar-brand-text">
               <span className="sidebar-brand-name">Incident KB</span>
-              <span className="sidebar-brand-version">v2.0</span>
+              <span className="sidebar-brand-version">v{__APP_VERSION__}</span>
             </div>
           )}
           <button 
