@@ -13,70 +13,72 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
-// Menu configuration with groups
-const getMenuConfig = (user) => [
+// Menu configuration with groups. `t` vem do i18next - a config em si
+// (paths, icones, roles) e fixa, so os labels mudam por idioma.
+const getMenuConfig = (user, t) => [
   {
     id: 'main',
-    label: 'Principal',
+    label: t('nav.groups.main'),
     icon: 'bi-house',
     items: [
-      { path: '/', label: 'Dashboard', icon: 'bi-speedometer2', exact: true },
-      { path: '/kb', label: 'Knowledge Base', icon: 'bi-book' },
-      { path: '/incidents', label: 'Incidentes', icon: 'bi-exclamation-triangle' },
-      { path: '/events', label: 'Eventos', icon: 'bi-calendar-event' },
+      { path: '/', label: t('nav.items.dashboard'), icon: 'bi-speedometer2', exact: true },
+      { path: '/kb', label: t('nav.items.kb'), icon: 'bi-book' },
+      { path: '/incidents', label: t('nav.items.incidents'), icon: 'bi-exclamation-triangle' },
+      { path: '/events', label: t('nav.items.events'), icon: 'bi-calendar-event' },
     ]
   },
   {
     id: 'search',
-    label: 'Busca & Análise',
+    label: t('nav.groups.search'),
     icon: 'bi-search',
     items: [
-      { path: '/smart-search', label: 'Busca Inteligente', icon: 'bi-robot', badge: 'AI' },
-      { path: '/search', label: 'Busca Avançada', icon: 'bi-search' },
-      { path: '/analytics', label: 'Analytics', icon: 'bi-graph-up' },
-      { path: '/gamification', label: 'Gamificação', icon: 'bi-trophy', badge: 'NEW' },
+      { path: '/smart-search', label: t('nav.items.smartSearch'), icon: 'bi-robot', badge: 'AI' },
+      { path: '/search', label: t('nav.items.search'), icon: 'bi-search' },
+      { path: '/analytics', label: t('nav.items.analytics'), icon: 'bi-graph-up' },
+      { path: '/gamification', label: t('nav.items.gamification'), icon: 'bi-trophy', badge: 'NEW' },
     ]
   },
   {
     id: 'tools',
-    label: 'Ferramentas',
+    label: t('nav.groups.tools'),
     icon: 'bi-tools',
     items: [
-      { path: '/quick-capture', label: 'Captura Rápida', icon: 'bi-lightning-charge' },
-      { path: '/gps', label: 'Diagnóstico GPS', icon: 'bi-signpost-2', exact: true },
-      { path: '/gps/sessions', label: 'Sessões GPS', icon: 'bi-clock-history' },
-      { path: '/postmortem', label: 'Post-Mortem', icon: 'bi-file-earmark-medical' },
-      { path: '/reports', label: 'Relatórios', icon: 'bi-file-earmark-bar-graph', badge: 'NEW' },
-      { path: '/integrations', label: 'Integrações', icon: 'bi-plug' },
+      { path: '/quick-capture', label: t('nav.items.quickCapture'), icon: 'bi-lightning-charge' },
+      { path: '/gps', label: t('nav.items.gpsDiagnostic'), icon: 'bi-signpost-2', exact: true },
+      { path: '/gps/sessions', label: t('nav.items.gpsSessions'), icon: 'bi-clock-history' },
+      { path: '/postmortem', label: t('nav.items.postmortem'), icon: 'bi-file-earmark-medical' },
+      { path: '/reports', label: t('nav.items.reports'), icon: 'bi-file-earmark-bar-graph', badge: 'NEW' },
+      { path: '/integrations', label: t('nav.items.integrations'), icon: 'bi-plug' },
     ]
   },
   {
     id: 'content',
-    label: 'Conteúdo',
+    label: t('nav.groups.content'),
     icon: 'bi-folder',
     items: [
-      { path: '/favorites', label: 'Favoritos', icon: 'bi-star' },
-      { path: '/templates', label: 'Templates', icon: 'bi-file-earmark-text' },
-      { path: '/tags', label: 'Tags & Categorias', icon: 'bi-tags' },
-      { path: '/properties', label: 'Propriedades', icon: 'bi-sliders' },
-      { path: '/reviews', label: 'Revisões', icon: 'bi-calendar-check' },
-      { path: '/import', label: 'Importar', icon: 'bi-cloud-upload' },
-      { path: '/help', label: 'Central de Ajuda', icon: 'bi-question-circle' },
+      { path: '/favorites', label: t('nav.items.favorites'), icon: 'bi-star' },
+      { path: '/templates', label: t('nav.items.templates'), icon: 'bi-file-earmark-text' },
+      { path: '/tags', label: t('nav.items.tags'), icon: 'bi-tags' },
+      { path: '/properties', label: t('nav.items.properties'), icon: 'bi-sliders' },
+      { path: '/reviews', label: t('nav.items.reviews'), icon: 'bi-calendar-check' },
+      { path: '/import', label: t('nav.items.import'), icon: 'bi-cloud-upload' },
+      { path: '/help', label: t('nav.items.help'), icon: 'bi-question-circle' },
     ]
   },
   {
     id: 'admin',
-    label: 'Administração',
+    label: t('nav.groups.admin'),
     icon: 'bi-shield-lock',
     roles: ['admin', 'owner'],
     items: [
-      { path: '/admin', label: 'Painel Admin', icon: 'bi-gear-fill' },
-      { path: '/kb-requests', label: 'Solicitações KB', icon: 'bi-inbox' },
-      { path: '/audit-logs', label: 'Audit Logs', icon: 'bi-journal-text' },
-      { path: '/webhooks', label: 'Webhooks', icon: 'bi-link-45deg' },
-      { path: '/user-activity', label: 'Atividade', icon: 'bi-activity' },
+      { path: '/admin', label: t('nav.items.adminPanel'), icon: 'bi-gear-fill' },
+      { path: '/kb-requests', label: t('nav.items.kbRequests'), icon: 'bi-inbox' },
+      { path: '/audit-logs', label: t('nav.items.auditLogs'), icon: 'bi-journal-text' },
+      { path: '/webhooks', label: t('nav.items.webhooks'), icon: 'bi-link-45deg' },
+      { path: '/user-activity', label: t('nav.items.userActivity'), icon: 'bi-activity' },
     ]
   },
 ];
@@ -85,16 +87,17 @@ const getMenuConfig = (user) => [
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const [expandedGroups, setExpandedGroups] = useState(['main', 'search']);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Filter menu based on user role
   const menuConfig = useMemo(() => {
-    return getMenuConfig(user).filter(group => {
+    return getMenuConfig(user, t).filter(group => {
       if (!group.roles) return true;
       return group.roles.includes(user?.role);
     });
-  }, [user]);
+  }, [user, t]);
 
   // Auto-expand group containing active route
   useEffect(() => {
@@ -184,7 +187,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <button 
             className="sidebar-collapse-btn d-none d-md-flex"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            title={isCollapsed ? 'Expandir menu' : 'Recolher menu'}
+            title={isCollapsed ? t('nav.expandMenu') : t('nav.collapseMenu')}
           >
             <i className={`bi bi-chevron-${isCollapsed ? 'right' : 'left'}`}></i>
           </button>
@@ -229,7 +232,7 @@ export default function Sidebar({ isOpen, onClose }) {
             </div>
             {!isCollapsed && (
               <div className="sidebar-user-info">
-                <span className="sidebar-user-name">{user?.name || 'Usuário'}</span>
+                <span className="sidebar-user-name">{user?.name || t('nav.user')}</span>
                 <span className="sidebar-user-role">
                   <i className="bi bi-shield-check me-1"></i>
                   {user?.role || 'user'}
@@ -241,7 +244,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <button 
             className="sidebar-logout-btn"
             onClick={logout}
-            title="Sair"
+            title={t('nav.logout')}
           >
             <i className="bi bi-box-arrow-right"></i>
           </button>

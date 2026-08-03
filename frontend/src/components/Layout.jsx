@@ -11,17 +11,20 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Container, Nav, Navbar, Button, Dropdown } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import QuickSearch from './QuickSearch';
 import NotificationDropdown from './notifications/NotificationDropdown';
+import LanguageSwitcher from './LanguageSwitcher';
 import Sidebar from './Sidebar';
 import './Sidebar.css';
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -48,40 +51,40 @@ export default function Layout() {
   // Get page title based on current route
   const getPageTitle = () => {
     const routes = {
-      '/': 'Dashboard',
-      '/kb': 'Knowledge Base',
-      '/incidents': 'Incidentes',
-      '/events': 'Eventos',
-      '/smart-search': 'Busca Inteligente',
-      '/search': 'Busca Avançada',
-      '/analytics': 'Analytics',
-      '/quick-capture': 'Captura Rápida',
-      '/gps': 'Diagnóstico GPS',
-      '/postmortem': 'Post-Mortem',
-      '/favorites': 'Favoritos',
-      '/templates': 'Templates',
-      '/tags': 'Tags & Categorias',
-      '/properties': 'Propriedades',
-      '/reviews': 'Revisões',
-      '/import': 'Importar',
-      '/admin': 'Administração',
-      '/kb-requests': 'Solicitações KB',
-      '/audit-logs': 'Audit Logs',
-      '/webhooks': 'Webhooks',
-      '/user-activity': 'Atividade de Usuários',
-      '/settings': 'Configurações',
+      '/': t('nav.items.dashboard'),
+      '/kb': t('nav.items.kb'),
+      '/incidents': t('nav.items.incidents'),
+      '/events': t('nav.items.events'),
+      '/smart-search': t('nav.items.smartSearch'),
+      '/search': t('nav.items.search'),
+      '/analytics': t('nav.items.analytics'),
+      '/quick-capture': t('nav.items.quickCapture'),
+      '/gps': t('nav.items.gpsDiagnostic'),
+      '/postmortem': t('nav.items.postmortem'),
+      '/favorites': t('nav.items.favorites'),
+      '/templates': t('nav.items.templates'),
+      '/tags': t('nav.items.tags'),
+      '/properties': t('nav.items.properties'),
+      '/reviews': t('nav.items.reviews'),
+      '/import': t('nav.items.import'),
+      '/admin': t('nav.groups.admin'),
+      '/kb-requests': t('nav.items.kbRequests'),
+      '/audit-logs': t('nav.items.auditLogs'),
+      '/webhooks': t('nav.items.webhooks'),
+      '/user-activity': t('navbar.userActivity'),
+      '/settings': t('navbar.settings'),
     };
-    
+
     // Check exact match first
     if (routes[location.pathname]) return routes[location.pathname];
-    
+
     // Check partial matches
     for (const [path, title] of Object.entries(routes)) {
       if (location.pathname.startsWith(path) && path !== '/') {
         return title;
       }
     }
-    
+
     return 'Incident KB';
   };
   
@@ -126,26 +129,29 @@ export default function Layout() {
             </div>
             
             <Nav className="align-items-center gap-2">
+              {/* Language Switcher */}
+              <LanguageSwitcher />
+
               {/* Theme Toggle */}
-              <button 
-                onClick={toggleTheme} 
+              <button
+                onClick={toggleTheme}
                 className="btn btn-link nav-link p-2 border-0"
-                title={isDark ? 'Tema claro' : 'Tema escuro'}
+                title={isDark ? t('navbar.lightTheme') : t('navbar.darkTheme')}
               >
                 <i className={`bi ${isDark ? 'bi-sun-fill text-warning' : 'bi-moon-fill'} fs-5`}></i>
               </button>
-              
+
               {/* Notifications */}
               <NotificationDropdown />
-              
+
               {/* Quick Capture Button */}
               <Link
                 to="/quick-capture"
                 className="btn btn-outline-primary d-none d-sm-inline-flex align-items-center gap-1"
-                title="Captura Rápida"
+                title={t('nav.items.quickCapture')}
               >
                 <i className="bi bi-lightning-charge"></i>
-                <span className="d-none d-md-inline">Captura Rápida</span>
+                <span className="d-none d-md-inline">{t('nav.items.quickCapture')}</span>
               </Link>
 
               {/* New KB Button */}
@@ -154,9 +160,9 @@ export default function Layout() {
                 className="btn btn-primary d-none d-sm-inline-flex align-items-center gap-1"
               >
                 <i className="bi bi-plus-lg"></i>
-                <span className="d-none d-md-inline">Novo KB</span>
+                <span className="d-none d-md-inline">{t('navbar.newKb')}</span>
               </Link>
-              
+
               {/* Quick Actions Dropdown - Mobile */}
               <Dropdown align="end" className="d-sm-none">
                 <Dropdown.Toggle variant="primary" size="sm" id="quick-actions">
@@ -165,20 +171,20 @@ export default function Layout() {
                 <Dropdown.Menu>
                   <Dropdown.Item as={Link} to="/kb/new">
                     <i className="bi bi-file-earmark-plus me-2"></i>
-                    Novo KB
+                    {t('navbar.newKb')}
                   </Dropdown.Item>
                   <Dropdown.Item as={Link} to="/quick-capture">
                     <i className="bi bi-lightning-charge me-2"></i>
-                    Captura Rápida
+                    {t('nav.items.quickCapture')}
                   </Dropdown.Item>
                   <Dropdown.Item as={Link} to="/smart-search">
                     <i className="bi bi-robot me-2"></i>
-                    Busca Inteligente
+                    {t('nav.items.smartSearch')}
                   </Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Item as={Link} to="/gps">
                     <i className="bi bi-signpost-2 me-2"></i>
-                    Diagnóstico GPS
+                    {t('nav.items.gpsDiagnostic')}
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
@@ -198,7 +204,7 @@ export default function Layout() {
       <button 
         className="sidebar-mobile-toggle"
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        title="Menu"
+        title={t('navbar.menu')}
       >
         <i className={`bi bi-${sidebarOpen ? 'x-lg' : 'list'}`}></i>
       </button>

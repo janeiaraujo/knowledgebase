@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, ListGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { kbAPI } from '../services/api';
 
 export default function QuickSearch() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -71,7 +73,7 @@ export default function QuickSearch() {
     <div className="quick-search" ref={searchRef} style={{ position: 'relative', width: '400px' }}>
       <Form.Control
         type="search"
-        placeholder="Quick search KBs... (⌘K)"
+        placeholder={t('navbar.quickSearchPlaceholder')}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="me-2"
@@ -82,7 +84,7 @@ export default function QuickSearch() {
           {loading ? (
             <div className="text-center p-3">
               <div className="spinner-border spinner-border-sm" role="status">
-                <span className="visually-hidden">Searching...</span>
+                <span className="visually-hidden">{t('navbar.searching')}</span>
               </div>
             </div>
           ) : results.length > 0 ? (
@@ -98,7 +100,7 @@ export default function QuickSearch() {
                     <div className="flex-grow-1">
                       <h6 className="mb-1">{result.title}</h6>
                       <small className="text-muted">
-                        {result.properties?.category || 'Uncategorized'}
+                        {result.properties?.category || t('navbar.uncategorized')}
                       </small>
                     </div>
                     <span className={`badge bg-${getStatusBadge(result.status)} status-badge`}>
@@ -110,7 +112,7 @@ export default function QuickSearch() {
             </ListGroup>
           ) : (
             <div className="p-3 text-center text-muted">
-              No results found
+              {t('navbar.noResultsFound')}
             </div>
           )}
         </div>
