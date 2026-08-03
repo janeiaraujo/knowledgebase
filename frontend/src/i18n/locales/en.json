@@ -3,7 +3,8 @@
     "loading": "Loading...",
     "total": "Total",
     "viewAll": "View All",
-    "andMore": "and more..."
+    "andMore": "and more...",
+    "cancel": "Cancel"
   },
   "nav": {
     "expandMenu": "Expand menu",
@@ -126,6 +127,18 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System"
+    },
+    "avatar": {
+      "change": "Change photo",
+      "remove": "Remove",
+      "removed": "Photo removed",
+      "updated": "Profile photo updated",
+      "cropTitle": "Adjust photo",
+      "cropHelp": "Drag to reposition and use the slider above to zoom. The image is saved as a 512px square.",
+      "zoom": "Zoom",
+      "save": "Save photo",
+      "invalidFormat": "Invalid format. Please upload an image (JPEG, PNG or WebP).",
+      "tooLarge": "Image is too large. The limit is 8MB."
     }
   },
   "dashboard": {

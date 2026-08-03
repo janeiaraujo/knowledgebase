@@ -6,9 +6,25 @@ import { requireRole } from '../../middlewares/rbac.middleware.js';
 import Joi from 'joi';
 import { hashPassword } from '../auth/auth.service.js';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import {
+    storeFileWithRedundancy,
+    deleteLocalCopy,
+    deleteFromR2,
+    hasR2Config
+} from '../../utils/storage.js';
 
 const SUPPORTED_LANGUAGES = ['pt', 'en'];
 const SUPPORTED_THEMES = ['light', 'dark', 'system'];
+
+// Tipos aceitos no avatar. O arquivo ja chega recortado do frontend, entao
+// 2MB e folgado para um quadrado de 512px.
+const AVATAR_MIME_TYPES = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp'
+};
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 
 const publicProfile = (user) => ({
     _id: user._id,
@@ -20,6 +36,9 @@ const publicProfile = (user) => ({
     email_verified: user.email_verified,
     created_at: user.created_at,
     last_login: user.last_login,
+    avatar_url: user.avatar?.url || null,
+    // URL da copia local, usada pelo frontend como fallback se a do R2 falhar
+    avatar_fallback_url: user.avatar?.local_url || null,
     preferences: {
         language: user.preferences?.language || 'pt',
         theme: user.preferences?.theme || 'system'
@@ -130,6 +149,128 @@ export default async function userRoutes(fastify, options) {
 
         return { success: true };
     });
+
+    // Foto de perfil. A imagem ja chega recortada (quadrada) do frontend -
+    // aqui so validamos, gravamos com redundancia (local + R2) e trocamos a
+    // anterior.
+    fastify.post('/me/avatar', {
+        preHandler: [authMiddleware, tenantMiddleware]
+    }, async(request, reply) => {
+        const db = fastify.db();
+
+        try {
+            const data = await request.file();
+            if (!data) {
+                return reply.status(400).send({ error: 'Nenhuma imagem enviada' });
+            }
+
+            const extension = AVATAR_MIME_TYPES[data.mimetype];
+            if (!extension) {
+                return reply.status(400).send({
+                    error: 'Formato inválido. Use JPEG, PNG ou WebP.'
+                });
+            }
+
+            const chunks = [];
+            let total = 0;
+            for await (const chunk of data.file) {
+                total += chunk.length;
+                if (total > MAX_AVATAR_BYTES) {
+                    return reply.status(413).send({ error: 'Imagem muito grande (máx. 2MB)' });
+                }
+                chunks.push(chunk);
+            }
+            const buffer = Buffer.concat(chunks);
+
+            if (buffer.length === 0) {
+                return reply.status(400).send({ error: 'Imagem vazia' });
+            }
+
+            const tenantIdStr = request.tenantId.toString();
+            const fileName = `avatar-${request.currentUser._id}-${crypto.randomBytes(8).toString('hex')}.${extension}`;
+
+            const stored = await storeFileWithRedundancy({
+                tenantId: tenantIdStr,
+                fileName,
+                buffer,
+                contentType: data.mimetype,
+                metadata: {
+                    tenant_id: tenantIdStr,
+                    user_id: request.currentUser._id.toString(),
+                    kind: 'avatar'
+                },
+                logger: fastify.log
+            });
+
+            const previous = request.currentUser.avatar;
+
+            await db.collection('users').updateOne(
+                { _id: request.currentUser._id, tenant_id: request.tenantId },
+                {
+                    $set: {
+                        avatar: {
+                            url: stored.url,
+                            local_url: stored.localUrl,
+                            r2_url: stored.r2Url,
+                            key: stored.key,
+                            file_name: fileName,
+                            storage: stored.storage,
+                            updated_at: new Date()
+                        },
+                        updated_at: new Date()
+                    }
+                }
+            );
+
+            // Remove a imagem antiga depois de gravar a nova, para nunca ficar
+            // sem avatar caso a limpeza falhe.
+            if (previous?.file_name) {
+                removePreviousAvatar(previous, tenantIdStr, fastify.log);
+            }
+
+            const updated = await db.collection('users').findOne({ _id: request.currentUser._id });
+            return { success: true, user: publicProfile(updated), storage: stored.storage };
+
+        } catch (error) {
+            fastify.log.error({ err: error }, 'Falha ao enviar avatar');
+            return reply.status(500).send({ error: 'Falha ao enviar a imagem', details: error.message });
+        }
+    });
+
+    fastify.delete('/me/avatar', {
+        preHandler: [authMiddleware, tenantMiddleware]
+    }, async(request, reply) => {
+        const db = fastify.db();
+        const current = request.currentUser.avatar;
+
+        await db.collection('users').updateOne(
+            { _id: request.currentUser._id, tenant_id: request.tenantId },
+            { $unset: { avatar: '' }, $set: { updated_at: new Date() } }
+        );
+
+        if (current?.file_name) {
+            removePreviousAvatar(current, request.tenantId.toString(), fastify.log);
+        }
+
+        const updated = await db.collection('users').findOne({ _id: request.currentUser._id });
+        return { success: true, user: publicProfile(updated) };
+    });
+
+    // Limpeza best-effort das duas copias: falhar aqui nao pode quebrar a
+    // troca/remocao do avatar, que ja foi persistida.
+    function removePreviousAvatar(avatar, tenantIdStr, logger) {
+        try {
+            deleteLocalCopy(tenantIdStr, avatar.file_name);
+        } catch (error) {
+            logger?.warn?.({ err: error }, 'Falha ao remover cópia local do avatar anterior');
+        }
+
+        if (avatar.r2_url && avatar.key && hasR2Config()) {
+            deleteFromR2(avatar.key).catch(error => {
+                logger?.warn?.({ err: error }, 'Falha ao remover avatar anterior do R2');
+            });
+        }
+    }
 
     // ==================== GESTAO DE USUARIOS (admin/owner) ====================
 

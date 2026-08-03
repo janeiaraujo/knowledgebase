@@ -90,6 +90,18 @@ export default function Sidebar({ isOpen, onClose }) {
   const { t } = useTranslation();
   const [expandedGroups, setExpandedGroups] = useState(['main', 'search']);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+
+  // Avatar: URL principal (R2 quando configurado) -> copia local -> inicial do
+  // nome. `avatarFailed` cobre o caso da imagem principal nao carregar.
+  const avatarSrc = avatarFailed
+    ? user?.avatar_fallback_url
+    : (user?.avatar_url || user?.avatar_fallback_url);
+
+  // Uma troca de avatar precisa limpar o estado de falha da imagem anterior
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [user?.avatar_url]);
 
   // Filter menu based on user role
   const menuConfig = useMemo(() => {
@@ -228,7 +240,18 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="sidebar-footer">
           <Link to="/profile" className="sidebar-user" onClick={onClose}>
             <div className="sidebar-user-avatar">
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              {avatarSrc ? (
+                <img
+                  src={avatarSrc}
+                  alt=""
+                  className="w-100 h-100 rounded-circle"
+                  style={{ objectFit: 'cover' }}
+                  // Se a URL do R2 falhar, usa a copia local antes de cair na inicial
+                  onError={() => setAvatarFailed(true)}
+                />
+              ) : (
+                user?.name?.charAt(0)?.toUpperCase() || 'U'
+              )}
             </div>
             {!isCollapsed && (
               <div className="sidebar-user-info">

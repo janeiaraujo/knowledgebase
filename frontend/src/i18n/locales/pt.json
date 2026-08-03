@@ -3,7 +3,8 @@
     "loading": "Carregando...",
     "total": "Total",
     "viewAll": "Ver Todos",
-    "andMore": "e mais..."
+    "andMore": "e mais...",
+    "cancel": "Cancelar"
   },
   "nav": {
     "expandMenu": "Expandir menu",
@@ -126,6 +127,18 @@
       "light": "Claro",
       "dark": "Escuro",
       "system": "Sistema"
+    },
+    "avatar": {
+      "change": "Alterar foto",
+      "remove": "Remover",
+      "removed": "Foto removida",
+      "updated": "Foto de perfil atualizada",
+      "cropTitle": "Ajustar foto",
+      "cropHelp": "Arraste para posicionar e use o controle acima para aproximar. A imagem é salva como um quadrado de 512px.",
+      "zoom": "Zoom",
+      "save": "Salvar foto",
+      "invalidFormat": "Formato inválido. Envie uma imagem (JPEG, PNG ou WebP).",
+      "tooLarge": "Imagem muito grande. O limite é 8MB."
     }
   },
   "dashboard": {

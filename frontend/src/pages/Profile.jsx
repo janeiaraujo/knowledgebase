@@ -7,6 +7,7 @@ import { ptBR, enUS } from 'date-fns/locale';
 import { userAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import AvatarUploader from '../components/AvatarUploader';
 
 const LANGUAGES = [
   { code: 'pt', labelKey: 'profile.languages.pt', flag: '🇧🇷' },
@@ -60,7 +61,13 @@ export default function Profile() {
   // Mantem AuthContext/localStorage em sincronia com o perfil salvo, para que
   // a sidebar e o restante do app reflitam a mudanca sem precisar recarregar.
   const syncAuthUser = (updated) => {
-    const merged = { ...user, name: updated.name, preferences: updated.preferences };
+    const merged = {
+      ...user,
+      name: updated.name,
+      preferences: updated.preferences,
+      avatar_url: updated.avatar_url,
+      avatar_fallback_url: updated.avatar_fallback_url
+    };
     setUser?.(merged);
     try {
       localStorage.setItem('user', JSON.stringify(merged));
@@ -166,16 +173,16 @@ export default function Profile() {
           {/* Identity card */}
           <Card className="border-0 shadow-sm">
             <Card.Body className="text-center">
-              <div
-                className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 text-white fw-bold"
-                style={{
-                  width: '88px',
-                  height: '88px',
-                  fontSize: '2rem',
-                  background: 'linear-gradient(135deg, #6610f2 0%, #d63384 100%)'
-                }}
-              >
-                {profile.name?.charAt(0)?.toUpperCase() || 'U'}
+              <div className="mb-3">
+                <AvatarUploader
+                  avatarUrl={profile.avatar_url}
+                  fallbackUrl={profile.avatar_fallback_url}
+                  name={profile.name}
+                  onChange={(updated) => {
+                    setProfile(updated);
+                    syncAuthUser(updated);
+                  }}
+                />
               </div>
               <h5 className="mb-1">{profile.name}</h5>
               <p className="text-muted small mb-2">{profile.email}</p>
