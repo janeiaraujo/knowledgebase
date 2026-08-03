@@ -455,5 +455,151 @@
     "scheduleError": "Erro ao agendar revisão",
     "completeError": "Erro ao completar revisão",
     "bulkScheduleError": "Erro ao agendar revisões em lote"
+  },
+  "integrations": {
+    "title": "Integrações",
+    "subtitle": "Entrada: ferramentas que enviam dados para dentro desta plataforma. Saída: para onde esta plataforma envia notificações.",
+    "tabInbound": "Entrada",
+    "tabOutbound": "Saída",
+    "tabNotifications": "Notificações",
+    "loading": "Carregando integrações...",
+    "loadError": "Erro ao carregar integrações",
+    "configured": "Configurado",
+    "notConfigured": "Não configurado",
+    "features": "Recursos:",
+    "configure": "Configurar",
+    "configureNamed": "Configurar {{name}}",
+    "documentation": "Documentação",
+    "sendTest": "Enviar teste",
+    "remove": "Remover",
+    "confirmRemove": "Remover esta integração?",
+    "removed": "Integração removida",
+    "removeError": "Erro ao remover integração",
+    "enabled": "Integração ativada",
+    "disabled": "Integração desativada",
+    "toggleError": "Erro ao atualizar integração",
+    "testConnection": "Testar Conexão",
+    "testing": "Testando...",
+    "testOk": "Conexão estabelecida com sucesso!",
+    "testFail": "Falha na conexão",
+    "testSent": "Notificação de teste enviada!",
+    "testSendError": "Erro ao enviar notificação",
+    "updateError": "Erro ao atualizar configuração",
+    "saving": "Salvando...",
+    "saveConfig": "Salvar Configuração",
+    "saved": "Integração configurada com sucesso!",
+    "saveError": "Erro ao salvar configuração",
+    "noConfigForm": "Configuração não disponível",
+    "notificationSettings": "Configurações de Notificação",
+    "notificationSettingsHelp": "Escolha quais eventos disparam notificações em cada canal",
+    "event": "Evento",
+    "defaultChannel": "Canal Padrão",
+    "smtpHost": "Servidor SMTP",
+    "port": "Porta",
+    "user": "Usuário",
+    "password": "Senha",
+    "fromEmail": "Email Remetente",
+    "jiraUrl": "URL do Jira",
+    "defaultProject": "Projeto Padrão",
+    "serviceId": "Service ID",
+    "site": "Site",
+    "events": {
+      "kb_created": "Novo KB criado",
+      "kb_published": "KB publicado",
+      "kb_updated": "KB atualizado",
+      "incident_created": "Novo incidente",
+      "incident_resolved": "Incidente resolvido",
+      "review_needed": "Revisão necessária",
+      "daily_digest": "Resumo diário",
+      "weekly_digest": "Resumo semanal"
+    }
+  },
+  "inbound": {
+    "adminOnly": "Apenas owners/admins podem gerenciar fontes de eventos.",
+    "intro": "Integrações de <b>entrada</b>: ferramentas de monitoramento enviam eventos <i>para dentro</i> desta plataforma via <path>POST /api/events/ingest</path>, autenticando com um token próprio no header <header>x-api-token</header>. Um token pode, opcionalmente, abrir incidentes automaticamente quando a severidade do alerta atingir um piso configurado.",
+    "seeCurlExample": "Ver exemplo de requisição (curl)",
+    "activeTokens_one": "{{count}} token ativo",
+    "activeTokens_other": "{{count}} tokens ativos",
+    "revoke": "Revogar",
+    "confirmRevoke": "Revogar este token? Integrações que o usam param de funcionar imediatamente.",
+    "tokenRevoked": "Token revogado",
+    "revokeError": "Erro ao revogar token",
+    "copied": "Copiado",
+    "addAnotherToken": "Adicionar outro token",
+    "newSourceTitle": "Nova fonte de eventos",
+    "copyTokenNow": "Copie o token agora — por segurança, ele não será exibido novamente.",
+    "readyExample": "Exemplo pronto pra usar (envie este comando no terminal, ou copie a URL/token para a configuração de webhook da ferramenta de origem)",
+    "copyCurl": "Copiar curl",
+    "tokenAlone": "Token (isolado, se preferir)",
+    "ingestEndpoint": "Endpoint de ingestão",
+    "label": "Label",
+    "labelPlaceholder": "Ex: Zabbix produção",
+    "source": "Fonte",
+    "autoCreate": "Abrir incidente automaticamente",
+    "autoCreateHelp": "Recomendado apenas para fontes confiáveis, para evitar abrir incidentes por alertas ruidosos.",
+    "minSeverity": "Severidade mínima para auto-abrir",
+    "sevMedium": "Média ou acima",
+    "sevHigh": "Alta ou acima",
+    "sevCritical": "Somente crítica",
+    "createToken": "Criar token",
+    "createTokenError": "Erro ao criar token",
+    "done": "Concluído",
+    "sources": {
+      "zabbix": {
+        "description": "Triggers do Zabbix viram eventos aqui, prontos para virar incidente",
+        "features": [
+          "Media Type webhook nativo",
+          "Abertura de incidente por severidade",
+          "Deduplicação automática (5 min)",
+          "Correlação com KBs existentes"
+        ]
+      },
+      "grafana": {
+        "description": "Alert rules do Grafana enviadas via Contact Point webhook",
+        "features": [
+          "Contact Point tipo webhook",
+          "Abertura de incidente por severidade",
+          "Deduplicação automática (5 min)",
+          "Metadata completo do alerta"
+        ]
+      },
+      "datadog": {
+        "description": "Monitors do Datadog enviados via Webhooks integration",
+        "features": [
+          "Webhooks integration nativa",
+          "Abertura de incidente por severidade",
+          "Correlação de incidentes",
+          "Metadata completo do alerta"
+        ]
+      },
+      "sentry": {
+        "description": "Erros de aplicação capturados pelo Sentry viram eventos aqui",
+        "features": [
+          "Internal Integration webhook",
+          "Abertura de incidente por severidade",
+          "Stack trace nos metadados",
+          "Correlação com KBs existentes"
+        ]
+      },
+      "pagerduty": {
+        "description": "Incidentes/alertas do PagerDuty viram eventos aqui",
+        "features": [
+          "Webhook v3 (Event Orchestration)",
+          "Abertura de incidente por severidade",
+          "KB gerado vincula de volta ao alerta",
+          "Deduplicação automática (5 min)"
+        ]
+      },
+      "custom": {
+        "description": "Qualquer sistema que fale HTTP/JSON - scripts internos, outra ferramenta",
+        "features": [
+          "Mesma autenticação por token",
+          "Schema simples e documentado",
+          "Abertura de incidente por severidade",
+          "Ideal para automações internas"
+        ],
+        "name": "Customizado"
+      }
+    }
   }
 }

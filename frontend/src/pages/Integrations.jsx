@@ -13,6 +13,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Modal, Badge, Alert, Spinner, Tab, Tabs, ListGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { FaSlack, FaMicrosoft, FaJira, FaEnvelope, FaBell, FaPlug, FaCheck, FaTimes, FaCog, FaExternalLinkAlt, FaTrash, FaToggleOn, FaToggleOff, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import InboundEventSources from '../components/integrations/InboundEventSources';
 
@@ -27,6 +28,7 @@ const integrationIcons = {
 };
 
 export default function Integrations() {
+    const { t } = useTranslation();
     const [integrations, setIntegrations] = useState([]);
     const [notificationSettings, setNotificationSettings] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ export default function Integrations() {
             setNotificationSettings(settingsRes.data.settings);
         } catch (error) {
             console.error('Error loading integrations:', error);
-            toast.error('Erro ao carregar integrações');
+            toast.error(t('integrations.loadError'));
         } finally {
             setLoading(false);
         }
@@ -89,9 +91,9 @@ export default function Integrations() {
         setTesting(true);
         try {
             await api.post(`/integrations/${selectedIntegration.type}/test`, configForm);
-            toast.success('Conexão estabelecida com sucesso!');
+            toast.success(t('integrations.testOk'));
         } catch (error) {
-            toast.error(error.response?.data?.details || 'Falha na conexão');
+            toast.error(error.response?.data?.details || t('integrations.testFail'));
         } finally {
             setTesting(false);
         }
@@ -103,25 +105,25 @@ export default function Integrations() {
         setSaving(true);
         try {
             await api.post(`/integrations/${selectedIntegration.type}`, configForm);
-            toast.success('Integração configurada com sucesso!');
+            toast.success(t('integrations.saved'));
             setShowConfigModal(false);
             loadData();
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Erro ao salvar configuração');
+            toast.error(error.response?.data?.error || t('integrations.saveError'));
         } finally {
             setSaving(false);
         }
     };
 
     const deleteIntegration = async (type) => {
-        if (!window.confirm('Remover esta integração?')) return;
+        if (!window.confirm(t('integrations.confirmRemove'))) return;
         
         try {
             await api.delete(`/integrations/${type}`);
-            toast.success('Integração removida');
+            toast.success(t('integrations.removed'));
             loadData();
         } catch (error) {
-            toast.error('Erro ao remover integração');
+            toast.error(t('integrations.removeError'));
         }
     };
 
@@ -130,19 +132,19 @@ export default function Integrations() {
             await api.put(`/integrations/${integration.type}`, {
                 enabled: !integration.config?.enabled
             });
-            toast.success(integration.config?.enabled ? 'Integração desativada' : 'Integração ativada');
+            toast.success(integration.config?.enabled ? t('integrations.disabled') : t('integrations.enabled'));
             loadData();
         } catch (error) {
-            toast.error('Erro ao atualizar integração');
+            toast.error(t('integrations.toggleError'));
         }
     };
 
     const sendTestNotification = async (type) => {
         try {
             await api.post('/integrations/notifications/test', { type });
-            toast.success('Notificação de teste enviada!');
+            toast.success(t('integrations.testSent'));
         } catch (error) {
-            toast.error(error.response?.data?.error || 'Erro ao enviar notificação');
+            toast.error(error.response?.data?.error || t('integrations.testSendError'));
         }
     };
 
@@ -159,7 +161,7 @@ export default function Integrations() {
             await api.put('/integrations/notifications/settings', newSettings);
             setNotificationSettings(newSettings);
         } catch (error) {
-            toast.error('Erro ao atualizar configuração');
+            toast.error(t('integrations.updateError'));
         }
     };
 
@@ -185,7 +187,7 @@ export default function Integrations() {
                             </Form.Text>
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Canal Padrão</Form.Label>
+                            <Form.Label>{t('integrations.defaultChannel')}</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={configForm.channel || ''}
@@ -220,7 +222,7 @@ export default function Integrations() {
                         <Row>
                             <Col md={8}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Servidor SMTP *</Form.Label>
+                                    <Form.Label>{t('integrations.smtpHost')} *</Form.Label>
                                     <Form.Control
                                         type="text"
                                         value={configForm.smtp_host || ''}
@@ -231,7 +233,7 @@ export default function Integrations() {
                             </Col>
                             <Col md={4}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Porta *</Form.Label>
+                                    <Form.Label>{t('integrations.port')} *</Form.Label>
                                     <Form.Control
                                         type="number"
                                         value={configForm.smtp_port || 587}
@@ -241,7 +243,7 @@ export default function Integrations() {
                             </Col>
                         </Row>
                         <Form.Group className="mb-3">
-                            <Form.Label>Usuário</Form.Label>
+                            <Form.Label>{t('integrations.user')}</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={configForm.smtp_user || ''}
@@ -249,7 +251,7 @@ export default function Integrations() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Senha</Form.Label>
+                            <Form.Label>{t('integrations.password')}</Form.Label>
                             <Form.Control
                                 type="password"
                                 value={configForm.smtp_pass || ''}
@@ -257,7 +259,7 @@ export default function Integrations() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Email Remetente *</Form.Label>
+                            <Form.Label>{t('integrations.fromEmail')} *</Form.Label>
                             <Form.Control
                                 type="email"
                                 value={configForm.from_email || ''}
@@ -272,7 +274,7 @@ export default function Integrations() {
                 return (
                     <>
                         <Form.Group className="mb-3">
-                            <Form.Label>URL do Jira *</Form.Label>
+                            <Form.Label>{t('integrations.jiraUrl')} *</Form.Label>
                             <Form.Control
                                 type="url"
                                 value={configForm.base_url || ''}
@@ -302,7 +304,7 @@ export default function Integrations() {
                             </Form.Text>
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Projeto Padrão</Form.Label>
+                            <Form.Label>{t('integrations.defaultProject')}</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={configForm.project_key || ''}
@@ -325,7 +327,7 @@ export default function Integrations() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Service ID</Form.Label>
+                            <Form.Label>{t('integrations.serviceId')}</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={configForm.service_id || ''}
@@ -355,7 +357,7 @@ export default function Integrations() {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
-                            <Form.Label>Site</Form.Label>
+                            <Form.Label>{t('integrations.site')}</Form.Label>
                             <Form.Select
                                 value={configForm.site || 'datadoghq.com'}
                                 onChange={(e) => setConfigForm(prev => ({ ...prev, site: e.target.value }))}
@@ -370,7 +372,7 @@ export default function Integrations() {
                 );
 
             default:
-                return <p>Configuração não disponível</p>;
+                return <p>{t('integrations.noConfigForm')}</p>;
         }
     };
 
@@ -378,7 +380,7 @@ export default function Integrations() {
         return (
             <div className="text-center py-5">
                 <Spinner animation="border" />
-                <p className="mt-2">Carregando integrações...</p>
+                <p className="mt-2">{t('integrations.loading')}</p>
             </div>
         );
     }
@@ -389,21 +391,20 @@ export default function Integrations() {
                 <Col>
                     <h2 className="mb-1">
                         <i className="bi bi-plug me-2"></i>
-                        Integrações
+                        {t('integrations.title')}
                     </h2>
                     <p className="text-muted">
-                        Entrada: ferramentas que enviam dados para dentro desta plataforma. Saída: para onde esta
-                        plataforma envia notificações.
+                        {t('integrations.subtitle')}
                     </p>
                 </Col>
             </Row>
 
             <Tabs defaultActiveKey="inbound" className="mb-4">
-                <Tab eventKey="inbound" title={<span><FaSignInAlt className="me-2" />Entrada</span>}>
+                <Tab eventKey="inbound" title={<span><FaSignInAlt className="me-2" />{t('integrations.tabInbound')}</span>}>
                     <InboundEventSources />
                 </Tab>
 
-                <Tab eventKey="integrations" title={<span><FaSignOutAlt className="me-2" />Saída</span>}>
+                <Tab eventKey="integrations" title={<span><FaSignOutAlt className="me-2" />{t('integrations.tabOutbound')}</span>}>
                     <Row xs={1} md={2} lg={3} className="g-4">
                         {integrations.map(integration => {
                             const IconComponent = integrationIcons[integration.type]?.icon || FaPlug;
@@ -424,10 +425,10 @@ export default function Integrations() {
                                                     <h5 className="mb-1">{integration.name}</h5>
                                                     {integration.configured ? (
                                                         <Badge bg="success" className="d-flex align-items-center gap-1" style={{ width: 'fit-content' }}>
-                                                            <FaCheck size={10} /> Configurado
+                                                            <FaCheck size={10} /> {t('integrations.configured')}
                                                         </Badge>
                                                     ) : (
-                                                        <Badge bg="secondary">Não configurado</Badge>
+                                                        <Badge bg="secondary">{t('integrations.notConfigured')}</Badge>
                                                     )}
                                                 </div>
                                             </div>
@@ -435,7 +436,7 @@ export default function Integrations() {
                                             <p className="text-muted small mb-3">{integration.description}</p>
                                             
                                             <div className="mb-3">
-                                                <small className="text-muted fw-semibold">Recursos:</small>
+                                                <small className="text-muted fw-semibold">{t('integrations.features')}</small>
                                                 <ul className="small mb-0 ps-3">
                                                     {integration.features?.slice(0, 3).map((feature, idx) => (
                                                         <li key={idx}>{feature}</li>
@@ -452,13 +453,13 @@ export default function Integrations() {
                                                     onClick={() => openConfigModal(integration)}
                                                 >
                                                     <FaCog className="me-1" />
-                                                    {integration.configured ? 'Editar' : 'Configurar'}
+                                                    {integration.configured ? t('common.edit') : t('integrations.configure')}
                                                 </Button>
                                                 
                                                 {integration.configured && (
                                                     <>
                                                         <OverlayTrigger
-                                                            overlay={<Tooltip>Enviar teste</Tooltip>}
+                                                            overlay={<Tooltip>{t('integrations.sendTest')}</Tooltip>}
                                                         >
                                                             <Button
                                                                 variant="outline-success"
@@ -469,7 +470,7 @@ export default function Integrations() {
                                                             </Button>
                                                         </OverlayTrigger>
                                                         <OverlayTrigger
-                                                            overlay={<Tooltip>Remover</Tooltip>}
+                                                            overlay={<Tooltip>{t('integrations.remove')}</Tooltip>}
                                                         >
                                                             <Button
                                                                 variant="outline-danger"
@@ -490,13 +491,13 @@ export default function Integrations() {
                     </Row>
                 </Tab>
 
-                <Tab eventKey="notifications" title={<span><FaBell className="me-2" />Notificações</span>}>
+                <Tab eventKey="notifications" title={<span><FaBell className="me-2" />{t('integrations.tabNotifications')}</span>}>
                     {notificationSettings && (
                         <Card className="shadow-sm border-0">
                             <Card.Header className="bg-white">
-                                <h5 className="mb-0">Configurações de Notificação</h5>
+                                <h5 className="mb-0">{t('integrations.notificationSettings')}</h5>
                                 <small className="text-muted">
-                                    Escolha quais eventos disparam notificações em cada canal
+                                    {t('integrations.notificationSettingsHelp')}
                                 </small>
                             </Card.Header>
                             <Card.Body>
@@ -504,7 +505,7 @@ export default function Integrations() {
                                     <table className="table table-hover align-middle">
                                         <thead>
                                             <tr>
-                                                <th>Evento</th>
+                                                <th>{t('integrations.event')}</th>
                                                 <th className="text-center" style={{ width: 100 }}>
                                                     <FaSlack className="me-1" /> Slack
                                                 </th>
@@ -518,17 +519,17 @@ export default function Integrations() {
                                         </thead>
                                         <tbody>
                                             {[
-                                                { key: 'kb_created', label: 'Novo KB criado' },
-                                                { key: 'kb_published', label: 'KB publicado' },
-                                                { key: 'kb_updated', label: 'KB atualizado' },
-                                                { key: 'incident_created', label: 'Novo incidente' },
-                                                { key: 'incident_resolved', label: 'Incidente resolvido' },
-                                                { key: 'review_needed', label: 'Revisão necessária' },
-                                                { key: 'daily_digest', label: 'Resumo diário' },
-                                                { key: 'weekly_digest', label: 'Resumo semanal' }
+                                                { key: 'kb_created', labelKey: 'integrations.events.kb_created' },
+                                                { key: 'kb_published', labelKey: 'integrations.events.kb_published' },
+                                                { key: 'kb_updated', labelKey: 'integrations.events.kb_updated' },
+                                                { key: 'incident_created', labelKey: 'integrations.events.incident_created' },
+                                                { key: 'incident_resolved', labelKey: 'integrations.events.incident_resolved' },
+                                                { key: 'review_needed', labelKey: 'integrations.events.review_needed' },
+                                                { key: 'daily_digest', labelKey: 'integrations.events.daily_digest' },
+                                                { key: 'weekly_digest', labelKey: 'integrations.events.weekly_digest' }
                                             ].map(event => (
                                                 <tr key={event.key}>
-                                                    <td>{event.label}</td>
+                                                    <td>{t(event.labelKey)}</td>
                                                     {['slack', 'teams', 'email'].map(channel => (
                                                         <td key={channel} className="text-center">
                                                             <Form.Check
@@ -566,7 +567,7 @@ export default function Integrations() {
                                         style: { color: integrationIcons[selectedIntegration.type]?.color }
                                     }
                                 )}
-                                Configurar {selectedIntegration.name}
+                                {t('integrations.configureNamed', { name: selectedIntegration.name })}
                             </>
                         )}
                     </Modal.Title>
@@ -585,7 +586,7 @@ export default function Integrations() {
                                             rel="noopener noreferrer"
                                             className="btn btn-sm btn-outline-primary"
                                         >
-                                            Documentação <FaExternalLinkAlt className="ms-1" size={10} />
+                                            {t('integrations.documentation')} <FaExternalLinkAlt className="ms-1" size={10} />
                                         </a>
                                     </div>
                                 )}
@@ -600,19 +601,19 @@ export default function Integrations() {
                 <Modal.Footer>
                     <Button variant="outline-secondary" onClick={testConnection} disabled={testing}>
                         {testing ? (
-                            <><Spinner size="sm" className="me-2" />Testando...</>
+                            <><Spinner size="sm" className="me-2" />{t('integrations.testing')}</>
                         ) : (
-                            <><FaCheck className="me-2" />Testar Conexão</>
+                            <><FaCheck className="me-2" />{t('integrations.testConnection')}</>
                         )}
                     </Button>
                     <Button variant="secondary" onClick={() => setShowConfigModal(false)}>
-                        Cancelar
+                        {t('common.cancel')}
                     </Button>
                     <Button variant="primary" onClick={saveConfiguration} disabled={saving}>
                         {saving ? (
-                            <><Spinner size="sm" className="me-2" />Salvando...</>
+                            <><Spinner size="sm" className="me-2" />{t('integrations.saving')}</>
                         ) : (
-                            'Salvar Configuração'
+                            t('integrations.saveConfig')
                         )}
                     </Button>
                 </Modal.Footer>

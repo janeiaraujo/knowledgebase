@@ -455,5 +455,151 @@
     "scheduleError": "Failed to schedule review",
     "completeError": "Failed to complete review",
     "bulkScheduleError": "Failed to bulk-schedule reviews"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Inbound: tools that send data into this platform. Outbound: where this platform sends notifications.",
+    "tabInbound": "Inbound",
+    "tabOutbound": "Outbound",
+    "tabNotifications": "Notifications",
+    "loading": "Loading integrations...",
+    "loadError": "Failed to load integrations",
+    "configured": "Configured",
+    "notConfigured": "Not configured",
+    "features": "Features:",
+    "configure": "Configure",
+    "configureNamed": "Configure {{name}}",
+    "documentation": "Documentation",
+    "sendTest": "Send test",
+    "remove": "Remove",
+    "confirmRemove": "Remove this integration?",
+    "removed": "Integration removed",
+    "removeError": "Failed to remove integration",
+    "enabled": "Integration enabled",
+    "disabled": "Integration disabled",
+    "toggleError": "Failed to update integration",
+    "testConnection": "Test Connection",
+    "testing": "Testing...",
+    "testOk": "Connection established successfully!",
+    "testFail": "Connection failed",
+    "testSent": "Test notification sent!",
+    "testSendError": "Failed to send notification",
+    "updateError": "Failed to update setting",
+    "saving": "Saving...",
+    "saveConfig": "Save Configuration",
+    "saved": "Integration configured successfully!",
+    "saveError": "Failed to save configuration",
+    "noConfigForm": "Configuration not available",
+    "notificationSettings": "Notification Settings",
+    "notificationSettingsHelp": "Choose which events trigger notifications on each channel",
+    "event": "Event",
+    "defaultChannel": "Default Channel",
+    "smtpHost": "SMTP Server",
+    "port": "Port",
+    "user": "User",
+    "password": "Password",
+    "fromEmail": "Sender Email",
+    "jiraUrl": "Jira URL",
+    "defaultProject": "Default Project",
+    "serviceId": "Service ID",
+    "site": "Site",
+    "events": {
+      "kb_created": "New KB created",
+      "kb_published": "KB published",
+      "kb_updated": "KB updated",
+      "incident_created": "New incident",
+      "incident_resolved": "Incident resolved",
+      "review_needed": "Review needed",
+      "daily_digest": "Daily digest",
+      "weekly_digest": "Weekly digest"
+    }
+  },
+  "inbound": {
+    "adminOnly": "Only owners/admins can manage event sources.",
+    "intro": "<b>Inbound</b> integrations: monitoring tools send events <i>into</i> this platform through <path>POST /api/events/ingest</path>, authenticating with their own token in the <header>x-api-token</header> header. A token can optionally open incidents automatically once the alert severity reaches a configured floor.",
+    "seeCurlExample": "See request example (curl)",
+    "activeTokens_one": "{{count}} active token",
+    "activeTokens_other": "{{count}} active tokens",
+    "revoke": "Revoke",
+    "confirmRevoke": "Revoke this token? Integrations using it stop working immediately.",
+    "tokenRevoked": "Token revoked",
+    "revokeError": "Failed to revoke token",
+    "copied": "Copied",
+    "addAnotherToken": "Add another token",
+    "newSourceTitle": "New event source",
+    "copyTokenNow": "Copy the token now — for security, it will not be shown again.",
+    "readyExample": "Ready-to-use example (run this command in a terminal, or copy the URL/token into the webhook settings of the source tool)",
+    "copyCurl": "Copy curl",
+    "tokenAlone": "Token (on its own, if you prefer)",
+    "ingestEndpoint": "Ingest endpoint",
+    "label": "Label",
+    "labelPlaceholder": "e.g. Zabbix production",
+    "source": "Source",
+    "autoCreate": "Open incident automatically",
+    "autoCreateHelp": "Recommended only for trusted sources, to avoid opening incidents from noisy alerts.",
+    "minSeverity": "Minimum severity to auto-open",
+    "sevMedium": "Medium or above",
+    "sevHigh": "High or above",
+    "sevCritical": "Critical only",
+    "createToken": "Create token",
+    "createTokenError": "Failed to create token",
+    "done": "Done",
+    "sources": {
+      "zabbix": {
+        "description": "Zabbix triggers become events here, ready to turn into incidents",
+        "features": [
+          "Native webhook Media Type",
+          "Incident opened by severity",
+          "Automatic deduplication (5 min)",
+          "Correlation with existing KBs"
+        ]
+      },
+      "grafana": {
+        "description": "Grafana alert rules delivered through a webhook Contact Point",
+        "features": [
+          "Webhook-type Contact Point",
+          "Incident opened by severity",
+          "Automatic deduplication (5 min)",
+          "Full alert metadata"
+        ]
+      },
+      "datadog": {
+        "description": "Datadog monitors delivered through the Webhooks integration",
+        "features": [
+          "Native Webhooks integration",
+          "Incident opened by severity",
+          "Incident correlation",
+          "Full alert metadata"
+        ]
+      },
+      "sentry": {
+        "description": "Application errors captured by Sentry become events here",
+        "features": [
+          "Internal Integration webhook",
+          "Incident opened by severity",
+          "Stack trace in metadata",
+          "Correlation with existing KBs"
+        ]
+      },
+      "pagerduty": {
+        "description": "PagerDuty incidents and alerts become events here",
+        "features": [
+          "Webhook v3 (Event Orchestration)",
+          "Incident opened by severity",
+          "Generated KB links back to the alert",
+          "Automatic deduplication (5 min)"
+        ]
+      },
+      "custom": {
+        "description": "Any system that speaks HTTP/JSON - internal scripts, another tool",
+        "features": [
+          "Same token authentication",
+          "Simple, documented schema",
+          "Incident opened by severity",
+          "Ideal for internal automation"
+        ],
+        "name": "Custom"
+      }
+    }
   }
 }

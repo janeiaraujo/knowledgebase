@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Row, Col, Badge, Button, Modal, Form, Spinner, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { toast } from 'react-toastify';
+import { Trans, useTranslation } from 'react-i18next';
 import { eventAPI } from '../../services/api';
 
 // Catalogo de fontes de eventos, no mesmo padrao visual das integrações de
@@ -12,80 +11,38 @@ const SOURCES = [
   {
     type: 'zabbix',
     name: 'Zabbix',
-    description: 'Triggers do Zabbix viram eventos aqui, prontos para virar incidente',
     icon: 'bi-diagram-3',
     color: '#D40000',
-    features: [
-      'Media Type webhook nativo',
-      'Abertura de incidente por severidade',
-      'Deduplicação automática (5 min)',
-      'Correlação com KBs existentes'
-    ]
   },
   {
     type: 'grafana',
     name: 'Grafana',
-    description: 'Alert rules do Grafana enviadas via Contact Point webhook',
     icon: 'bi-bar-chart-line',
     color: '#F46800',
-    features: [
-      'Contact Point tipo webhook',
-      'Abertura de incidente por severidade',
-      'Deduplicação automática (5 min)',
-      'Metadata completo do alerta'
-    ]
   },
   {
     type: 'datadog',
     name: 'Datadog',
-    description: 'Monitors do Datadog enviados via Webhooks integration',
     icon: 'bi-graph-up',
     color: '#632CA6',
-    features: [
-      'Webhooks integration nativa',
-      'Abertura de incidente por severidade',
-      'Correlação de incidentes',
-      'Metadata completo do alerta'
-    ]
   },
   {
     type: 'sentry',
     name: 'Sentry',
-    description: 'Erros de aplicação capturados pelo Sentry viram eventos aqui',
     icon: 'bi-bug',
     color: '#362D59',
-    features: [
-      'Internal Integration webhook',
-      'Abertura de incidente por severidade',
-      'Stack trace nos metadados',
-      'Correlação com KBs existentes'
-    ]
   },
   {
     type: 'pagerduty',
     name: 'PagerDuty',
-    description: 'Incidentes/alertas do PagerDuty viram eventos aqui',
     icon: 'bi-bell',
     color: '#06AC38',
-    features: [
-      'Webhook v3 (Event Orchestration)',
-      'Abertura de incidente por severidade',
-      'KB gerado vincula de volta ao alerta',
-      'Deduplicação automática (5 min)'
-    ]
   },
   {
     type: 'custom',
-    name: 'Customizado',
-    description: 'Qualquer sistema que fale HTTP/JSON - scripts internos, outra ferramenta',
+    nameKey: 'inbound.sources.custom.name',
     icon: 'bi-code-slash',
     color: '#6c757d',
-    features: [
-      'Mesma autenticação por token',
-      'Schema simples e documentado',
-      'Abertura de incidente por severidade',
-      'Ideal para automações internas'
-    ]
   }
 ];
 
@@ -94,8 +51,8 @@ function samplePayload(source) {
     source,
     event_type: 'alert',
     severity: 'high',
-    title: 'Exemplo: CPU acima de 90% por 5 minutos',
-    description: 'Descrição livre do alerta, vinda da ferramenta de origem.',
+    title: 'Example: CPU above 90% for 5 minutes',
+    description: 'Free-form alert description, coming from the source tool.',
     timestamp: new Date().toISOString(),
     metadata: { host: 'srv-web-01', trigger_id: '12345' }
   };
@@ -117,6 +74,12 @@ function sampleCurl(source, url, token) {
 }
 
 export default function InboundEventSources() {
+  const { t } = useTranslation();
+
+  const featuresOf = (type) => {
+    const list = t(`inbound.sources.${type}.features`, { returnObjects: true });
+    return Array.isArray(list) ? list : [];
+  };
   const [tokens, setTokens] = useState([]);
   const [loadingTokens, setLoadingTokens] = useState(true);
   const [tokensForbidden, setTokensForbidden] = useState(false);
@@ -167,20 +130,20 @@ export default function InboundEventSources() {
       setNewTokenIngestUrl(data.ingest_url);
       await loadTokens();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Erro ao criar token');
+      toast.error(err.response?.data?.error || t('inbound.createTokenError'));
     } finally {
       setCreatingToken(false);
     }
   };
 
   const handleRevoke = async (tokenId) => {
-    if (!window.confirm('Revogar este token? Integrações que o usam param de funcionar imediatamente.')) return;
+    if (!window.confirm(t('inbound.confirmRevoke'))) return;
     try {
       await eventAPI.revokeToken(tokenId);
-      toast.success('Token revogado');
+      toast.success(t('inbound.tokenRevoked'));
       loadTokens();
     } catch (err) {
-      toast.error('Erro ao revogar token');
+      toast.error(t('inbound.revokeError'));
     }
   };
 
@@ -193,13 +156,13 @@ export default function InboundEventSources() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard?.writeText(text);
-    toast.success('Copiado');
+    toast.success(t('inbound.copied'));
   };
 
   if (tokensForbidden) {
     return (
       <Alert variant="secondary" className="mb-0">
-        Apenas owners/admins podem gerenciar fontes de eventos.
+        {t('inbound.adminOnly')}
       </Alert>
     );
   }
@@ -207,15 +170,15 @@ export default function InboundEventSources() {
   return (
     <>
       <p className="text-muted small mb-3">
-        Integrações de <strong>entrada</strong>: ferramentas de monitoramento enviam eventos <em>para dentro</em>
-        desta plataforma via <code>POST /api/events/ingest</code>, autenticando com um token próprio no header{' '}
-        <code>x-api-token</code>. Um token pode, opcionalmente, abrir incidentes automaticamente quando a
-        severidade do alerta atingir um piso configurado.
+        <Trans
+          i18nKey="inbound.intro"
+          components={{ b: <strong />, i: <em />, path: <code />, header: <code /> }}
+        />
       </p>
 
       <details className="mb-4">
         <summary className="text-primary small" style={{ cursor: 'pointer' }}>
-          Ver exemplo de requisição (curl)
+          {t('inbound.seeCurlExample')}
         </summary>
         <pre className="bg-body-secondary p-2 rounded small mt-2" style={{ whiteSpace: 'pre-wrap' }}>
           {sampleCurl('zabbix')}
@@ -239,24 +202,24 @@ export default function InboundEventSources() {
                         <i className={`bi ${source.icon}`} style={{ color: source.color, fontSize: '1.5rem' }}></i>
                       </div>
                       <div className="flex-grow-1">
-                        <h5 className="mb-1">{source.name}</h5>
+                        <h5 className="mb-1">{source.nameKey ? t(source.nameKey) : source.name}</h5>
                         {configured ? (
                           <Badge bg="success" className="d-flex align-items-center gap-1" style={{ width: 'fit-content' }}>
                             <i className="bi bi-check"></i>
-                            {sourceTokens.length === 1 ? '1 token ativo' : `${sourceTokens.length} tokens ativos`}
+                            {t('inbound.activeTokens', { count: sourceTokens.length })}
                           </Badge>
                         ) : (
-                          <Badge bg="secondary">Não configurado</Badge>
+                          <Badge bg="secondary">{t('integrations.notConfigured')}</Badge>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-muted small mb-3">{source.description}</p>
+                    <p className="text-muted small mb-3">{t(`inbound.sources.${source.type}.description`)}</p>
 
                     <div className="mb-3">
-                      <small className="text-muted fw-semibold">Recursos:</small>
+                      <small className="text-muted fw-semibold">{t('integrations.features')}</small>
                       <ul className="small mb-0 ps-3">
-                        {source.features.slice(0, 3).map((feature, idx) => (
+                        {featuresOf(source.type).slice(0, 3).map((feature, idx) => (
                           <li key={idx}>{feature}</li>
                         ))}
                       </ul>
@@ -273,7 +236,7 @@ export default function InboundEventSources() {
                                 <Badge bg="success" className="ms-1">auto ≥ {t.auto_create_severity_threshold}</Badge>
                               )}
                             </div>
-                            <OverlayTrigger overlay={<Tooltip>Revogar</Tooltip>}>
+                            <OverlayTrigger overlay={<Tooltip>{t('inbound.revoke')}</Tooltip>}>
                               <Button size="sm" variant="outline-danger" onClick={() => handleRevoke(t._id)}>
                                 <i className="bi bi-trash"></i>
                               </Button>
@@ -291,7 +254,7 @@ export default function InboundEventSources() {
                       onClick={() => openModalForSource(source.type)}
                     >
                       <i className="bi bi-plus-lg me-1"></i>
-                      {configured ? 'Adicionar outro token' : 'Configurar'}
+                      {configured ? t('inbound.addAnotherToken') : t('integrations.configure')}
                     </Button>
                   </Card.Footer>
                 </Card>
@@ -304,18 +267,17 @@ export default function InboundEventSources() {
       {/* Modal: novo token */}
       <Modal show={showTokenModal} onHide={closeTokenModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Nova fonte de eventos</Modal.Title>
+          <Modal.Title>{t('inbound.newSourceTitle')}</Modal.Title>
         </Modal.Header>
         {newTokenValue ? (
           <Modal.Body>
             <Alert variant="warning">
               <i className="bi bi-exclamation-triangle me-1"></i>
-              Copie o token agora — por segurança, ele não será exibido novamente.
+              {t('inbound.copyTokenNow')}
             </Alert>
 
             <Form.Label className="small text-muted">
-              Exemplo pronto pra usar (envie este comando no terminal, ou copie a URL/token para a configuração de
-              webhook da ferramenta de origem)
+              {t('inbound.readyExample')}
             </Form.Label>
             <div className="input-group mb-3">
               <pre className="bg-body-secondary p-2 rounded small mb-0 flex-grow-1" style={{ whiteSpace: 'pre-wrap' }}>
@@ -328,10 +290,10 @@ export default function InboundEventSources() {
               className="mb-3"
               onClick={() => copyToClipboard(sampleCurl(tokenForm.source, newTokenIngestUrl, newTokenValue))}
             >
-              <i className="bi bi-clipboard me-1"></i>Copiar curl
+              <i className="bi bi-clipboard me-1"></i>{t('inbound.copyCurl')}
             </Button>
 
-            <Form.Label className="small text-muted">Token (isolado, se preferir)</Form.Label>
+            <Form.Label className="small text-muted">{t('inbound.tokenAlone')}</Form.Label>
             <div className="input-group mb-2">
               <Form.Control readOnly value={newTokenValue} />
               <Button variant="outline-secondary" onClick={() => copyToClipboard(newTokenValue)}>
@@ -339,7 +301,7 @@ export default function InboundEventSources() {
               </Button>
             </div>
 
-            <Form.Label className="small text-muted">Endpoint de ingestão</Form.Label>
+            <Form.Label className="small text-muted">{t('inbound.ingestEndpoint')}</Form.Label>
             <div className="input-group">
               <Form.Control readOnly value={newTokenIngestUrl || ''} />
               <Button variant="outline-secondary" onClick={() => copyToClipboard(newTokenIngestUrl)}>
@@ -351,23 +313,23 @@ export default function InboundEventSources() {
           <Form onSubmit={handleCreateToken}>
             <Modal.Body>
               <Form.Group className="mb-3">
-                <Form.Label>Label</Form.Label>
+                <Form.Label>{t('inbound.label')}</Form.Label>
                 <Form.Control
                   autoFocus
                   required
-                  placeholder="Ex: Zabbix produção"
+                  placeholder={t('inbound.labelPlaceholder')}
                   value={tokenForm.label}
                   onChange={(e) => setTokenForm(prev => ({ ...prev, label: e.target.value }))}
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Fonte</Form.Label>
+                <Form.Label>{t('inbound.source')}</Form.Label>
                 <Form.Select
                   value={tokenForm.source}
                   onChange={(e) => setTokenForm(prev => ({ ...prev, source: e.target.value }))}
                 >
                   {SOURCES.map(source => (
-                    <option key={source.type} value={source.type}>{source.name}</option>
+                    <option key={source.type} value={source.type}>{source.nameKey ? t(source.nameKey) : source.name}</option>
                   ))}
                 </Form.Select>
               </Form.Group>
@@ -375,39 +337,39 @@ export default function InboundEventSources() {
                 <Form.Check
                   type="switch"
                   id="auto-create-switch"
-                  label="Abrir incidente automaticamente"
+                  label={t('inbound.autoCreate')}
                   checked={tokenForm.auto_create_incident}
                   onChange={(e) => setTokenForm(prev => ({ ...prev, auto_create_incident: e.target.checked }))}
                 />
                 <Form.Text className="text-muted">
-                  Recomendado apenas para fontes confiáveis, para evitar abrir incidentes por alertas ruidosos.
+                  {t('inbound.autoCreateHelp')}
                 </Form.Text>
               </Form.Group>
               {tokenForm.auto_create_incident && (
                 <Form.Group>
-                  <Form.Label className="small">Severidade mínima para auto-abrir</Form.Label>
+                  <Form.Label className="small">{t('inbound.minSeverity')}</Form.Label>
                   <Form.Select
                     value={tokenForm.auto_create_severity_threshold}
                     onChange={(e) => setTokenForm(prev => ({ ...prev, auto_create_severity_threshold: e.target.value }))}
                   >
-                    <option value="medium">Média ou acima</option>
-                    <option value="high">Alta ou acima</option>
-                    <option value="critical">Somente crítica</option>
+                    <option value="medium">{t('inbound.sevMedium')}</option>
+                    <option value="high">{t('inbound.sevHigh')}</option>
+                    <option value="critical">{t('inbound.sevCritical')}</option>
                   </Form.Select>
                 </Form.Group>
               )}
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="outline-secondary" onClick={closeTokenModal}>Cancelar</Button>
+              <Button variant="outline-secondary" onClick={closeTokenModal}>{t('common.cancel')}</Button>
               <Button variant="primary" type="submit" disabled={creatingToken || !tokenForm.label.trim()}>
-                {creatingToken ? <Spinner size="sm" animation="border" /> : 'Criar token'}
+                {creatingToken ? <Spinner size="sm" animation="border" /> : t('inbound.createToken')}
               </Button>
             </Modal.Footer>
           </Form>
         )}
         {newTokenValue && (
           <Modal.Footer>
-            <Button variant="primary" onClick={closeTokenModal}>Concluído</Button>
+            <Button variant="primary" onClick={closeTokenModal}>{t('inbound.done')}</Button>
           </Modal.Footer>
         )}
       </Modal>
