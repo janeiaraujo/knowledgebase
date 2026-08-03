@@ -46,7 +46,7 @@ async function getCroppedBlob(imageSrc, croppedAreaPixels) {
   });
 }
 
-export default function AvatarUploader({ avatarUrl, fallbackUrl, name, onChange }) {
+export default function AvatarUploader({ avatarUrl, name, onChange }) {
   const { t } = useTranslation();
   const inputRef = useRef(null);
 
@@ -56,11 +56,10 @@ export default function AvatarUploader({ avatarUrl, fallbackUrl, name, onChange 
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [saving, setSaving] = useState(false);
   const [removing, setRemoving] = useState(false);
-  // Se a URL principal (R2) falhar, cai para a cópia local — a redundância
-  // só serve se o frontend souber usá-la.
-  const [useFallback, setUseFallback] = useState(false);
+  // Imagem quebrada (URL fora do ar) cai para a inicial do nome
+  const [imageFailed, setImageFailed] = useState(false);
 
-  const displayedUrl = useFallback ? fallbackUrl : (avatarUrl || fallbackUrl);
+  const displayedUrl = imageFailed ? null : avatarUrl;
 
   const onCropComplete = useCallback((_area, areaPixels) => {
     setCroppedAreaPixels(areaPixels);
@@ -98,7 +97,7 @@ export default function AvatarUploader({ avatarUrl, fallbackUrl, name, onChange 
       formData.append('file', blob, 'avatar.jpg');
 
       const { data } = await userAPI.uploadAvatar(formData);
-      setUseFallback(false);
+      setImageFailed(false);
       onChange?.(data.user);
       setImageSrc(null);
       toast.success(t('profile.avatar.updated'));
@@ -113,7 +112,7 @@ export default function AvatarUploader({ avatarUrl, fallbackUrl, name, onChange 
     setRemoving(true);
     try {
       const { data } = await userAPI.deleteAvatar();
-      setUseFallback(false);
+      setImageFailed(false);
       onChange?.(data.user);
       toast.success(t('profile.avatar.removed'));
     } catch (err) {
@@ -132,10 +131,7 @@ export default function AvatarUploader({ avatarUrl, fallbackUrl, name, onChange 
             alt={name || 'avatar'}
             className="rounded-circle"
             style={{ width: '88px', height: '88px', objectFit: 'cover' }}
-            onError={() => {
-              // URL principal indisponível (R2 fora do ar, bucket movido...)
-              if (!useFallback && fallbackUrl) setUseFallback(true);
-            }}
+            onError={() => setImageFailed(true)}
           />
         ) : (
           <div
@@ -174,7 +170,7 @@ export default function AvatarUploader({ avatarUrl, fallbackUrl, name, onChange 
         <Button variant="link" size="sm" className="p-0" onClick={() => inputRef.current?.click()}>
           {t('profile.avatar.change')}
         </Button>
-        {(avatarUrl || fallbackUrl) && (
+        {avatarUrl && (
           <>
             <span className="text-muted mx-1">·</span>
             <Button

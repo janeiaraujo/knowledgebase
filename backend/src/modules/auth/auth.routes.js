@@ -119,7 +119,6 @@ export default async function authRoutes(fastify, options) {
           // Permite ao frontend aplicar o idioma/tema do perfil ja no login,
           // sem esperar um novo GET /me.
           avatar_url: user.avatar?.url || null,
-          avatar_fallback_url: user.avatar?.local_url || null,
           preferences: {
             language: user.preferences?.language || 'pt',
             theme: user.preferences?.theme || 'system'
@@ -237,7 +236,6 @@ export default async function authRoutes(fastify, options) {
           // Permite ao frontend aplicar o idioma/tema do perfil ja no login,
           // sem esperar um novo GET /me.
           avatar_url: user.avatar?.url || null,
-          avatar_fallback_url: user.avatar?.local_url || null,
           preferences: {
             language: user.preferences?.language || 'pt',
             theme: user.preferences?.theme || 'system'
@@ -299,7 +297,6 @@ export default async function authRoutes(fastify, options) {
         created_at: user.created_at,
         last_login: user.last_login,
         avatar_url: user.avatar?.url || null,
-        avatar_fallback_url: user.avatar?.local_url || null,
         // Usado pelo frontend para aplicar idioma/tema salvos no perfil
         preferences: {
           language: user.preferences?.language || 'pt',

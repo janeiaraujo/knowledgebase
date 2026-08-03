@@ -65,8 +65,7 @@ export default function Profile() {
       ...user,
       name: updated.name,
       preferences: updated.preferences,
-      avatar_url: updated.avatar_url,
-      avatar_fallback_url: updated.avatar_fallback_url
+      avatar_url: updated.avatar_url
     };
     setUser?.(merged);
     try {
@@ -176,7 +175,6 @@ export default function Profile() {
               <div className="mb-3">
                 <AvatarUploader
                   avatarUrl={profile.avatar_url}
-                  fallbackUrl={profile.avatar_fallback_url}
                   name={profile.name}
                   onChange={(updated) => {
                     setProfile(updated);
