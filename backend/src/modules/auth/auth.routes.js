@@ -2,10 +2,21 @@ import Joi from 'joi';
 import * as authService from './auth.service.js';
 import { sendWelcomeEmail } from './email.service.js';
 
+// Rate limit por IP nas rotas de autenticacao. O limite global do server.js
+// (100 req/min) e permissivo demais aqui: permitiria ~6.000 tentativas de
+// senha por hora vindas de uma unica origem.
+//
+// Complementa - nao substitui - o bloqueio por conta em auth.service.js:
+// este barra volume de um IP, aquele barra tentativa distribuida contra um
+// usuario especifico.
+const authRateLimit = (max, timeWindow) => ({
+  config: { rateLimit: { max, timeWindow } }
+});
+
 export default async function authRoutes(fastify, options) {
-  
+
   // Register new user
-  fastify.post('/register', async (request, reply) => {
+  fastify.post('/register', authRateLimit(5, '1 hour'), async (request, reply) => {
     try {
       const db = fastify.db();
       const { email, password, name, organizationName } = request.body;
@@ -60,7 +71,7 @@ export default async function authRoutes(fastify, options) {
   });
   
   // Login with password
-  fastify.post('/login', async (request, reply) => {
+  fastify.post('/login', authRateLimit(10, '15 minutes'), async (request, reply) => {
     try {
       const db = fastify.db();
       const { email, password } = request.body;
@@ -130,14 +141,15 @@ export default async function authRoutes(fastify, options) {
 
     } catch (error) {
       fastify.log.error(error);
-      return reply.status(401).send({ 
-        error: error.message || 'Login failed' 
+      // Conta bloqueada por excesso de tentativas vem com 429; o resto e 401.
+      return reply.status(error.statusCode || 401).send({
+        error: error.message || 'Login failed'
       });
     }
   });
-  
+
   // Request magic link
-  fastify.post('/magic-link', async (request, reply) => {
+  fastify.post('/magic-link', authRateLimit(5, '15 minutes'), async (request, reply) => {
     try {
       const db = fastify.db();
       const { email } = request.body;
@@ -176,7 +188,7 @@ export default async function authRoutes(fastify, options) {
   });
   
   // Verify magic link token
-  fastify.post('/magic-verify', async (request, reply) => {
+  fastify.post('/magic-verify', authRateLimit(10, '15 minutes'), async (request, reply) => {
     try {
       const db = fastify.db();
       const { token } = request.body;

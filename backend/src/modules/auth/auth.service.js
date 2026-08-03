@@ -126,33 +126,71 @@ export async function registerUser(db, { email, password, name, organizationName
 /**
  * Login with email and password
  */
+// Bloqueio temporario por conta. Complementa o rate limit por IP da rota:
+// aquele barra muitas tentativas de uma origem, este barra tentativas
+// distribuidas (varios IPs) contra um unico usuario.
+export const MAX_FAILED_LOGIN_ATTEMPTS = 5;
+export const LOGIN_LOCK_MINUTES = 15;
+
 export async function loginWithPassword(db, { email, password }) {
   const user = await db.collection('users').findOne({ email });
-  
+
   if (!user) {
     throw new Error('Invalid credentials');
   }
-  
+
   if (!user.password) {
     throw new Error('Password not set. Please use magic link.');
   }
-  
+
+  // Conta bloqueada: nao gasta bcrypt e nao permite continuar tentando
+  if (user.locked_until && user.locked_until > new Date()) {
+    const minutesLeft = Math.ceil((user.locked_until - new Date()) / 60000);
+    const error = new Error(
+      `Muitas tentativas de login. Tente novamente em ${minutesLeft} minuto(s).`
+    );
+    error.statusCode = 429;
+    throw error;
+  }
+
   const isValid = await comparePassword(password, user.password);
   if (!isValid) {
+    await registerFailedLogin(db, user);
     throw new Error('Invalid credentials');
   }
-  
+
   if (!user.active) {
     throw new Error('Account is inactive');
   }
-  
-  // Update last login
+
+  // Login valido zera o contador junto com o last_login
   await db.collection('users').updateOne(
     { _id: user._id },
-    { $set: { last_login: new Date() } }
+    {
+      $set: { last_login: new Date() },
+      $unset: { failed_login_attempts: '', locked_until: '' }
+    }
   );
-  
+
   return user;
+}
+
+/**
+ * Incrementa o contador de falhas e bloqueia a conta ao atingir o limite.
+ * O bloqueio e por tempo (nao permanente) para nao virar um vetor de
+ * negacao de servico: qualquer um poderia travar a conta de outra pessoa
+ * so errando a senha de proposito.
+ */
+async function registerFailedLogin(db, user) {
+  const attempts = (user.failed_login_attempts || 0) + 1;
+  const updates = { failed_login_attempts: attempts };
+
+  if (attempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+    updates.locked_until = new Date(Date.now() + LOGIN_LOCK_MINUTES * 60 * 1000);
+    updates.failed_login_attempts = 0;
+  }
+
+  await db.collection('users').updateOne({ _id: user._id }, { $set: updates });
 }
 
 /**
