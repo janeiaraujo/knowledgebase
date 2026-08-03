@@ -46,6 +46,20 @@
   width: var(--sidebar-collapsed-width);
 }
 
+/* Colapsada, o brand vira so o icone + o botao: nao ha largura para os
+   dois lado a lado (40px do icone + 28px do botao > 70px - padding), o
+   que fazia o botao vazar para fora da sidebar e ficar "invisivel" sobre
+   o fundo claro do conteudo principal. Empilha em coluna para caber. */
+.sidebar-pro.collapsed .sidebar-brand {
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.5rem;
+}
+
+.sidebar-pro.collapsed .sidebar-collapse-btn {
+  margin-left: 0;
+}
+
 /* ========================================
    Brand/Logo Section
 ======================================== */
