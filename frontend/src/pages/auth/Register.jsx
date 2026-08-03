@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Register() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,33 +15,33 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { register } = useAuth();
   const navigate = useNavigate();
-  
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordsDoNotMatch'));
       return;
     }
-    
+
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError(t('auth.passwordTooShort'));
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       await register({
         name: formData.name,
@@ -49,12 +51,12 @@ export default function Register() {
       });
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
+      setError(err.response?.data?.error || t('auth.registrationFailed'));
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
       <Row className="w-100">
@@ -64,16 +66,16 @@ export default function Register() {
               <div className="text-center mb-4">
                 <h3 className="fw-bold">
                   <i className="bi bi-database-fill me-2"></i>
-                  Create Account
+                  {t('auth.createAccount')}
                 </h3>
-                <p className="text-muted">Start managing incidents better</p>
+                <p className="text-muted">{t('auth.registerSubtitle')}</p>
               </div>
-              
+
               {error && <Alert variant="danger">{error}</Alert>}
-              
+
               <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Full Name</Form.Label>
+                  <Form.Label>{t('auth.fullName')}</Form.Label>
                   <Form.Control
                     type="text"
                     name="name"
@@ -82,9 +84,9 @@ export default function Register() {
                     required
                   />
                 </Form.Group>
-                
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Email</Form.Label>
+                  <Form.Label>{t('auth.email')}</Form.Label>
                   <Form.Control
                     type="email"
                     name="email"
@@ -93,20 +95,20 @@ export default function Register() {
                     required
                   />
                 </Form.Group>
-                
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Organization Name</Form.Label>
+                  <Form.Label>{t('auth.organizationName')}</Form.Label>
                   <Form.Control
                     type="text"
                     name="organizationName"
                     value={formData.organizationName}
                     onChange={handleChange}
-                    placeholder="Optional"
+                    placeholder={t('auth.optional')}
                   />
                 </Form.Group>
-                
+
                 <Form.Group className="mb-3">
-                  <Form.Label>Password</Form.Label>
+                  <Form.Label>{t('auth.password')}</Form.Label>
                   <Form.Control
                     type="password"
                     name="password"
@@ -115,12 +117,12 @@ export default function Register() {
                     required
                   />
                   <Form.Text className="text-muted">
-                    Minimum 8 characters
+                    {t('auth.minCharacters')}
                   </Form.Text>
                 </Form.Group>
-                
+
                 <Form.Group className="mb-4">
-                  <Form.Label>Confirm Password</Form.Label>
+                  <Form.Label>{t('auth.confirmPassword')}</Form.Label>
                   <Form.Control
                     type="password"
                     name="confirmPassword"
@@ -129,7 +131,7 @@ export default function Register() {
                     required
                   />
                 </Form.Group>
-                
+
                 <Button
                   type="submit"
                   variant="primary"
@@ -139,19 +141,19 @@ export default function Register() {
                   {loading ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" role="status" />
-                      Creating account...
+                      {t('auth.creatingAccount')}
                     </>
                   ) : (
-                    'Create Account'
+                    t('auth.createAccount')
                   )}
                 </Button>
               </Form>
-              
+
               <hr />
-              
+
               <div className="text-center">
-                <span className="text-muted">Already have an account? </span>
-                <Link to="/login">Sign in</Link>
+                <span className="text-muted">{t('auth.alreadyHaveAccount')} </span>
+                <Link to="/login">{t('auth.signIn')}</Link>
               </div>
             </Card.Body>
           </Card>
