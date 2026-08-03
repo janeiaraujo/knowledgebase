@@ -1,6 +1,6 @@
 {
     "name": "incident-kb-backend",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Backend API for Incident Intelligence Platform",
     "type": "module",
     "main": "src/server.js",
