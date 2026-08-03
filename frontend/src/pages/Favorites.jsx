@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Table, Badge, Spinner, Alert, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { favoriteAPI } from '../services/api';
 import { FavoriteIcon } from '../components/favorites/FavoriteButton';
 
 export default function Favorites() {
+  const { t } = useTranslation();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,7 +24,7 @@ export default function Favorites() {
       setFavorites(data.favorites || []);
       setPagination(data.pagination);
     } catch (error) {
-      setError('Falha ao carregar favoritos');
+      setError(t('favorites.loadError'));
     } finally {
       setLoading(false);
     }
@@ -53,13 +55,13 @@ export default function Favorites() {
   
   const getStatusLabel = (status) => {
     const labels = {
-      draft: 'Rascunho',
-      in_review: 'Em Revisão',
-      approved: 'Aprovado',
-      published: 'Publicado',
-      rejected: 'Rejeitado'
+      draft: 'kb.status.draft',
+      in_review: 'kb.status.in_review',
+      approved: 'kb.status.approved',
+      published: 'kb.status.published',
+      rejected: 'kb.status.rejected'
     };
-    return labels[status] || status;
+    return labels[status] ? t(labels[status]) : status;
   };
   
   return (
@@ -94,10 +96,10 @@ export default function Favorites() {
                 <thead>
                   <tr>
                     <th width="40"></th>
-                    <th>Título</th>
-                    <th>Status</th>
-                    <th>Autor</th>
-                    <th>Favoritado em</th>
+                    <th>{t('common.title')}</th>
+                    <th>{t('common.status')}</th>
+                    <th>{t('favorites.author')}</th>
+                    <th>{t('favorites.favoritedAt')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -117,7 +119,7 @@ export default function Favorites() {
                           to={`/kb/${fav.record?._id}`}
                           className="text-decoration-none fw-medium"
                         >
-                          {fav.record?.title || 'Título indisponível'}
+                          {fav.record?.title || t('favorites.untitled')}
                         </Link>
                       </td>
                       <td>
@@ -169,7 +171,7 @@ export default function Favorites() {
           ) : (
             <div className="text-center py-5 text-muted">
               <i className="bi bi-star fs-1 d-block mb-3"></i>
-              <h5>Nenhum favorito ainda</h5>
+              <h5>{t('favorites.empty')}</h5>
               <p className="mb-3">
                 Clique no ícone de estrela em qualquer KB para adicioná-lo aos favoritos.
               </p>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, ListGroup, Badge, Button, Spinner, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { notificationAPI } from '../services/api';
@@ -13,6 +14,7 @@ const NOTIFICATION_TYPES = {
 };
 
 export default function Notifications() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export default function Notifications() {
       setPagination(data.pagination || { page: 1, pages: 1, total: 0 });
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
-      setError('Falha ao carregar notificações');
+      setError(t('notifications.loadError'));
     } finally {
       setLoading(false);
     }
@@ -102,7 +104,7 @@ export default function Notifications() {
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="mb-1">Notificações</h2>
+          <h2 className="mb-1">{t('notifications.title')}</h2>
           <p className="text-muted mb-0">
             {pagination.total} notificação{pagination.total !== 1 ? 'ões' : ''}
             {unreadCount > 0 && ` • ${unreadCount} não lida${unreadCount !== 1 ? 's' : ''}`}
@@ -221,8 +223,8 @@ export default function Notifications() {
               <i className="bi bi-bell-slash fs-1 d-block mb-3"></i>
               <p className="mb-0">
                 {filter === 'unread' 
-                  ? 'Você não tem notificações não lidas' 
-                  : 'Você ainda não tem notificações'
+                  ? t('notifications.emptyUnread') 
+                  : t('notifications.empty')
                 }
               </p>
             </div>
