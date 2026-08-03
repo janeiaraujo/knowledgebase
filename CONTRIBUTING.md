@@ -49,7 +49,7 @@ fix: corrigir paginacao na listagem de incidentes
 docs: documentar variaveis de ambiente opcionais
 ```
 
-Se o PR merece uma nova versão (`feat`/`fix` relevantes), bump `backend/package.json` **e** `frontend/package.json` juntos, no mesmo PR — veja [Versionamento](README.md#versionamento) no README. A tag e a release são criadas automaticamente ao mergear.
+Se o PR merece uma nova versão (`feat`/`fix` relevantes), bump `backend/package.json` **e** `frontend/package.json` juntos, no mesmo PR — use `npm version <x.y.z> --no-git-tag-version` em cada um, para os `package-lock.json` acompanharem (senão o `npm ci` do CI falha). Adicione também a seção da versão no [CHANGELOG.md](CHANGELOG.md): é ela que vira o corpo da release. Veja [Versionamento](README.md#versionamento) no README. A tag e a release são criadas automaticamente ao mergear.
 
 ## Padrões de código
 

@@ -46,13 +46,35 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # As notas saem do CHANGELOG, nao da lista de commits: quem le a
+      # release quer saber o que mudou e por que, nao a sequencia de merges.
+      - name: Extrair a secao da versao no CHANGELOG
+        id: notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if [ -f CHANGELOG.md ] && grep -q "^## \[$VERSION\]" CHANGELOG.md; then
+            awk -v v="$VERSION" '
+              $0 ~ "^## \\[" v "\\]" { found = 1; next }
+              found && /^## \[/ { exit }
+              found { print }
+            ' CHANGELOG.md > release-notes.md
+            echo "from_changelog=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::CHANGELOG.md nao tem secao para $VERSION - caindo para notas geradas dos commits"
+            echo "from_changelog=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Criar tag e GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git tag "v${{ steps.version.outputs.version }}"
-          git push origin "v${{ steps.version.outputs.version }}"
-          gh release create "v${{ steps.version.outputs.version }}" \
-            --title "v${{ steps.version.outputs.version }}" \
-            --generate-notes
+          VERSION="${{ steps.version.outputs.version }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+          if [ "${{ steps.notes.outputs.from_changelog }}" = "true" ]; then
+            gh release create "v$VERSION" --title "v$VERSION" --notes-file release-notes.md
+          else
+            gh release create "v$VERSION" --title "v$VERSION" --generate-notes
+          fi

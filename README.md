@@ -281,7 +281,7 @@ Se este projeto te ajudou, considere deixar uma ⭐ — é o que aumenta o alcan
 
 Segue [SemVer](https://semver.org/lang/pt-BR/). A versão vive em dois lugares que precisam estar sempre iguais: `backend/package.json` e `frontend/package.json` — o CI falha o build se eles divergirem.
 
-Tag e [release](https://github.com/janeiaraujo/knowledgebase/releases) são automáticas: ao mergear um PR que muda a versão, o workflow `.github/workflows/release.yml` cria a tag `vX.Y.Z` e publica a release com as notas geradas a partir dos PRs mergeados desde a última — não precisa criar nada manualmente. O badge de "versão" no topo deste README lê `backend/package.json` em tempo real; o de "release" lê a última tag publicada.
+Tag e [release](https://github.com/janeiaraujo/knowledgebase/releases) são automáticas: ao mergear um PR que muda a versão, o workflow `.github/workflows/release.yml` cria a tag `vX.Y.Z` e publica a release usando a seção correspondente do [CHANGELOG.md](CHANGELOG.md) como corpo — não precisa criar nada manualmente. Se o CHANGELOG ainda não tiver a seção da versão, o workflow avisa e cai para as notas geradas a partir dos commits. O badge de "versão" no topo deste README lê `backend/package.json` em tempo real; o de "release" lê a última tag publicada.
 
 Para lançar uma nova versão: bump os dois `package.json` no mesmo PR, seguindo o tipo de mudança (`patch` para correção, `minor` para funcionalidade nova compatível, `major` para quebra de compatibilidade), e mergeie — o resto é automático.
 
