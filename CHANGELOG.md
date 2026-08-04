@@ -8,6 +8,57 @@ e o versionamento segue [SemVer](https://semver.org/lang/pt-BR/).
 A seção de cada versão vira o corpo da GitHub Release automaticamente —
 veja [Versionamento](README.md#versionamento).
 
+## [2.6.0] - 2026-08-03
+
+### Corrigido
+
+Cinco bugs que já estavam em produção, todos encontrados ao introduzir o
+ESLint (#50) — nenhum deles quebrava o build, todos quebravam na tela ou na
+requisição:
+
+- `deliverWithRetry` usava `request.tenantId`, mas roda fora do ciclo da
+  requisição (entrega assíncrona, com retry agendado por `setTimeout`). Toda
+  atualização de estatística de webhook estourava `ReferenceError`. O tenant
+  agora sai do próprio webhook.
+- `GET` e `PATCH /databases/:id` referenciavam um `objectId` que nunca foi
+  declarado — quebravam em toda chamada.
+- A tela de Revisões estava inteiramente quebrada: importava `useTranslation`
+  e nunca chamava o hook, com 57 usos de `t()` sem escopo.
+- A tela de Atividade dos Usuários chamava `useTranslation` sem importar.
+- Em KBView, `getErrorMessage` vivia no escopo de módulo e chamava `t()` — a
+  função criada para consertar o "Erro desconhecido" quebrava justamente
+  quando havia erro. Agora recebe `t` por parâmetro.
+- O editor de texto tinha violação de `rules-of-hooks`: um retorno antecipado
+  antes de um `useCallback` mudava a ordem dos hooks entre renders.
+- A URL do WebSocket era montada com a porta 3000 fixa, o que quebra atrás de
+  qualquer proxy reverso. Passa a derivar da origem atual (#54).
+
+### Adicionado
+
+- `docker compose up -d` sobe a plataforma inteira — banco, API e interface —
+  respondendo em `http://localhost:8080`. A interface é servida por nginx, que
+  faz o proxy de `/api` e do WebSocket, então só uma porta precisa existir no
+  host. Os dados de demonstração ficam sob demanda
+  (`docker compose --profile demo run --rm seed`), porque o seed não é
+  idempotente (#54).
+- ESLint no backend e no frontend, rodando no CI antes dos testes. As regras
+  apontam bug, não estilo: variável fora de escopo, hook condicional, `catch`
+  vazio, declaração vazando entre `case` (#50).
+- `SECURITY.md` com canais privados de reporte, prazos e escopo, e
+  `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1). O projeto já havia publicado
+  três correções de segurança sem ter canal privado (#52).
+- Guarda contra release esquecida: o CI avisa quando um PR muda código de
+  produto sem bumpar a versão, e um workflow mantém uma issue aberta enquanto a
+  `main` estiver à frente da última tag, fechando-a sozinho quando a release
+  sair (#49).
+
+### Alterado
+
+- Logs de depuração saíram do console de produção: o ciclo de vida do WebSocket
+  passa por um helper guardado por `import.meta.env.DEV` (some do bundle em
+  produção) e as mensagens do backend viraram `fastify.log.info` (#53).
+- Removidos 94 imports mortos e 18 trechos de código morto (#50).
+
 ## [2.5.0] - 2026-08-03
 
 ### Segurança
@@ -164,6 +215,7 @@ Primeira versão pública.
 - Eliminadas as vulnerabilidades críticas do inventário de dependências e
   atualizada a stack (#9).
 
+[2.6.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.6.0
 [2.5.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.5.0
 [2.4.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.4.0
 [2.3.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.3.0
