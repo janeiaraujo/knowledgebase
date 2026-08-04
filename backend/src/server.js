@@ -208,6 +208,28 @@ import integrationsRoutes from './modules/integrations/integrations.routes.js';
 import gamificationRoutes from './modules/gamification/gamification.routes.js';
 import helpCenterRoutes from './modules/help-center/help-center.routes.js';
 
+// O tratador de erro precisa vir ANTES do registro das rotas. No Fastify o
+// contexto encapsulado herda o tratador que existir no momento em que ele e
+// criado - definido depois, ele nao alcanca nenhuma rota ja registrada, e o
+// padrao do framework responde no lugar dele.
+fastify.setErrorHandler((error, request, reply) => {
+    fastify.log.error(error);
+
+    const statusCode = error.statusCode || 500;
+    const message = error.message || 'Internal Server Error';
+
+    // `error` precisa ser a mensagem (string): todo o frontend le
+    // `error.response?.data?.error` esperando texto. Mandar `error: true`
+    // (booleano) fazia qualquer excecao nao tratada, em qualquer rota,
+    // aparecer como "...: true" para quem usa esse campo - ou, quando o
+    // fallback e usado, mascarava a causa real como "Erro desconhecido".
+    reply.status(statusCode).send({
+        error: message,
+        message,
+        statusCode
+    });
+});
+
 // Documentacao da API em /docs. Registrada ANTES das rotas: o hook onRoute
 // que agrupa por caminho so enxerga o que for registrado depois dele.
 // Desligue com DOCS_ENABLED=false se nao quiser expor o inventario de rotas.
@@ -263,23 +285,6 @@ fastify.addHook('preSerialization', async (request, reply, payload) =>
     translateReplyPayload(request, payload)
 );
 
-fastify.setErrorHandler((error, request, reply) => {
-    fastify.log.error(error);
-
-    const statusCode = error.statusCode || 500;
-    const message = error.message || 'Internal Server Error';
-
-    // `error` precisa ser a mensagem (string): todo o frontend le
-    // `error.response?.data?.error` esperando texto. Mandar `error: true`
-    // (booleano) fazia qualquer excecao nao tratada, em qualquer rota,
-    // aparecer como "...: true" para quem usa esse campo - ou, quando o
-    // fallback e usado, mascarava a causa real como "Erro desconhecido".
-    reply.status(statusCode).send({
-        error: message,
-        message,
-        statusCode
-    });
-});
 
 // Start server
 const start = async() => {
