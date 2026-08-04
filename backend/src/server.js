@@ -7,6 +7,7 @@ import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import { createIndexes } from './db/indexes.js';
 import { translateReplyPayload } from './i18n/index.js';
+import openapiPlugin from './plugins/openapi.js';
 
 dotenv.config();
 
@@ -206,6 +207,13 @@ import reportsRoutes from './modules/reports/reports.routes.js';
 import integrationsRoutes from './modules/integrations/integrations.routes.js';
 import gamificationRoutes from './modules/gamification/gamification.routes.js';
 import helpCenterRoutes from './modules/help-center/help-center.routes.js';
+
+// Documentacao da API em /docs. Registrada ANTES das rotas: o hook onRoute
+// que agrupa por caminho so enxerga o que for registrado depois dele.
+// Desligue com DOCS_ENABLED=false se nao quiser expor o inventario de rotas.
+if (process.env.DOCS_ENABLED !== 'false') {
+    await fastify.register(openapiPlugin);
+}
 
 // Register routes
 await fastify.register(authRoutes, { prefix: '/api/auth' });

@@ -153,3 +153,19 @@ você concorda com ele.
 
 Não abra issue pública — veja [SECURITY.md](SECURITY.md) para os canais
 privados de reporte.
+
+## Documentando uma rota na API
+
+A documentação em `/docs` monta sozinha: o grupo sai do caminho da rota, então
+um módulo novo já aparece agrupado sem ninguém precisar anotar nada.
+
+Para detalhar uma rota, use `schema` — mas **atenção a duas armadilhas medidas
+neste projeto**:
+
+- `schema.response` **não é só documentação**: ele controla a serialização. Um
+  campo que o schema não declara some do corpo, sem erro nenhum. Sempre inclua
+  `additionalProperties: true`.
+- **Não declare `response` para status de erro** (4xx/5xx): nesta aplicação o
+  corpo chega vazio ao cliente. Descreva os erros no texto de `description`.
+
+Os dois casos têm teste em `tests/openapi.test.js`, que falha se voltarem.
