@@ -104,9 +104,11 @@
 
 | Camada | Tecnologias |
 |---|---|
-| Backend | Node.js 18+, Fastify 4, MongoDB 7, JWT |
-| Frontend | React 18, Vite 5, Bootstrap 5, React Router 6 |
-| Infra local | Docker Compose (MongoDB) |
+| Backend | Node.js 22, Fastify 5, MongoDB 7, JWT |
+| Frontend | React 18, Vite 8, Bootstrap 5, React Router 7 |
+| Qualidade | ESLint 9, `node:test` (unidade e integração) |
+| Documentação | OpenAPI 3.1 em `/docs` |
+| Infra local | Docker Compose (aplicação completa) |
 | Opcionais | OpenAI, Cloudflare R2, SMTP |
 
 ---
@@ -135,7 +137,7 @@ Para desenvolver (com hot reload), siga o passo a passo abaixo.
 ### Pré-requisitos
 
 - **Node.js 22+** ([nodejs.org](https://nodejs.org)) — o backend roda em 18+, mas o Vite 8 do frontend exige `^20.19.0` ou `>=22.12.0`
-- **Docker** ([docs.docker.com](https://docs.docker.com/get-docker/)) — para o MongoDB local
+- **Docker** ([docs.docker.com](https://docs.docker.com/get-docker/)) — sobe o MongoDB e, se preferir, a aplicação inteira
 - **Git**
 
 > Prefere não usar Docker? Veja [Usando MongoDB Atlas](#usando-mongodb-atlas-alternativa).

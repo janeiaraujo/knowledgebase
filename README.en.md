@@ -99,14 +99,17 @@
 - **Event ingestion** — endpoint for Zabbix, Grafana and similar, via API token.
 - **Versioning and audit** — change history and audit trail.
 - **File uploads** — local disk by default, or Cloudflare R2 when configured.
+- **Portuguese and English** — interface and API messages in both languages, per user preference.
 
 ## Stack
 
 | Layer | Technologies |
 |---|---|
-| Backend | Node.js 18+, Fastify 4, MongoDB 7, JWT |
-| Frontend | React 18, Vite 5, Bootstrap 5, React Router 6 |
-| Local infra | Docker Compose (MongoDB) |
+| Backend | Node.js 22, Fastify 5, MongoDB 7, JWT |
+| Frontend | React 18, Vite 8, Bootstrap 5, React Router 7 |
+| Quality | ESLint 9, `node:test` (unit and integration) |
+| Documentation | OpenAPI 3.1 at `/docs` |
+| Local infra | Docker Compose (full application) |
 | Optional | OpenAI, Cloudflare R2, SMTP |
 
 ---
@@ -136,7 +139,7 @@ To develop with hot reload, follow the steps below.
 ### Prerequisites
 
 - **Node.js 22+** ([nodejs.org](https://nodejs.org)) — the backend runs on 18+, but the frontend's Vite 8 requires `^20.19.0` or `>=22.12.0`
-- **Docker** ([docs.docker.com](https://docs.docker.com/get-docker/)) — for local MongoDB
+- **Docker** ([docs.docker.com](https://docs.docker.com/get-docker/)) — runs MongoDB, or the whole application if you prefer
 - **Git**
 
 > Prefer not to use Docker? See [Using MongoDB Atlas](#using-mongodb-atlas-alternative).
