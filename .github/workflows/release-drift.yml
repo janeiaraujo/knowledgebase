@@ -43,7 +43,7 @@ jobs:
           # seguranca transitiva chega - foi o caso do fast-uri, que nao toca
           # em src nenhum e mesmo assim precisa ser publicado.
           ALVOS="backend/src frontend/src backend/package-lock.json frontend/package-lock.json"
-          COMMITS=$(git log --oneline "$TAG..HEAD" -- $ALVOS | wc -l | tr -d ' ')
+          COMMITS=$(git log --oneline --no-merges "$TAG..HEAD" -- $ALVOS | wc -l | tr -d ' ')
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "commits=$COMMITS" >> "$GITHUB_OUTPUT"
@@ -54,7 +54,7 @@ jobs:
           else
             echo "$COMMITS commit(s) de produto desde a $TAG."
             echo "pendente=true" >> "$GITHUB_OUTPUT"
-            git log --pretty='- %s' "$TAG..HEAD" -- $ALVOS > lista.txt
+            git log --pretty='- %s' --no-merges "$TAG..HEAD" -- $ALVOS > lista.txt
           fi
 
       - name: Abrir ou atualizar o lembrete
