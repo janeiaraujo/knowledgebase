@@ -332,6 +332,10 @@ Thanks to everyone who has contributed to this project:
 
 Distributed under the **GNU AGPL-3.0-or-later** license. See [LICENSE](LICENSE).
 
+The API ships interactive docs at **`/docs`** (OpenAPI 3.1). With the compose
+setup that is http://localhost:8080/docs — the raw spec lives at `/docs/json`.
+Set `DOCS_ENABLED=false` to keep the route inventory private.
+
 Found a security issue? Please do not open a public issue — see [SECURITY.md](SECURITY.md). This project follows the Contributor Covenant [Code of Conduct](CODE_OF_CONDUCT.md).
 
 In short: you can use, modify and redistribute the project, including commercially. However, **if you run it as a network-accessible service**, you must make the source code of your modified version available to that service's users.

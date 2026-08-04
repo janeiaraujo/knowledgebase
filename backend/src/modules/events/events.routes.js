@@ -57,6 +57,93 @@ export default async function eventRoutes(fastify, options) {
         timeWindow: '1 minute',
         keyGenerator: (request) => request.headers['x-api-token'] || request.ip
       }
+    },
+    // Schema so documenta: `additionalProperties: true` em todo lugar, para
+    // nao rejeitar payload que ja funcionava nem derrubar campo da resposta.
+    // Quem integra le esta rota antes de qualquer outra.
+    schema: {
+      tags: ['Eventos e Ingestão'],
+      summary: 'Recebe um evento de uma ferramenta de monitoramento',
+      description: [
+        'Única rota pública de escrita. Não usa sessão: autentica pelo token',
+        'no cabeçalho `x-api-token`, criado na tela de Integrações.',
+        '',
+        'Eventos iguais (mesma fonte e mesmo título) recebidos em menos de',
+        '5 minutos são deduplicados: a resposta traz `deduplicated: true` e o',
+        'contador de ocorrências do evento original é incrementado.',
+        '',
+        'Se o token estiver configurado com abertura automática, um incidente',
+        'é criado quando a severidade atinge o piso definido — e o `incidentId`',
+        'volta na resposta.',
+        '',
+        'Limite: 120 requisições por minuto **por token**.',
+        '',
+        '**Erros:** `400` quando falta `source` ou `title`; `401` quando o token',
+        'está ausente ou inativo; `429` acima do limite.'
+      ].join('\n'),
+      security: [{ apiToken: [] }],
+      body: {
+        type: 'object',
+        required: ['source', 'title'],
+        additionalProperties: true,
+        properties: {
+          source: {
+            type: 'string',
+            description: 'Ferramenta de origem',
+            examples: ['zabbix', 'grafana', 'datadog', 'sentry', 'pagerduty', 'custom']
+          },
+          title: {
+            type: 'string',
+            description: 'Resumo do alerta, em uma linha',
+            examples: ['CPU acima de 90% por 5 minutos']
+          },
+          event_type: {
+            type: 'string',
+            description: 'Natureza do evento. Padrão: alert',
+            examples: ['alert', 'incident', 'recovery']
+          },
+          severity: {
+            type: 'string',
+            enum: ['low', 'medium', 'high', 'critical'],
+            description: 'Severidade. Padrão: medium. Define se o incidente abre automaticamente.'
+          },
+          description: { type: 'string', description: 'Descrição livre vinda da ferramenta' },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Quando o alerta ocorreu. Padrão: o momento do recebimento.'
+          },
+          metadata: {
+            type: 'object',
+            additionalProperties: true,
+            description: 'Qualquer contexto extra (host, id do trigger, stack trace)',
+            examples: [{ host: 'srv-web-01', trigger_id: '12345' }]
+          }
+        }
+      },
+      response: {
+        200: {
+          description: 'Evento registrado (ou deduplicado)',
+          type: 'object',
+          additionalProperties: true,
+          properties: {
+            success: { type: 'boolean' },
+            eventId: { type: 'string', description: 'Id do evento criado ou do original, se deduplicado' },
+            incidentId: {
+              type: ['string', 'null'],
+              description: 'Preenchido quando o token abre incidente automaticamente'
+            },
+            deduplicated: {
+              type: 'boolean',
+              description: 'Presente e true quando o evento repetiu em menos de 5 minutos'
+            }
+          }
+        },
+      }
+      // Sem schema para 400/401/429 de proposito: medido nesta aplicacao,
+      // declarar `response` para status de erro esvazia o corpo - o cliente
+      // recebe {} no lugar da mensagem. Os erros estao descritos no texto
+      // acima, que e o que interessa a quem integra.
     }
   }, async (request, reply) => {
     const db = fastify.db();

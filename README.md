@@ -331,6 +331,10 @@ Obrigado a todas as pessoas que já contribuíram com este projeto:
 
 Distribuído sob a licença **GNU AGPL-3.0-or-later**. Veja [LICENSE](LICENSE).
 
+A API tem documentação interativa em **`/docs`** (OpenAPI 3.1). Subindo pelo
+compose, fica em http://localhost:8080/docs — a especificação crua está em
+`/docs/json`. Para não expor o inventário de rotas, suba com `DOCS_ENABLED=false`.
+
 Encontrou uma falha de segurança? Não abra issue pública — veja [SECURITY.md](SECURITY.md). Este projeto adota o [Código de Conduta](CODE_OF_CONDUCT.md) do Contributor Covenant.
 
 Em resumo: você pode usar, modificar e redistribuir o projeto, inclusive comercialmente. Porém, **se você o executar como serviço acessível pela rede**, precisa disponibilizar o código-fonte da sua versão modificada aos usuários desse serviço.
