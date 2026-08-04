@@ -1,9 +1,20 @@
+# Sobe a plataforma inteira:  docker compose up -d
+# Depois, acesse http://localhost:8080
+#
+# Para criar os dados de demonstracao (uma vez so - o seed nao e idempotente):
+#   docker compose --profile demo run --rm seed
+#
+# Este arquivo e para uso local e avaliacao. Para producao: troque os segredos,
+# nao exponha a porta do Mongo e ponha TLS na frente.
+
 services:
   mongo:
     image: mongo:7
     container_name: incident-kb-mongo
     restart: unless-stopped
     ports:
+      # Exposto para facilitar inspecao local. Em producao, remova esta linha:
+      # so o backend precisa alcancar o banco.
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
@@ -14,8 +25,60 @@ services:
       retries: 5
       start_period: 20s
 
+  backend:
+    build:
+      context: ./backend
+    container_name: incident-kb-api
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      MONGODB_URI: mongodb://mongo:27017/incident_intelligence
+      # SEGREDOS DE AVALIACAO. Troque antes de expor isto a qualquer rede:
+      #   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-antes-de-usar-de-verdade}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-troque-este-refresh-tambem}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      # Integracoes externas sao opcionais: sem elas a aplicacao sobe e apenas
+      # o recurso correspondente fica desabilitado.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      # Fallback local de upload, usado quando o R2 nao esta configurado.
+      - uploads:/app/uploads
+    # migrate cria os indices e e idempotente, entao pode rodar a cada boot.
+    command: sh -c "npm run migrate && node src/server.js"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: incident-kb-web
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+  # Dados de demonstracao. Roda sob demanda porque o seed nao e idempotente -
+  # executar a cada boot criaria organizacoes e usuarios duplicados.
+  #   docker compose --profile demo run --rm seed
+  seed:
+    build:
+      context: ./backend
+    profiles: ["demo"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/incident_intelligence
+    command: npm run seed
+
   # Interface web opcional para inspecionar o banco: http://localhost:8081
-  # Suba apenas quando precisar:  docker compose --profile tools up -d
+  #   docker compose --profile tools up -d
   mongo-express:
     image: mongo-express:1.0.2
     container_name: incident-kb-mongo-ui
@@ -32,3 +95,4 @@ services:
 
 volumes:
   mongo_data:
+  uploads:

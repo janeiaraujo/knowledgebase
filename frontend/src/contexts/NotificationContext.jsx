@@ -32,7 +32,10 @@ export const NotificationProvider = ({ children }) => {
     }
 
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = import.meta.env.VITE_WS_URL || `${wsProtocol}//${window.location.hostname}:3000`;
+    // window.location.host (com a porta), nao hostname + ':3000' fixo: a porta
+    // do backend nao e exposta atras de proxy - no docker compose, por exemplo,
+    // so a 8080 do nginx existe no host.
+    const wsHost = import.meta.env.VITE_WS_URL || `${wsProtocol}//${window.location.host}`;
     const wsUrl = `${wsHost}/api/ws/notifications?token=${token}`;
 
     try {

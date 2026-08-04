@@ -113,6 +113,26 @@
 
 ## Getting started
 
+### I just want to see it running
+
+```bash
+git clone https://github.com/janeiaraujo/knowledgebase.git
+cd knowledgebase
+docker compose up -d
+docker compose --profile demo run --rm seed   # demo data
+```
+
+Open **http://localhost:8080** and sign in with `demo@incidentkb.com` / `demo123`.
+
+This brings up MongoDB, the API and the UI — the UI is served by nginx, which
+proxies `/api` and the WebSocket, so port 8080 is the only one you need.
+
+> This compose file is for evaluation and local use. Before exposing it to any
+> network, change `JWT_SECRET` and `JWT_REFRESH_SECRET` — see
+> [SECURITY.md](SECURITY.md).
+
+To develop with hot reload, follow the steps below.
+
 ### Prerequisites
 
 - **Node.js 22+** ([nodejs.org](https://nodejs.org)) — the backend runs on 18+, but the frontend's Vite 8 requires `^20.19.0` or `>=22.12.0`
