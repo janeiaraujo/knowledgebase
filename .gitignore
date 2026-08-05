@@ -150,3 +150,7 @@ context*.txt
 .idea/
 .DS_Store
 Thumbs.db
+
+# Rascunhos de divulgacao ficam fora do repositorio
+tabnews-post.md
+*.rascunho.md
