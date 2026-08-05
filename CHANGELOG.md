@@ -8,6 +8,38 @@ e o versionamento segue [SemVer](https://semver.org/lang/pt-BR/).
 A seção de cada versão vira o corpo da GitHub Release automaticamente —
 veja [Versionamento](README.md#versionamento).
 
+## [2.7.0] - 2026-08-04
+
+### Corrigido
+
+- O tratador global de erros **nunca alcançou nenhuma rota**. No Fastify, cada
+  `register` cria um contexto encapsulado que herda o tratador existente naquele
+  momento — e ele era definido depois de todos os registros. Na prática, a
+  correção do "Erro desconhecido" esteve inerte desde que foi feita: as rotas
+  devolviam `"error": "Bad Request"` no campo que o frontend lê, com a causa real
+  escondida em `message` (#58).
+- Dez callbacks memoizados usavam `t()` sem declarar `t` nas dependências,
+  ficando presos ao idioma ativo no momento em que foram criados. O usuário
+  trocava de idioma e aquelas mensagens — quase todas de erro — continuavam na
+  língua anterior até recarregar a página. Dois deles tinham um `eslint-disable`
+  que escondia o aviso (#62).
+
+### Adicionado
+
+- Documentação OpenAPI 3.1 em `/docs`: 209 caminhos, 267 operações, agrupadas
+  automaticamente pelo caminho da rota. A rota pública de ingestão tem schema
+  completo, com exemplos, deduplicação e abertura automática de incidente.
+  Desligue com `DOCS_ENABLED=false` (#57).
+- Teste que monta **todas as 43 telas** e falha se alguma estourar ao renderizar.
+  Os três bugs de frontend encontrados na versão anterior eram todos dessa
+  família, e nenhum derrubava o build (#63).
+
+### Alterado
+
+- READMEs corrigidos: a tabela de Stack dizia Fastify 4, Vite 5 e React Router 6,
+  quando o projeto está em Fastify 5, Vite 8 e react-router-dom 7. Os
+  pré-requisitos ainda diziam que o Docker servia só para o MongoDB (#60).
+
 ## [2.6.0] - 2026-08-03
 
 ### Corrigido
@@ -215,6 +247,7 @@ Primeira versão pública.
 - Eliminadas as vulnerabilidades críticas do inventário de dependências e
   atualizada a stack (#9).
 
+[2.7.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.7.0
 [2.6.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.6.0
 [2.5.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.5.0
 [2.4.0]: https://github.com/janeiaraujo/knowledgebase/releases/tag/v2.4.0
