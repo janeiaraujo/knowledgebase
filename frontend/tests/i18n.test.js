@@ -169,6 +169,42 @@ describe('i18n', () => {
         assert.deepEqual(sombras, [], 'Renomeie o parametro: `t` esta reservado para a funcao de traducao.');
     });
 
+    test('callback memoizado que usa t() declara t nas dependencias', () => {
+        // Sem `t` no array, o callback fica preso ao idioma que estava ativo
+        // quando ele foi criado: o usuario troca de idioma e as mensagens
+        // daquele callback continuam na lingua anterior ate a pagina
+        // recarregar. Eram 8 casos, todos em toast de erro - justamente o
+        // texto que a pessoa le quando algo deu errado.
+        //
+        // O eslint acusa isso (react-hooks/exhaustive-deps), mas como aviso:
+        // ha 38 outras ocorrencias que precisam de analise caso a caso, e
+        // ligar a regra inteira como erro travaria qualquer PR. Este teste
+        // cobra so o caso de `t`, que e sempre bug.
+        const problemas = [];
+
+        // Corpo do hook ate o array de dependencias que o fecha.
+        const hook = /\b(useCallback|useEffect|useMemo)\(([\s\S]*?)\n(\s*)\}, \[([^\]]*)\]\)/g;
+
+        for (const { file, code } of SOURCES) {
+            if (!code.includes('useTranslation')) continue;
+
+            hook.lastIndex = 0;
+            let match;
+            while ((match = hook.exec(code)) !== null) {
+                const [, tipo, corpo, , deps] = match;
+                const usaT = /(?<![\w.$])t\(\s*['"`]/.test(corpo);
+                const declaraT = deps.split(',').map(d => d.trim()).includes('t');
+
+                if (usaT && !declaraT) {
+                    const linha = code.slice(0, match.index).split('\n').length;
+                    problemas.push(`${file}:${linha} -> ${tipo} usa t() e nao declara t`);
+                }
+            }
+        }
+
+        assert.deepEqual(problemas, [], 'Adicione `t` ao array de dependencias.');
+    });
+
     test('nao sobra texto em portugues cru nas telas ja traduzidas', () => {
         // Lista fechada: telas que ja passaram pela traducao nao podem
         // regredir. Telas ainda nao traduzidas ficam de fora ate a vez delas.

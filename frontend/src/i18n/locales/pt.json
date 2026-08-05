@@ -1065,7 +1065,8 @@
     "kbAtualizado": "KB atualizado",
     "novoComentario": "Novo comentário",
     "revisaoNecessaria": "Revisão necessária",
-    "voceFoiMencionado": "Você foi mencionado"
+    "voceFoiMencionado": "Você foi mencionado",
+    "porEmContexto": "Por {{autor}} em {{contexto}}"
   },
   "breadcrumb": {
     "home": "Home"

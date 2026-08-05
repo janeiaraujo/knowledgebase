@@ -23,7 +23,7 @@ export default function MagicLink() {
 
     verifyToken(token);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const verifyToken = async (token) => {
     try {

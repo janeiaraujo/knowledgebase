@@ -35,7 +35,7 @@ export default function UserActivity() {
         } finally {
             setLoading(false);
         }
-    }, [period]);
+    }, [period, t]);
 
     useEffect(() => {
         loadData();

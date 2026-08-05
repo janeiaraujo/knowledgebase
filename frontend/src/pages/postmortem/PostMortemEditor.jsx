@@ -109,7 +109,7 @@ export default function PostMortemEditor() {
         } finally {
             setLoading(false);
         }
-    }, [id, navigate]);
+    }, [id, navigate, t]);
 
     useEffect(() => {
         loadPostmortem();

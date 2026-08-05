@@ -51,7 +51,7 @@ const QuickCapture = () => {
 
         navigate(location.pathname, { replace: true, state: {} });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location.state]);
+    }, [location.state, t]);
 
     const loadRecentCaptures = async () => {
         try {

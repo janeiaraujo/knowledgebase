@@ -99,7 +99,7 @@ export default function KBRequests() {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters]);
+    }, [pagination.page, pagination.limit, filters, t]);
 
     // Load stats - already included in main request
     const loadStats = useCallback(async () => {

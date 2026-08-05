@@ -163,7 +163,7 @@ export function useRealTimeNotifications() {
                     <div>
                         <strong>{t('useRealTimeNotifications.voceFoiMencionado')}</strong>
                         <br />
-                        <small>Por {data.by} em {data.context}</small>
+                        <small>{t('useRealTimeNotifications.porEmContexto', { autor: data.by, contexto: data.context })}</small>
                     </div>,
                     { icon: '@' }
                 );
@@ -172,7 +172,7 @@ export function useRealTimeNotifications() {
             default:
                 debug('Unknown message type:', data.type);
         }
-    }, []);
+    }, [t]);
 
     const showToastNotification = (notification) => {
         const icons = {
