@@ -8,6 +8,14 @@ e o versionamento segue [SemVer](https://semver.org/lang/pt-BR/).
 A seção de cada versão vira o corpo da GitHub Release automaticamente —
 veja [Versionamento](README.md#versionamento).
 
+> **Sobre a lacuna entre 1.0.0 e 2.1.0.** Não existe tag `v2.0.0`, e isso é
+> intencional. A versão 2.0.0 chegou a existir nos `package.json` por cerca de
+> uma hora, num commit que apenas alinhou os números do backend e do frontend
+> (a sidebar mostrava `v2.0` como texto fixo, dessincronizado). Ela foi
+> substituída pela 2.1.0 no mesmo dia e **nunca foi publicada**. Criar a tag
+> depois apontaria para um estado que ninguém instalou nem testou como release,
+> o que engana mais do que a lacuna.
+
 ## [2.7.0] - 2026-08-04
 
 ### Corrigido
