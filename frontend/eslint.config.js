@@ -83,5 +83,17 @@ export default [
         languageOptions: {
             globals: { ...globals.node }
         }
+    },
+
+    {
+        // Testes de render rodam no Vitest, com globals habilitados.
+        files: ['tests/render/**/*.{js,jsx}'],
+        languageOptions: {
+            globals: {
+                ...globals.node,
+                describe: 'readonly', it: 'readonly', expect: 'readonly',
+                vi: 'readonly', beforeEach: 'readonly', afterEach: 'readonly'
+            }
+        }
     }
 ];

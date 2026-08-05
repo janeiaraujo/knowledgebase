@@ -89,6 +89,8 @@ precisam de análise caso a caso, e transformá-las em erro travaria qualquer PR
 
 `npm test` roda os testes de unidade (`backend/tests/*.test.js`), que não precisam de banco: matriz de permissões, bloqueio de login, recuperação de senha, armazenamento de arquivos e a varredura de isolamento multi-tenant.
 
+No frontend, `npm test` roda duas suítes: `test:i18n` (análise estática, no runner do Node) e `test:render` (Vitest + jsdom), que monta **todas as telas** e falha se alguma estourar ao renderizar. Essa segunda existe por um motivo concreto: os três bugs de frontend que o ESLint encontrou em produção eram todos "a tela quebra ao montar", e nenhum derrubava o `vite build`.
+
 `npm run test:integration` roda os testes que **precisam de MongoDB** (`backend/tests/integration/`). Eles sobem a API de verdade, criam duas organizações pelo endpoint de registro e verificam que uma não enxerga nem altera nada da outra. Usam uma base própria (`incident_kb_itest`) e a apagam no final, então não encostam nos seus dados de desenvolvimento:
 
 ```bash

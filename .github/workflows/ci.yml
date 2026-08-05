@@ -157,9 +157,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      # Roda antes do build: chave de traducao quebrada nao derruba o
-      # build, so aparece como caminho da chave na tela do usuario.
-      - name: Testes de i18n
+      # Rodam antes do build porque pegam o que o build nao pega: chave de
+      # traducao quebrada aparece como caminho da chave na tela, e tela que
+      # estoura ao renderizar compila sem um aviso sequer.
+      - name: Testes (i18n e render)
         run: npm test
 
       - name: Build
