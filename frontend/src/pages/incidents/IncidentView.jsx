@@ -55,7 +55,7 @@ export default function IncidentView() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     loadIncident();

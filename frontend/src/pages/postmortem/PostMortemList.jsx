@@ -127,7 +127,7 @@ export default function PostMortemList() {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters]);
+    }, [pagination.page, pagination.limit, filters, t]);
 
     // Load stats and templates
     const loadMetadata = useCallback(async () => {

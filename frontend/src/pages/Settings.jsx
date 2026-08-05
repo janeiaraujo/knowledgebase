@@ -34,7 +34,7 @@ export default function Settings() {
       .catch(() => active && setOrgError(t('settings.loadOrgError')))
       .finally(() => active && setLoadingOrg(false));
     return () => { active = false; };
-  }, []);
+  }, [t]);
 
   const handleSaveOrg = async (e) => {
     e.preventDefault();

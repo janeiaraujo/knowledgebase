@@ -50,7 +50,7 @@ export default function IncidentList() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, t]);
 
   useEffect(() => {
     loadIncidents();
